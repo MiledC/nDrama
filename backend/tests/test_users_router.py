@@ -96,7 +96,9 @@ async def _make_admin(db_session: AsyncSession, user_id: str) -> None:
     await db_session.commit()
 
 
-async def _get_admin_token(client: httpx.AsyncClient, db_session: AsyncSession, label: str) -> tuple[str, str]:
+async def _get_admin_token(
+    client: httpx.AsyncClient, db_session: AsyncSession, label: str,
+) -> tuple[str, str]:
     """Register a user, promote them to admin, re-login, and return (access_token, user_id)."""
     email, _token, user_id = await _register_user(client, label)
     await _make_admin(db_session, user_id)
