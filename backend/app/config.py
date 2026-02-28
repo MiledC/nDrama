@@ -21,5 +21,15 @@ class Settings(BaseSettings):
     s3_secret_key: str = "minioadmin"
     s3_bucket: str = "ndrama"
 
+    # Auth / JWT
+    jwt_secret_key: str = "change-me-in-production"
+    jwt_access_token_expire_minutes: int = 15
+    jwt_refresh_token_expire_days: int = 7
+
+    # OAuth (Google)
+    google_client_id: str = ""
+    google_client_secret: str = ""
+    google_redirect_uri: str = "http://localhost:8000/api/auth/google/callback"
+
 
 settings = Settings()
