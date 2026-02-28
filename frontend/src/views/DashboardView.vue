@@ -3,7 +3,11 @@
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-text-primary mb-4">Dashboard</h1>
-    <p class="text-text-secondary">Welcome to the nDrama management panel.</p>
+    <h1 class="text-2xl font-bold text-text-primary mb-4">
+      Dashboard
+    </h1>
+    <p class="text-text-secondary">
+      Welcome to the nDrama management panel.
+    </p>
   </div>
 </template>

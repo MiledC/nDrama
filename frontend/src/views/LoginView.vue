@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
 import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
@@ -17,8 +18,8 @@ async function handleLogin() {
   try {
     await auth.login(email.value, password.value)
     router.push('/')
-  } catch (e: any) {
-    error.value = e.response?.data?.detail || 'Login failed'
+  } catch (e: unknown) {
+    error.value = axios.isAxiosError(e) ? (e.response?.data?.detail ?? 'Login failed') : 'Login failed'
   } finally {
     loading.value = false
   }
@@ -34,12 +35,19 @@ function handleGoogleLogin() {
     <div class="w-full max-w-sm">
       <!-- Logo -->
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-accent">nDrama</h1>
-        <p class="text-text-secondary mt-2">Sign in to your account</p>
+        <h1 class="text-3xl font-bold text-accent">
+          nDrama
+        </h1>
+        <p class="text-text-secondary mt-2">
+          Sign in to your account
+        </p>
       </div>
 
       <!-- Login form -->
-      <form @submit.prevent="handleLogin" class="space-y-4">
+      <form
+        class="space-y-4"
+        @submit.prevent="handleLogin"
+      >
         <!-- Error message -->
         <div
           v-if="error"
@@ -50,7 +58,10 @@ function handleGoogleLogin() {
 
         <!-- Email -->
         <div>
-          <label for="email" class="block text-sm font-medium text-text-secondary mb-1">
+          <label
+            for="email"
+            class="block text-sm font-medium text-text-secondary mb-1"
+          >
             Email
           </label>
           <input
@@ -61,12 +72,15 @@ function handleGoogleLogin() {
             autocomplete="email"
             class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary placeholder-text-secondary/50 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             placeholder="you@example.com"
-          />
+          >
         </div>
 
         <!-- Password -->
         <div>
-          <label for="password" class="block text-sm font-medium text-text-secondary mb-1">
+          <label
+            for="password"
+            class="block text-sm font-medium text-text-secondary mb-1"
+          >
             Password
           </label>
           <input
@@ -77,7 +91,7 @@ function handleGoogleLogin() {
             autocomplete="current-password"
             class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary placeholder-text-secondary/50 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             placeholder="Enter your password"
-          />
+          >
         </div>
 
         <!-- Submit -->
@@ -93,7 +107,7 @@ function handleGoogleLogin() {
       <!-- Divider -->
       <div class="relative my-6">
         <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-border"></div>
+          <div class="w-full border-t border-border" />
         </div>
         <div class="relative flex justify-center text-sm">
           <span class="bg-bg-primary px-2 text-text-secondary">or</span>
@@ -102,10 +116,13 @@ function handleGoogleLogin() {
 
       <!-- Google OAuth -->
       <button
-        @click="handleGoogleLogin"
         class="w-full flex items-center justify-center gap-3 rounded-lg border border-border bg-bg-secondary px-4 py-2 text-sm font-medium text-text-primary hover:bg-bg-tertiary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-bg-primary transition-colors"
+        @click="handleGoogleLogin"
       >
-        <svg class="h-5 w-5" viewBox="0 0 24 24">
+        <svg
+          class="h-5 w-5"
+          viewBox="0 0 24 24"
+        >
           <path
             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
             fill="#4285F4"

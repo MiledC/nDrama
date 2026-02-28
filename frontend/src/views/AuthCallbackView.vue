@@ -23,6 +23,8 @@ onMounted(async () => {
 
 <template>
   <div class="min-h-screen bg-bg-primary flex items-center justify-center">
-    <p class="text-text-secondary">Authenticating...</p>
+    <p class="text-text-secondary">
+      Authenticating...
+    </p>
   </div>
 </template>

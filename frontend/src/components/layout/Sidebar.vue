@@ -79,9 +79,9 @@ function handleLogout() {
           </p>
         </div>
         <button
-          @click="handleLogout"
           class="text-text-secondary hover:text-text-primary transition-colors"
           title="Sign out"
+          @click="handleLogout"
         >
           <ArrowRightStartOnRectangleIcon class="h-5 w-5" />
         </button>
