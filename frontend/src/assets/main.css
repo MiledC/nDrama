@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* Saudi Green Dark Theme Tokens */
+@theme {
+  /* Background colors */
+  --color-bg-primary: #0A0A0A;
+  --color-bg-secondary: #171717;
+  --color-bg-tertiary: #262626;
+
+  /* Accent colors */
+  --color-accent: #006C35;
+  --color-accent-hover: #008542;
+
+  /* Text colors */
+  --color-text-primary: #FAFAFA;
+  --color-text-secondary: #A3A3A3;
+}
+
+/* Apply dark theme to body */
+body {
+  @apply bg-bg-primary text-text-primary;
+}
