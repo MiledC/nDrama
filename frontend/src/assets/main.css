@@ -14,6 +14,10 @@
   /* Text colors */
   --color-text-primary: #FAFAFA;
   --color-text-secondary: #A3A3A3;
+
+  /* UI colors */
+  --color-border: #404040;
+  --color-destructive: #DC2626;
 }
 
 /* Apply dark theme to body */
