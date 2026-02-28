@@ -6,6 +6,7 @@ import {
   Cog6ToothIcon,
   UsersIcon,
   ArrowRightStartOnRectangleIcon,
+  TagIcon,
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../../stores/auth'
 
@@ -16,6 +17,7 @@ const auth = useAuthStore()
 const navigation = [
   { name: 'Dashboard', href: '/', icon: HomeIcon },
   { name: 'Series', href: '/series', icon: FilmIcon },
+  { name: 'Tags', href: '/tags', icon: TagIcon },
   { name: 'Users', href: '/users', icon: UsersIcon, adminOnly: true },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ]
