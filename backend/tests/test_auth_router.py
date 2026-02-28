@@ -1,52 +1,11 @@
 import uuid
 
 import httpx
-import pytest
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-
-from app.config import settings
-from app.database import get_db
-from app.main import app
 
 
 def _unique_email(label: str) -> str:
     """Return a unique email for each test invocation to avoid collisions."""
     return f"test_{label}_{uuid.uuid4().hex[:8]}@example.com"
-
-
-@pytest.fixture
-async def client():
-    # Create a fresh engine per test to avoid connection pool sharing issues
-    test_engine = create_async_engine(settings.database_url)
-    test_session_maker = async_sessionmaker(
-        test_engine,
-        class_=AsyncSession,
-        expire_on_commit=False,
-    )
-
-    async def override_get_db():
-        async with test_session_maker() as session:
-            try:
-                yield session
-            finally:
-                await session.close()
-
-    app.dependency_overrides[get_db] = override_get_db
-
-    async with httpx.AsyncClient(
-        transport=httpx.ASGITransport(app=app),
-        base_url="http://testserver",
-    ) as ac:
-        yield ac
-
-    # Cleanup: remove all test users created during this test
-    async with test_session_maker() as session:
-        await session.execute(text("DELETE FROM users WHERE email LIKE 'test_%'"))
-        await session.commit()
-
-    app.dependency_overrides.clear()
-    await test_engine.dispose()
 
 
 # --- Registration ---
@@ -180,6 +139,4 @@ async def test_me_success(client):
 
 async def test_me_no_token(client):
     response = await client.get("/api/auth/me")
-    # HTTPBearer returns 403 (sync TestClient) or 401 (async httpx) when no
-    # credentials are provided.  Either indicates the request was rejected.
     assert response.status_code in (401, 403)

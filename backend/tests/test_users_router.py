@@ -1,69 +1,16 @@
 import uuid
 
 import httpx
-import pytest
-from sqlalchemy import select, text
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.config import settings
-from app.database import get_db
-from app.main import app
 from app.models.user import User, UserRole
+from app.services.auth_service import create_access_token, hash_password
 
 
 def _unique_email(label: str) -> str:
     """Return a unique email for each test invocation to avoid collisions."""
     return f"test_{label}_{uuid.uuid4().hex[:8]}@example.com"
-
-
-@pytest.fixture
-async def db_session():
-    """Provide a raw DB session for direct manipulation (e.g. promoting to admin)."""
-    test_engine = create_async_engine(settings.database_url)
-    test_session_maker = async_sessionmaker(
-        test_engine,
-        class_=AsyncSession,
-        expire_on_commit=False,
-    )
-
-    async with test_session_maker() as session:
-        yield session
-
-    await test_engine.dispose()
-
-
-@pytest.fixture
-async def client():
-    """Async HTTP client wired to the FastAPI app with a test DB session."""
-    test_engine = create_async_engine(settings.database_url)
-    test_session_maker = async_sessionmaker(
-        test_engine,
-        class_=AsyncSession,
-        expire_on_commit=False,
-    )
-
-    async def override_get_db():
-        async with test_session_maker() as session:
-            try:
-                yield session
-            finally:
-                await session.close()
-
-    app.dependency_overrides[get_db] = override_get_db
-
-    async with httpx.AsyncClient(
-        transport=httpx.ASGITransport(app=app),
-        base_url="http://testserver",
-    ) as ac:
-        yield ac
-
-    # Cleanup: remove all test users created during this test
-    async with test_session_maker() as session:
-        await session.execute(text("DELETE FROM users WHERE email LIKE 'test_%'"))
-        await session.commit()
-
-    app.dependency_overrides.clear()
-    await test_engine.dispose()
 
 
 async def _register_user(client: httpx.AsyncClient, label: str) -> tuple[str, str, str]:
@@ -96,7 +43,9 @@ async def _make_admin(db_session: AsyncSession, user_id: str) -> None:
     await db_session.commit()
 
 
-async def _get_admin_token(client: httpx.AsyncClient, db_session: AsyncSession, label: str) -> tuple[str, str]:
+async def _get_admin_token(
+    client: httpx.AsyncClient, db_session: AsyncSession, label: str,
+) -> tuple[str, str]:
     """Register a user, promote them to admin, re-login, and return (access_token, user_id)."""
     email, _token, user_id = await _register_user(client, label)
     await _make_admin(db_session, user_id)
