@@ -31,7 +31,7 @@ jobs:
         run: ruff check .
 
       - name: Run tests
-        run: pytest -v
+        run: pytest -v --cov=app --cov-report=term-missing
 
       - name: Build Docker image
         run: docker build -t ndrama-backend:ci .
@@ -61,6 +61,9 @@ jobs:
 
       - name: Type check
         run: npm run type-check
+
+      - name: Run tests
+        run: npm run test:ci
 
       - name: Build
         run: npm run build
