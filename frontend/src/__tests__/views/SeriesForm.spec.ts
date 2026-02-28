@@ -27,7 +27,7 @@ describe('SeriesForm', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Mock FileReader as a class
-    global.FileReader = class {
+    globalThis.FileReader = class {
       onload: ((e: ProgressEvent<FileReader>) => void) | null = null
       result: string = 'data:image/jpeg;base64,fake'
       readAsDataURL = vi.fn()
@@ -42,19 +42,19 @@ describe('SeriesForm', () => {
 
     // Check form fields are empty
     const titleInput = wrapper.find('input#title')
-    expect(titleInput.element.value).toBe('')
+    expect((titleInput.element as HTMLInputElement).value).toBe('')
 
     const descriptionTextarea = wrapper.find('textarea#description')
-    expect(descriptionTextarea.element.value).toBe('')
+    expect((descriptionTextarea.element as HTMLTextAreaElement).value).toBe('')
 
     const statusSelect = wrapper.find('select#status')
-    expect(statusSelect.element.value).toBe('draft')
+    expect((statusSelect.element as HTMLSelectElement).value).toBe('draft')
 
     const freeEpisodesInput = wrapper.find('input#free-episodes')
-    expect(freeEpisodesInput.element.value).toBe('0')
+    expect((freeEpisodesInput.element as HTMLInputElement).value).toBe('0')
 
     const coinCostInput = wrapper.find('input#coin-cost')
-    expect(coinCostInput.element.value).toBe('0')
+    expect((coinCostInput.element as HTMLInputElement).value).toBe('0')
 
     // Check tags are loaded and displayed
     expect(wrapper.text()).toContain('Action')
@@ -90,19 +90,19 @@ describe('SeriesForm', () => {
 
     // Check form fields are prefilled
     const titleInput = wrapper.find('input#title')
-    expect(titleInput.element.value).toBe('Existing Series')
+    expect((titleInput.element as HTMLInputElement).value).toBe('Existing Series')
 
     const descriptionTextarea = wrapper.find('textarea#description')
-    expect(descriptionTextarea.element.value).toBe('Existing description')
+    expect((descriptionTextarea.element as HTMLTextAreaElement).value).toBe('Existing description')
 
     const statusSelect = wrapper.find('select#status')
-    expect(statusSelect.element.value).toBe('published')
+    expect((statusSelect.element as HTMLSelectElement).value).toBe('published')
 
     const freeEpisodesInput = wrapper.find('input#free-episodes')
-    expect(freeEpisodesInput.element.value).toBe('5')
+    expect((freeEpisodesInput.element as HTMLInputElement).value).toBe('5')
 
     const coinCostInput = wrapper.find('input#coin-cost')
-    expect(coinCostInput.element.value).toBe('15')
+    expect((coinCostInput.element as HTMLInputElement).value).toBe('15')
 
     // Check selected tags count
     expect(wrapper.text()).toContain('2 tags selected')

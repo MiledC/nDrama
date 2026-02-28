@@ -65,7 +65,7 @@ describe('TagsView', () => {
     const nameInput = wrapper.find('input[placeholder="Enter tag name"]')
     await nameInput.setValue('Drama')
 
-    const categorySelect = wrapper.findAll('select')[0]  // First select in the modal
+    const categorySelect = wrapper.findAll('select')[0]!  // First select in the modal
     await categorySelect.setValue('genre')
 
     // Submit form
@@ -87,33 +87,25 @@ describe('TagsView', () => {
     const wrapper = mountWithPlugins(TagsView)
     await flushPromises()
 
-    // Find and click the first menu button (for first tag)
-    const menuButtons = wrapper.findAll('[class*="text-text-secondary hover:text-text-primary"]')
-    if (menuButtons.length > 0) {
-      await menuButtons[0].trigger('click')
-      await flushPromises()
+    // Trigger delete confirmation directly via component (HeadlessUI menus
+    // are difficult to interact with in happy-dom test environment)
+    const vm = wrapper.vm as unknown as { showDeleteConfirm: boolean; deletingTag: typeof mockTags[0] | null }
+    vm.deletingTag = mockTags[0]!
+    vm.showDeleteConfirm = true
+    await wrapper.vm.$nextTick()
 
-      // Click delete option
-      const deleteButtons = wrapper.findAll('button').filter(btn => btn.text().includes('Delete'))
-      if (deleteButtons.length > 0) {
-        await deleteButtons[0].trigger('click')
-        await flushPromises()
+    // Confirm deletion modal should be visible
+    expect(wrapper.text()).toContain('Delete Tag')
+    expect(wrapper.text()).toContain('Are you sure you want to delete the tag')
 
-        // Confirm deletion modal should be visible
-        expect(wrapper.text()).toContain('Delete Tag')
-        expect(wrapper.text()).toContain('Are you sure you want to delete the tag')
+    // Find and click confirm button
+    const confirmButtons = wrapper.findAll('button').filter(btn => btn.text() === 'Delete Tag')
+    expect(confirmButtons.length).toBeGreaterThan(0)
+    await confirmButtons[0]!.trigger('click')
+    await flushPromises()
 
-        // Find and click confirm button
-        const confirmButtons = wrapper.findAll('button').filter(btn => btn.text() === 'Delete Tag')
-        if (confirmButtons.length > 0) {
-          await confirmButtons[0].trigger('click')
-          await flushPromises()
-
-          // Verify API was called
-          expect(api.delete).toHaveBeenCalledWith('/api/tags/1')
-        }
-      }
-    }
+    // Verify API was called
+    expect(api.delete).toHaveBeenCalledWith('/api/tags/1')
   })
 
   it('filters tags by category', async () => {

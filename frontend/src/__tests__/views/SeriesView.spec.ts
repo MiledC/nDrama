@@ -235,7 +235,7 @@ describe('SeriesView', () => {
     vi.clearAllMocks()
 
     // Change status filter
-    const statusSelect = wrapper.findAll('select')[0]
+    const statusSelect = wrapper.findAll('select')[0]!
     await statusSelect.setValue('published')
     await flushPromises()
 
@@ -266,7 +266,7 @@ describe('SeriesView', () => {
     vi.clearAllMocks()
 
     // Change tag filter
-    const tagSelect = wrapper.findAll('select')[1]
+    const tagSelect = wrapper.findAll('select')[1]!
     await tagSelect.setValue('t1')
     await flushPromises()
 

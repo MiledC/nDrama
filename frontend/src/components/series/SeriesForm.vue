@@ -10,7 +10,7 @@ interface Tag {
   category: 'genre' | 'mood' | 'language' | null
 }
 
-interface FormData {
+type SeriesFormData = {
   title: string
   description?: string
   thumbnail_url?: string
@@ -21,7 +21,7 @@ interface FormData {
 }
 
 interface Props {
-  initialData?: Partial<FormData>
+  initialData?: Partial<SeriesFormData>
   isLoading?: boolean
 }
 
@@ -31,7 +31,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  submit: [data: FormData]
+  submit: [data: SeriesFormData]
   cancel: []
 }>()
 
@@ -48,6 +48,10 @@ const selectedTagIds = ref<Set<string>>(new Set())
 const tags = ref<Tag[]>([])
 const tagsLoading = ref(false)
 const tagsError = ref('')
+
+// File input ref
+// eslint-disable-next-line no-undef
+const fileInput = ref<HTMLInputElement | null>(null)
 
 // Thumbnail upload
 // eslint-disable-next-line no-undef
@@ -71,7 +75,9 @@ const tagsByCategory = computed(() => {
 
   tags.value.forEach(tag => {
     const category = tag.category || 'other'
-    grouped[category].push(tag)
+    if (grouped[category]) {
+      grouped[category].push(tag)
+    }
   })
 
   // Filter out empty categories
@@ -217,7 +223,7 @@ function handleSubmit() {
     return
   }
 
-  const formData: FormData = {
+  const formData: SeriesFormData = {
     title: title.value.trim(),
     status: status.value,
     free_episode_count: freeEpisodeCount.value,
@@ -401,7 +407,7 @@ onMounted(fetchTags)
           </label>
           <div
             class="relative w-full aspect-video rounded-lg border-2 border-dashed border-border hover:border-accent transition-colors cursor-pointer overflow-hidden bg-bg-tertiary"
-            @click="$refs.fileInput?.click()"
+            @click="fileInput?.click()"
           >
             <!-- Preview -->
             <div
