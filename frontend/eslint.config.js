@@ -7,6 +7,18 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   ...vue.configs['flat/recommended'],
   {
+    languageOptions: {
+      globals: {
+        window: 'readonly',
+        console: 'readonly',
+        setTimeout: 'readonly',
+        clearTimeout: 'readonly',
+        document: 'readonly',
+        navigator: 'readonly',
+      },
+    },
+  },
+  {
     files: ['**/*.vue'],
     languageOptions: {
       parserOptions: {
