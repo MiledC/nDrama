@@ -5,7 +5,6 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.user import User, UserRole
-from app.services.auth_service import create_access_token, hash_password
 
 
 def _unique_email(label: str) -> str:

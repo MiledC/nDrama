@@ -1,7 +1,5 @@
 import uuid
 
-import httpx
-
 
 def _unique_email(label: str) -> str:
     """Return a unique email for each test invocation to avoid collisions."""
