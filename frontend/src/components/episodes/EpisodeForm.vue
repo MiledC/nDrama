@@ -42,7 +42,7 @@ const status = ref<'draft' | 'processing' | 'ready' | 'published'>('draft')
 const thumbnailUrl = ref('')
 
 // Thumbnail upload
-// eslint-disable-next-line no-undef
+ 
 const fileInput = ref<HTMLInputElement | null>(null)
 // eslint-disable-next-line no-undef
 const thumbnailFile = ref<File | null>(null)
@@ -60,7 +60,7 @@ const videoUploadLoading = ref(false)
 const videoUploadProgress = ref(0)
 const videoUploadError = ref('')
 const videoUploadSuccess = ref(false)
-// eslint-disable-next-line no-undef
+ 
 const videoFileInput = ref<HTMLInputElement | null>(null)
 // eslint-disable-next-line no-undef
 const videoFile = ref<File | null>(null)
@@ -87,7 +87,7 @@ watch(() => props.initialData, initializeForm, { immediate: true })
 
 // eslint-disable-next-line no-undef
 function handleThumbnailSelect(event: Event) {
-  // eslint-disable-next-line no-undef
+   
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
 
@@ -151,7 +151,7 @@ async function uploadThumbnail(file: File) {
 
 // eslint-disable-next-line no-undef
 function handleVideoSelect(event: Event) {
-  // eslint-disable-next-line no-undef
+   
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
 

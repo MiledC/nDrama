@@ -7,12 +7,21 @@ import {
   UsersIcon,
   ArrowRightStartOnRectangleIcon,
   TagIcon,
+  XMarkIcon,
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../../stores/auth'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+
+defineProps<{
+  mobileOpen?: boolean
+}>()
+
+const emit = defineEmits<{
+  close: []
+}>()
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: HomeIcon },
@@ -30,13 +39,35 @@ function handleLogout() {
   auth.logout()
   router.push('/login')
 }
+
+function handleNavClick() {
+  emit('close')
+}
 </script>
 
 <template>
-  <aside class="fixed inset-y-0 left-0 z-50 w-64 bg-bg-secondary border-r border-bg-tertiary flex flex-col">
+  <!-- Mobile overlay -->
+  <div
+    v-if="mobileOpen"
+    class="fixed inset-0 z-40 bg-black/50 lg:hidden"
+    @click="emit('close')"
+  />
+
+  <aside
+    :class="[
+      'fixed inset-y-0 left-0 z-50 w-64 bg-bg-secondary border-r border-bg-tertiary flex flex-col transition-transform duration-200',
+      mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
+    ]"
+  >
     <!-- Logo -->
-    <div class="flex h-16 items-center px-6 border-b border-bg-tertiary">
+    <div class="flex h-16 items-center justify-between px-6 border-b border-bg-tertiary">
       <span class="text-xl font-bold text-accent">nDrama</span>
+      <button
+        class="lg:hidden text-text-secondary hover:text-text-primary transition-colors"
+        @click="emit('close')"
+      >
+        <XMarkIcon class="h-5 w-5" />
+      </button>
     </div>
 
     <!-- Navigation -->
@@ -55,6 +86,7 @@ function handleLogout() {
                 : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary',
               'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
             ]"
+            @click="handleNavClick"
           >
             <component
               :is="item.icon"

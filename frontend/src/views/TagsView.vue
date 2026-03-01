@@ -14,6 +14,7 @@ import {
   PencilIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline'
+import { useToastStore } from '../stores/toast'
 
 interface Tag {
   id: string
@@ -22,6 +23,8 @@ interface Tag {
   created_at: string
   updated_at: string
 }
+
+const toast = useToastStore()
 
 const tags = ref<Tag[]>([])
 const loading = ref(true)
@@ -100,6 +103,7 @@ async function createTag() {
     showCreateForm.value = false
     createName.value = ''
     createCategory.value = ''
+    toast.success('Tag created successfully')
     await fetchTags()
   } catch (e: unknown) {
     createError.value = axios.isAxiosError(e) ? (e.response?.data?.detail ?? 'Failed to create tag') : 'Failed to create tag'
@@ -134,6 +138,7 @@ async function updateTag() {
     editingTag.value = null
     editName.value = ''
     editCategory.value = ''
+    toast.success('Tag updated successfully')
     await fetchTags()
   } catch (e: unknown) {
     editError.value = axios.isAxiosError(e) ? (e.response?.data?.detail ?? 'Failed to update tag') : 'Failed to update tag'
@@ -157,6 +162,7 @@ async function deleteTag() {
     await api.delete(`/api/tags/${deletingTag.value.id}`)
     showDeleteConfirm.value = false
     deletingTag.value = null
+    toast.success('Tag deleted successfully')
     await fetchTags()
   } catch (e: unknown) {
     if (axios.isAxiosError(e) && e.response?.status === 409) {
@@ -420,12 +426,25 @@ onMounted(fetchTags)
       </div>
     </div>
 
-    <!-- Loading -->
+    <!-- Loading Skeleton -->
     <div
       v-if="loading"
-      class="text-text-secondary"
+      class="overflow-hidden rounded-xl border border-border animate-pulse"
     >
-      Loading tags...
+      <div class="border-b border-border bg-bg-secondary px-4 py-3">
+        <div class="h-4 w-32 bg-bg-tertiary rounded" />
+      </div>
+      <div
+        v-for="i in 5"
+        :key="i"
+        class="flex items-center gap-4 px-4 py-3 border-b border-border last:border-0"
+      >
+        <div class="flex-1">
+          <div class="h-4 w-28 bg-bg-tertiary rounded" />
+        </div>
+        <div class="h-5 w-16 bg-bg-tertiary rounded-full" />
+        <div class="h-4 w-20 bg-bg-tertiary rounded" />
+      </div>
     </div>
 
     <!-- Tags Table -->

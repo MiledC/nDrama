@@ -12,6 +12,7 @@ import {
   EllipsisVerticalIcon,
   PlusIcon,
 } from '@heroicons/vue/24/outline'
+import { useToastStore } from '../stores/toast'
 
 interface User {
   id: string
@@ -22,6 +23,8 @@ interface User {
   oauth_provider: string | null
   created_at: string
 }
+
+const toast = useToastStore()
 
 const users = ref<User[]>([])
 const loading = ref(true)
@@ -64,6 +67,7 @@ async function inviteUser() {
     inviteName.value = ''
     invitePassword.value = ''
     inviteRole.value = 'editor'
+    toast.success('User invited successfully')
     await fetchUsers()
   } catch (e: unknown) {
     inviteError.value = axios.isAxiosError(e) ? (e.response?.data?.detail ?? 'Failed to invite user') : 'Failed to invite user'
@@ -75,6 +79,7 @@ async function inviteUser() {
 async function changeRole(userId: string, role: 'admin' | 'editor') {
   try {
     await api.patch(`/api/users/${userId}/role`, { role })
+    toast.success(`Role changed to ${role}`)
     await fetchUsers()
   } catch (e: unknown) {
     error.value = axios.isAxiosError(e) ? (e.response?.data?.detail ?? 'Failed to change role') : 'Failed to change role'
@@ -84,6 +89,7 @@ async function changeRole(userId: string, role: 'admin' | 'editor') {
 async function toggleActive(userId: string, isActive: boolean) {
   try {
     await api.patch(`/api/users/${userId}/active`, { is_active: !isActive })
+    toast.success(`Account ${isActive ? 'disabled' : 'enabled'}`)
     await fetchUsers()
   } catch (e: unknown) {
     error.value = axios.isAxiosError(e) ? (e.response?.data?.detail ?? 'Failed to update user status') : 'Failed to update user status'
@@ -208,12 +214,26 @@ onMounted(fetchUsers)
       </div>
     </div>
 
-    <!-- Loading -->
+    <!-- Loading Skeleton -->
     <div
       v-if="loading"
-      class="text-text-secondary"
+      class="overflow-hidden rounded-xl border border-border animate-pulse"
     >
-      Loading users...
+      <div class="border-b border-border bg-bg-secondary px-4 py-3">
+        <div class="h-4 w-32 bg-bg-tertiary rounded" />
+      </div>
+      <div
+        v-for="i in 5"
+        :key="i"
+        class="flex items-center gap-4 px-4 py-3 border-b border-border last:border-0"
+      >
+        <div class="flex-1">
+          <div class="h-4 w-32 bg-bg-tertiary rounded mb-1" />
+          <div class="h-3 w-48 bg-bg-tertiary rounded" />
+        </div>
+        <div class="h-5 w-14 bg-bg-tertiary rounded-full" />
+        <div class="h-5 w-14 bg-bg-tertiary rounded-full" />
+      </div>
     </div>
 
     <!-- Users Table -->

@@ -5,7 +5,9 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.config import settings
 from app.routers.audio_tracks import router as audio_tracks_router
 from app.routers.auth import router as auth_router
+from app.routers.dashboard import router as dashboard_router
 from app.routers.episodes import router as episodes_router
+from app.routers.search import router as search_router
 from app.routers.series import router as series_router
 from app.routers.subtitles import router as subtitles_router
 from app.routers.tags import router as tags_router
@@ -35,6 +37,8 @@ app.include_router(episodes_router)
 app.include_router(audio_tracks_router)
 app.include_router(subtitles_router)
 app.include_router(upload_router)
+app.include_router(dashboard_router)
+app.include_router(search_router)
 
 
 @app.get("/health")
