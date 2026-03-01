@@ -84,6 +84,15 @@ const tagsByCategory = computed(() => {
   return Object.entries(grouped).filter(([, items]) => items.length > 0)
 })
 
+const pricingPreview = computed(() => {
+  const free = freeEpisodeCount.value || 0
+  const cost = coinCostPerEpisode.value || 0
+  if (free === 0 && cost === 0) return 'All episodes are free'
+  if (free === 0) return `All episodes cost ${cost} coin${cost === 1 ? '' : 's'} each`
+  if (cost === 0) return `First ${free} episode${free === 1 ? '' : 's'} free, remaining episodes are free`
+  return `First ${free} episode${free === 1 ? '' : 's'} free, then ${cost} coin${cost === 1 ? '' : 's'} each`
+})
+
 // Initialize form with initial data
 function initializeForm() {
   if (props.initialData) {
@@ -394,6 +403,19 @@ onMounted(fetchTags)
           >
           <p class="mt-1 text-xs text-text-secondary">
             Cost in coins to unlock each premium episode
+          </p>
+        </div>
+
+        <!-- Pricing Preview -->
+        <div class="rounded-lg border border-border bg-bg-tertiary/50 px-4 py-3">
+          <p class="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1">
+            Pricing Preview
+          </p>
+          <p
+            class="text-sm text-text-primary"
+            data-testid="pricing-preview"
+          >
+            {{ pricingPreview }}
           </p>
         </div>
       </div>

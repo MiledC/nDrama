@@ -13,7 +13,14 @@ from app.middleware.auth import get_current_user
 from app.models.series import Series, SeriesStatus, series_tags
 from app.models.tag import Tag
 from app.models.user import User
-from app.schemas.series import SeriesCreate, SeriesListResponse, SeriesResponse, SeriesUpdate
+from app.schemas.series import (
+    PricingResponse,
+    PricingUpdate,
+    SeriesCreate,
+    SeriesListResponse,
+    SeriesResponse,
+    SeriesUpdate,
+)
 
 router = APIRouter(prefix="/api/series", tags=["series"])
 
@@ -214,3 +221,49 @@ async def delete_series(
 
     series.status = SeriesStatus.archived
     await db.commit()
+
+
+@router.get("/{series_id}/pricing", response_model=PricingResponse)
+async def get_pricing(
+    series_id: uuid.UUID,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Get pricing configuration for a series."""
+    result = await db.execute(select(Series).where(Series.id == series_id))
+    series = result.scalar_one_or_none()
+
+    if series is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Series not found",
+        )
+
+    return series
+
+
+@router.patch("/{series_id}/pricing", response_model=PricingResponse)
+async def update_pricing(
+    series_id: uuid.UUID,
+    request: PricingUpdate,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Update pricing configuration for a series."""
+    result = await db.execute(select(Series).where(Series.id == series_id))
+    series = result.scalar_one_or_none()
+
+    if series is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Series not found",
+        )
+
+    update_data = request.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(series, field, value)
+
+    await db.commit()
+    await db.refresh(series)
+
+    return series
