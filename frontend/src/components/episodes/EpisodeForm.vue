@@ -4,6 +4,8 @@ import { PhotoIcon, CloudArrowUpIcon, ArrowPathIcon } from '@heroicons/vue/24/ou
 import api from '../../lib/api'
 import axios from 'axios'
 import VideoPlayer from './VideoPlayer.vue'
+import AudioTrackManager from './AudioTrackManager.vue'
+import SubtitleManager from './SubtitleManager.vue'
 
 type EpisodeFormData = {
   title: string
@@ -559,6 +561,18 @@ onMounted(() => {
             Video upload will be available after creating the episode.
           </p>
         </div>
+
+        <!-- Audio Tracks (edit mode only) -->
+        <AudioTrackManager
+          v-if="isEditMode && episodeId"
+          :episode-id="episodeId"
+        />
+
+        <!-- Subtitles (edit mode only) -->
+        <SubtitleManager
+          v-if="isEditMode && episodeId"
+          :episode-id="episodeId"
+        />
       </div>
     </div>
 
