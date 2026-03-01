@@ -108,7 +108,7 @@ describe('EpisodeForm', () => {
     const emitted = wrapper.emitted('submit')
     expect(emitted).toBeDefined()
     expect(emitted).not.toBeUndefined()
-    if (emitted) {
+    if (emitted && emitted[0]) {
       expect(emitted[0][0]).toEqual(
         expect.objectContaining({
           title: 'New Episode',
