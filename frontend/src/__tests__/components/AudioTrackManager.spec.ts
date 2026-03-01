@@ -106,7 +106,7 @@ describe('AudioTrackManager', () => {
     await flushPromises()
 
     expect(mockPost).toHaveBeenCalledOnce()
-    const callArgs = mockPost.mock.calls[0]
+    const callArgs = mockPost.mock.calls[0]!
     expect(callArgs[0]).toBe('/api/episodes/ep1/audio-tracks')
     expect(callArgs[1]).toBeInstanceOf(FormData)
   })

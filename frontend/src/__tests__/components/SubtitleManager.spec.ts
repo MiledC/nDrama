@@ -92,7 +92,7 @@ describe('SubtitleManager', () => {
     await flushPromises()
 
     expect(mockPost).toHaveBeenCalledOnce()
-    const callArgs = mockPost.mock.calls[0]
+    const callArgs = mockPost.mock.calls[0]!
     expect(callArgs[0]).toBe('/api/episodes/ep1/subtitles')
     expect(callArgs[1]).toBeInstanceOf(FormData)
   })
@@ -122,7 +122,7 @@ describe('SubtitleManager', () => {
     await flushPromises()
 
     expect(mockPost).toHaveBeenCalledOnce()
-    const callArgs = mockPost.mock.calls[0]
+    const callArgs = mockPost.mock.calls[0]!
     expect(callArgs[0]).toBe('/api/episodes/ep1/subtitles')
     expect(callArgs[1]).toBeInstanceOf(FormData)
   })
