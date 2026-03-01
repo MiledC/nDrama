@@ -107,14 +107,17 @@ describe('EpisodeForm', () => {
     // Should emit with data
     const emitted = wrapper.emitted('submit')
     expect(emitted).toBeDefined()
-    expect(emitted![0][0]).toEqual(
-      expect.objectContaining({
-        title: 'New Episode',
-        description: 'A description',
-        episode_number: 3,
-        status: 'draft',
-      })
-    )
+    expect(emitted).not.toBeUndefined()
+    if (emitted) {
+      expect(emitted[0][0]).toEqual(
+        expect.objectContaining({
+          title: 'New Episode',
+          description: 'A description',
+          episode_number: 3,
+          status: 'draft',
+        })
+      )
+    }
   })
 
   it('emits cancel event', async () => {

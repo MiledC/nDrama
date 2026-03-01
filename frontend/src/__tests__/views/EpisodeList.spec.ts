@@ -162,12 +162,12 @@ describe('SeriesDetailView - Episode List', () => {
     expect(rows.length).toBe(3)
 
     // Episode numbers should be in order
-    expect(rows[0].text()).toContain('1')
-    expect(rows[0].text()).toContain('Episode One')
-    expect(rows[1].text()).toContain('2')
-    expect(rows[1].text()).toContain('Episode Two')
-    expect(rows[2].text()).toContain('3')
-    expect(rows[2].text()).toContain('Episode Three')
+    expect(rows[0]!.text()).toContain('1')
+    expect(rows[0]!.text()).toContain('Episode One')
+    expect(rows[1]!.text()).toContain('2')
+    expect(rows[1]!.text()).toContain('Episode Two')
+    expect(rows[2]!.text()).toContain('3')
+    expect(rows[2]!.text()).toContain('Episode Three')
   })
 
   it('status badges display correctly', async () => {
