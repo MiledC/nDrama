@@ -7,6 +7,7 @@ Usage:
 import uuid
 from typing import Any
 
+from app.models.episode import Episode, EpisodeStatus
 from app.models.series import Series, SeriesStatus
 from app.models.tag import Tag, TagCategory
 from app.models.user import User, UserRole
@@ -62,3 +63,21 @@ def make_series(created_by: uuid.UUID, **overrides: Any) -> Series:
     }
     defaults.update(overrides)
     return Series(**defaults)
+
+
+def make_episode(
+    series_id: uuid.UUID, created_by: uuid.UUID, **overrides: Any
+) -> Episode:
+    """Create an Episode instance with sensible defaults. Does NOT add to session."""
+    n = _next_id()
+    defaults: dict[str, Any] = {
+        "id": uuid.uuid4(),
+        "series_id": series_id,
+        "title": f"Test Episode {n}",
+        "description": f"Description for episode {n}",
+        "episode_number": n,
+        "status": EpisodeStatus.draft,
+        "created_by": created_by,
+    }
+    defaults.update(overrides)
+    return Episode(**defaults)

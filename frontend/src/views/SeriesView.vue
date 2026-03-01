@@ -355,7 +355,7 @@ onMounted(() => {
                 <div>
                   <button
                     class="text-sm font-medium text-text-primary hover:text-accent transition-colors text-left"
-                    @click="router.push(`/series/${s.id}/edit`)"
+                    @click="router.push(`/series/${s.id}`)"
                   >
                     {{ s.title }}
                   </button>

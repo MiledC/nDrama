@@ -31,5 +31,11 @@ class Settings(BaseSettings):
     google_client_secret: str = ""
     google_redirect_uri: str = "http://localhost:8000/api/auth/google/callback"
 
+    # Video Provider
+    video_provider: str = "mux"
+    mux_token_id: str = ""
+    mux_token_secret: str = ""
+    frontend_url: str = "http://localhost:3000"
+
 
 settings = Settings()

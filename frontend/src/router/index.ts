@@ -32,9 +32,24 @@ const router = createRouter({
       component: () => import('../views/SeriesCreateView.vue'),
     },
     {
+      path: '/series/:id',
+      name: 'series-detail',
+      component: () => import('../views/SeriesDetailView.vue'),
+    },
+    {
       path: '/series/:id/edit',
       name: 'series-edit',
       component: () => import('../views/SeriesEditView.vue'),
+    },
+    {
+      path: '/series/:seriesId/episodes/create',
+      name: 'episode-create',
+      component: () => import('../views/EpisodeCreateView.vue'),
+    },
+    {
+      path: '/series/:seriesId/episodes/:id/edit',
+      name: 'episode-edit',
+      component: () => import('../views/EpisodeEditView.vue'),
     },
     {
       path: '/tags',

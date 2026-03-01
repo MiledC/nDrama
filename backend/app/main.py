@@ -4,6 +4,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
 from app.routers.auth import router as auth_router
+from app.routers.episodes import router as episodes_router
 from app.routers.series import router as series_router
 from app.routers.tags import router as tags_router
 from app.routers.upload import router as upload_router
@@ -16,7 +17,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,6 +29,7 @@ app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(tags_router)
 app.include_router(series_router)
+app.include_router(episodes_router)
 app.include_router(upload_router)
 
 
