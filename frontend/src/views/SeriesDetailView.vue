@@ -160,6 +160,18 @@ function formatDuration(seconds: number | null): string {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
+function getEpisodePricingBadge(episodeNumber: number): { label: string; class: string } {
+  if (!series.value) return { label: '', class: '' }
+  if (episodeNumber <= series.value.free_episode_count) {
+    return { label: 'Free', class: 'bg-green-500/10 text-green-400' }
+  }
+  const cost = series.value.coin_cost_per_episode
+  return {
+    label: cost > 0 ? `${cost} coins` : 'Locked',
+    class: 'bg-amber-500/10 text-amber-400',
+  }
+}
+
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -316,6 +328,9 @@ onMounted(() => {
                 Status
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-24">
+                Access
+              </th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-24">
                 Duration
               </th>
               <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-32">
@@ -374,6 +389,14 @@ onMounted(() => {
                   ]"
                 >
                   {{ ep.status }}
+                </span>
+              </td>
+              <td class="px-4 py-3">
+                <span
+                  :class="[getEpisodePricingBadge(ep.episode_number).class, 'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium']"
+                  :data-testid="`episode-${ep.episode_number}-access`"
+                >
+                  {{ getEpisodePricingBadge(ep.episode_number).label }}
                 </span>
               </td>
               <td class="px-4 py-3 text-sm text-text-secondary font-mono">

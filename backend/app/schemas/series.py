@@ -48,3 +48,14 @@ class SeriesListResponse(BaseModel):
     total: int
     page: int
     per_page: int
+
+
+class PricingResponse(BaseModel):
+    free_episode_count: int
+    coin_cost_per_episode: int
+    model_config = {"from_attributes": True}
+
+
+class PricingUpdate(BaseModel):
+    free_episode_count: int | None = Field(None, ge=0)
+    coin_cost_per_episode: int | None = Field(None, ge=0)
