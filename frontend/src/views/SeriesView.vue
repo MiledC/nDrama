@@ -18,6 +18,7 @@ import {
   ArchiveBoxIcon,
   TrashIcon,
 } from '@heroicons/vue/24/outline'
+import { useToastStore } from '../stores/toast'
 
 interface Tag {
   id: string
@@ -47,6 +48,7 @@ interface PaginatedResponse {
 }
 
 const router = useRouter()
+const toast = useToastStore()
 
 // State
 const series = ref<Series[]>([])
@@ -169,8 +171,10 @@ async function confirmDelete() {
     } else {
       await api.delete(`/api/series/${deletingSeries.value.id}`)
     }
+    const action = deleteAction.value
     showDeleteConfirm.value = false
     deletingSeries.value = null
+    toast.success(`Series ${action === 'archive' ? 'archived' : 'deleted'} successfully`)
     await fetchSeries()
   } catch (e: unknown) {
     deleteError.value = axios.isAxiosError(e)
@@ -294,12 +298,26 @@ onMounted(() => {
       </select>
     </div>
 
-    <!-- Loading -->
+    <!-- Loading Skeleton -->
     <div
       v-if="loading"
-      class="text-text-secondary"
+      class="overflow-hidden rounded-xl border border-border animate-pulse"
     >
-      Loading series...
+      <div class="border-b border-border bg-bg-secondary px-4 py-3">
+        <div class="h-4 w-32 bg-bg-tertiary rounded" />
+      </div>
+      <div
+        v-for="i in 5"
+        :key="i"
+        class="flex items-center gap-4 px-4 py-3 border-b border-border last:border-0"
+      >
+        <div class="h-10 w-10 bg-bg-tertiary rounded-lg flex-shrink-0" />
+        <div class="flex-1">
+          <div class="h-4 w-40 bg-bg-tertiary rounded mb-1" />
+          <div class="h-3 w-24 bg-bg-tertiary rounded" />
+        </div>
+        <div class="h-5 w-16 bg-bg-tertiary rounded-full" />
+      </div>
     </div>
 
     <!-- Series Table -->

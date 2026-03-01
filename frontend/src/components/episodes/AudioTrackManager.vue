@@ -38,7 +38,7 @@ const deleteConfirmId = ref<string | null>(null)
 const languageCode = ref('ar')
 const label = ref('')
 const isDefault = ref(false)
-// eslint-disable-next-line no-undef
+ 
 const fileInput = ref<HTMLInputElement | null>(null)
 // eslint-disable-next-line no-undef
 const selectedFile = ref<File | null>(null)
@@ -71,7 +71,7 @@ async function fetchTracks() {
 
 // eslint-disable-next-line no-undef
 function handleFileSelect(event: Event) {
-  // eslint-disable-next-line no-undef
+   
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {

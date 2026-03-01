@@ -18,6 +18,7 @@ import {
   ArrowLeftIcon,
   PlayCircleIcon,
 } from '@heroicons/vue/24/outline'
+import { useToastStore } from '../stores/toast'
 
 interface Tag {
   id: string
@@ -60,6 +61,7 @@ interface EpisodeListResponse {
 
 const route = useRoute()
 const router = useRouter()
+const toast = useToastStore()
 const seriesId = computed(() => route.params.id as string)
 
 // Series state
@@ -130,6 +132,7 @@ async function confirmDelete() {
     await api.delete(`/api/episodes/${deletingEpisode.value.id}`)
     showDeleteConfirm.value = false
     deletingEpisode.value = null
+    toast.success('Episode deleted successfully')
     await fetchEpisodes()
   } catch (e: unknown) {
     deleteError.value = axios.isAxiosError(e)
@@ -198,12 +201,17 @@ onMounted(() => {
         Back to Series
       </button>
 
-      <!-- Series loading/error -->
+      <!-- Series loading skeleton -->
       <div
         v-if="seriesLoading"
-        class="text-text-secondary"
+        class="flex items-start gap-4 animate-pulse"
       >
-        Loading series...
+        <div class="h-20 w-20 bg-bg-tertiary rounded-lg flex-shrink-0" />
+        <div class="flex-1">
+          <div class="h-6 w-48 bg-bg-tertiary rounded mb-2" />
+          <div class="h-4 w-72 bg-bg-tertiary rounded mb-2" />
+          <div class="h-3 w-40 bg-bg-tertiary rounded" />
+        </div>
       </div>
       <div
         v-else-if="seriesError"
@@ -302,12 +310,27 @@ onMounted(() => {
         {{ episodesError }}
       </div>
 
-      <!-- Episodes loading -->
+      <!-- Episodes loading skeleton -->
       <div
         v-if="episodesLoading"
-        class="text-text-secondary"
+        class="overflow-hidden rounded-xl border border-border animate-pulse"
       >
-        Loading episodes...
+        <div class="border-b border-border bg-bg-secondary px-4 py-3">
+          <div class="h-4 w-32 bg-bg-tertiary rounded" />
+        </div>
+        <div
+          v-for="i in 3"
+          :key="i"
+          class="flex items-center gap-4 px-4 py-3 border-b border-border last:border-0"
+        >
+          <div class="h-4 w-6 bg-bg-tertiary rounded" />
+          <div class="h-10 w-16 bg-bg-tertiary rounded" />
+          <div class="flex-1">
+            <div class="h-4 w-36 bg-bg-tertiary rounded mb-1" />
+            <div class="h-3 w-24 bg-bg-tertiary rounded" />
+          </div>
+          <div class="h-5 w-16 bg-bg-tertiary rounded-full" />
+        </div>
       </div>
 
       <!-- Episodes Table -->

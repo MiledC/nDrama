@@ -50,7 +50,7 @@ const tagsLoading = ref(false)
 const tagsError = ref('')
 
 // File input ref
-// eslint-disable-next-line no-undef
+ 
 const fileInput = ref<HTMLInputElement | null>(null)
 
 // Thumbnail upload
@@ -129,7 +129,7 @@ async function fetchTags() {
 // Handle file selection
 // eslint-disable-next-line no-undef
 function handleFileSelect(event: Event) {
-  // eslint-disable-next-line no-undef
+   
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
 
