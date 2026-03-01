@@ -238,10 +238,11 @@ async def upload_video(
     provider = get_video_provider()
     asset = await provider.create_upload(f"episode-{episode_id}")
 
-    # Update episode with provider info
+    # Update episode with provider info — asset_id may be empty until upload completes
     episode.video_provider = VideoProviderEnum.mux
-    episode.video_provider_asset_id = asset.asset_id
-    episode.video_playback_id = asset.playback_id
+    episode.video_provider_asset_id = asset.asset_id or None
+    episode.video_provider_upload_id = asset.upload_id
+    episode.video_playback_id = None
     episode.status = EpisodeStatus.processing
 
     await db.commit()
@@ -252,3 +253,48 @@ async def upload_video(
         asset_id=asset.asset_id,
         playback_id=asset.playback_id,
     )
+
+
+@router.post(
+    "/api/episodes/{episode_id}/video/complete",
+    response_model=EpisodeResponse,
+)
+async def complete_video_upload(
+    episode_id: uuid.UUID,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Finalize video upload: fetch asset_id and playback_id from provider."""
+    result = await db.execute(select(Episode).where(Episode.id == episode_id))
+    episode = result.scalar_one_or_none()
+
+    if episode is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Episode not found",
+        )
+
+    if not episode.video_provider_upload_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No video upload in progress for this episode",
+        )
+
+    provider = get_video_provider(episode.video_provider)
+    details = await provider.get_upload_details(episode.video_provider_upload_id)
+
+    if details.asset_id:
+        episode.video_provider_asset_id = details.asset_id
+    if details.playback_id:
+        episode.video_playback_id = details.playback_id
+
+    # Map provider status to episode status
+    if details.status == "ready":
+        episode.status = EpisodeStatus.ready
+    elif details.status == "errored":
+        episode.status = EpisodeStatus.draft
+
+    await db.commit()
+    await db.refresh(episode)
+
+    return episode

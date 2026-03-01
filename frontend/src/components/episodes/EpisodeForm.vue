@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
-import { PhotoIcon, CloudArrowUpIcon } from '@heroicons/vue/24/outline'
+import { PhotoIcon, CloudArrowUpIcon, ArrowPathIcon } from '@heroicons/vue/24/outline'
 import api from '../../lib/api'
 import axios from 'axios'
+import VideoPlayer from './VideoPlayer.vue'
 
 type EpisodeFormData = {
   title: string
@@ -10,6 +11,7 @@ type EpisodeFormData = {
   episode_number?: number
   thumbnail_url?: string
   status: 'draft' | 'processing' | 'ready' | 'published'
+  video_playback_id?: string
 }
 
 interface Props {
@@ -47,6 +49,10 @@ const thumbnailUploadLoading = ref(false)
 const thumbnailUploadProgress = ref(0)
 const thumbnailUploadError = ref('')
 
+// Video playback
+const videoPlaybackId = ref<string | undefined>(undefined)
+const isReplacingVideo = ref(false)
+
 // Video upload
 const videoUploadLoading = ref(false)
 const videoUploadProgress = ref(0)
@@ -71,6 +77,7 @@ function initializeForm() {
     status.value = props.initialData.status || 'draft'
     thumbnailUrl.value = props.initialData.thumbnail_url || ''
     thumbnailPreview.value = props.initialData.thumbnail_url || ''
+    videoPlaybackId.value = props.initialData.video_playback_id
   }
 }
 
@@ -185,6 +192,16 @@ async function uploadVideo() {
         }
       },
     })
+
+    // Finalize: fetch asset_id and playback_id from Mux via backend
+    try {
+      const completeResp = await api.post(`/api/episodes/${props.episodeId}/video/complete`)
+      if (completeResp.data.video_playback_id) {
+        videoPlaybackId.value = completeResp.data.video_playback_id
+      }
+    } catch {
+      // Non-fatal: playback_id will be available on next page load
+    }
 
     videoUploadSuccess.value = true
     videoFile.value = null
@@ -414,88 +431,116 @@ onMounted(() => {
             Video
           </label>
 
-          <!-- Video file selection area -->
-          <div
-            class="relative w-full rounded-lg border-2 border-dashed border-border hover:border-accent transition-colors cursor-pointer overflow-hidden bg-bg-tertiary p-6"
-            @click="videoFileInput?.click()"
-          >
-            <div class="flex flex-col items-center justify-center text-center">
-              <!-- Upload success -->
-              <div
-                v-if="videoUploadSuccess"
-                class="text-green-400"
-              >
-                <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2" />
-                <p class="text-sm font-medium">
-                  Video uploaded successfully
-                </p>
-                <p class="text-xs text-text-secondary mt-1">
-                  Processing may take a few minutes
-                </p>
-              </div>
-
-              <!-- Upload in progress -->
-              <div
-                v-else-if="videoUploadLoading"
-                class="w-full"
-              >
-                <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2 text-accent animate-pulse" />
-                <p class="text-sm text-text-primary mb-3">
-                  Uploading video...
-                </p>
-                <div class="w-full bg-bg-primary rounded-full h-3 mb-2">
-                  <div
-                    class="bg-accent h-3 rounded-full transition-all duration-300"
-                    :style="{ width: `${videoUploadProgress}%` }"
-                  />
-                </div>
-                <p class="text-xs text-text-secondary">
-                  {{ videoUploadProgress }}% complete
-                </p>
-              </div>
-
-              <!-- File selected, ready to upload -->
-              <div v-else-if="videoFile">
-                <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2 text-text-secondary" />
-                <p class="text-sm font-medium text-text-primary">
-                  {{ videoFileName }}
-                </p>
-                <p class="text-xs text-text-secondary mt-1">
-                  {{ formatFileSize(videoFile.size) }}
-                </p>
-              </div>
-
-              <!-- Empty state -->
-              <div v-else>
-                <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2 text-text-secondary" />
-                <p class="text-sm text-text-secondary">
-                  Click to select a video file
-                </p>
-                <p class="text-xs text-text-secondary mt-1">
-                  Max 2GB, video files only
-                </p>
-              </div>
-            </div>
-            <input
-              ref="videoFileInput"
-              type="file"
-              accept="video/*"
-              class="hidden"
-              @change="handleVideoSelect"
-              @click.stop
+          <!-- Existing video player -->
+          <div v-if="videoPlaybackId && !isReplacingVideo">
+            <VideoPlayer
+              :playback-id="videoPlaybackId"
+              :status="status"
+            />
+            <button
+              type="button"
+              class="mt-3 w-full flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-tertiary transition-colors"
+              @click="isReplacingVideo = true"
             >
+              <ArrowPathIcon class="h-4 w-4" />
+              Replace Video
+            </button>
           </div>
 
-          <!-- Upload button (separate from file selection) -->
-          <button
-            v-if="videoFile && !videoUploadLoading && !videoUploadSuccess"
-            type="button"
-            class="mt-3 w-full flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accent-hover transition-colors"
-            @click.stop="uploadVideo"
-          >
-            <CloudArrowUpIcon class="h-4 w-4" />
-            Upload Video
-          </button>
+          <!-- Video file selection area -->
+          <template v-else>
+            <div
+              class="relative w-full rounded-lg border-2 border-dashed border-border hover:border-accent transition-colors cursor-pointer overflow-hidden bg-bg-tertiary p-6"
+              @click="videoFileInput?.click()"
+            >
+              <div class="flex flex-col items-center justify-center text-center">
+                <!-- Upload success -->
+                <div
+                  v-if="videoUploadSuccess"
+                  class="text-green-400"
+                >
+                  <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2" />
+                  <p class="text-sm font-medium">
+                    Video uploaded successfully
+                  </p>
+                  <p class="text-xs text-text-secondary mt-1">
+                    Processing may take a few minutes
+                  </p>
+                </div>
+
+                <!-- Upload in progress -->
+                <div
+                  v-else-if="videoUploadLoading"
+                  class="w-full"
+                >
+                  <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2 text-accent animate-pulse" />
+                  <p class="text-sm text-text-primary mb-3">
+                    Uploading video...
+                  </p>
+                  <div class="w-full bg-bg-primary rounded-full h-3 mb-2">
+                    <div
+                      class="bg-accent h-3 rounded-full transition-all duration-300"
+                      :style="{ width: `${videoUploadProgress}%` }"
+                    />
+                  </div>
+                  <p class="text-xs text-text-secondary">
+                    {{ videoUploadProgress }}% complete
+                  </p>
+                </div>
+
+                <!-- File selected, ready to upload -->
+                <div v-else-if="videoFile">
+                  <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2 text-text-secondary" />
+                  <p class="text-sm font-medium text-text-primary">
+                    {{ videoFileName }}
+                  </p>
+                  <p class="text-xs text-text-secondary mt-1">
+                    {{ formatFileSize(videoFile.size) }}
+                  </p>
+                </div>
+
+                <!-- Empty state -->
+                <div v-else>
+                  <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2 text-text-secondary" />
+                  <p class="text-sm text-text-secondary">
+                    Click to select a video file
+                  </p>
+                  <p class="text-xs text-text-secondary mt-1">
+                    Max 2GB, video files only
+                  </p>
+                </div>
+              </div>
+              <input
+                ref="videoFileInput"
+                type="file"
+                accept="video/*"
+                class="hidden"
+                @change="handleVideoSelect"
+                @click.stop
+              >
+            </div>
+
+            <!-- Upload button (separate from file selection) -->
+            <button
+              v-if="videoFile && !videoUploadLoading && !videoUploadSuccess"
+              type="button"
+              class="mt-3 w-full flex items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-medium text-white hover:bg-accent-hover transition-colors"
+              @click.stop="uploadVideo"
+            >
+              <CloudArrowUpIcon class="h-4 w-4" />
+              Upload Video
+            </button>
+
+            <!-- Cancel replace button -->
+            <button
+              v-if="videoPlaybackId && isReplacingVideo && !videoUploadLoading && !videoUploadSuccess"
+              type="button"
+              class="mt-2 w-full text-center text-sm text-text-secondary hover:text-text-primary transition-colors"
+              @click="isReplacingVideo = false; videoFile = null; videoFileName = ''"
+            >
+              Cancel replacement
+            </button>
+          </template>
 
           <p
             v-if="videoUploadError"

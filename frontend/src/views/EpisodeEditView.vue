@@ -55,6 +55,7 @@ function getInitialData() {
     episode_number: episode.value.episode_number,
     thumbnail_url: episode.value.thumbnail_url || undefined,
     status: episode.value.status,
+    video_playback_id: episode.value.video_playback_id || undefined,
   }
 }
 

@@ -8,6 +8,7 @@ from app.services.video_provider import (
     AssetStatus,
     MuxProvider,
     ProviderAsset,
+    UploadDetails,
     VideoProvider,
     get_video_provider,
 )
@@ -20,7 +21,9 @@ def test_provider_interface_contract():
         for name, method in inspect.getmembers(VideoProvider)
         if getattr(method, "__isabstractmethod__", False)
     }
-    assert abstract_methods == {"create_upload", "get_status", "delete", "get_playback_url"}
+    assert abstract_methods == {
+        "create_upload", "get_upload_details", "get_status", "delete", "get_playback_url",
+    }
 
 
 def test_mux_provider_implements_interface():
@@ -29,6 +32,7 @@ def test_mux_provider_implements_interface():
     # Should be instantiable (not abstract)
     provider = MuxProvider()
     assert hasattr(provider, "create_upload")
+    assert hasattr(provider, "get_upload_details")
     assert hasattr(provider, "get_status")
     assert hasattr(provider, "delete")
     assert hasattr(provider, "get_playback_url")
@@ -59,6 +63,22 @@ def test_provider_asset_defaults():
     asset = ProviderAsset(asset_id="abc123")
     assert asset.playback_id is None
     assert asset.upload_url is None
+    assert asset.upload_id is None
+
+
+def test_upload_details_dataclass():
+    """UploadDetails stores upload check results."""
+    details = UploadDetails(asset_id="a1", playback_id="p1", status=AssetStatus.ready)
+    assert details.asset_id == "a1"
+    assert details.playback_id == "p1"
+    assert details.status == AssetStatus.ready
+
+
+def test_upload_details_defaults():
+    """UploadDetails has sensible defaults."""
+    details = UploadDetails(asset_id="")
+    assert details.playback_id is None
+    assert details.status == AssetStatus.waiting
 
 
 def test_asset_status_values():

@@ -43,6 +43,7 @@ class Episode(Base, UUIDMixin, TimestampMixin):
         Enum(VideoProviderEnum), nullable=True
     )
     video_provider_asset_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    video_provider_upload_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     video_playback_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     duration_seconds: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_by: Mapped[uuid.UUID] = mapped_column(

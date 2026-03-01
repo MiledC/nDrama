@@ -46,6 +46,7 @@ describe('EpisodeForm', () => {
       episode_number: 5,
       status: 'published' as const,
       thumbnail_url: 'https://example.com/thumb.jpg',
+      video_playback_id: 'mux-abc123',
     }
 
     const wrapper = mountWithPlugins(EpisodeForm, {
@@ -134,7 +135,7 @@ describe('EpisodeForm', () => {
     expect(wrapper.emitted('cancel')).toBeDefined()
   })
 
-  it('shows video upload area in edit mode', () => {
+  it('shows video upload area in edit mode without video', () => {
     const wrapper = mountWithPlugins(EpisodeForm, {
       props: {
         seriesId: 's1',
@@ -149,6 +150,27 @@ describe('EpisodeForm', () => {
     // Should show video upload area
     expect(wrapper.text()).toContain('Click to select a video file')
     expect(wrapper.text()).toContain('Max 2GB')
+  })
+
+  it('shows video player when video_playback_id is provided', async () => {
+    const wrapper = mountWithPlugins(EpisodeForm, {
+      props: {
+        seriesId: 's1',
+        episodeId: 'e1',
+        initialData: {
+          title: 'Episode With Video',
+          status: 'ready' as const,
+          video_playback_id: 'mux-playback-123',
+        },
+      },
+    })
+
+    await flushPromises()
+
+    // Should show the video player, not the upload prompt
+    expect(wrapper.text()).not.toContain('Click to select a video file')
+    expect(wrapper.findComponent({ name: 'VideoPlayer' }).exists()).toBe(true)
+    expect(wrapper.text()).toContain('Replace Video')
   })
 
   it('shows character count for description', async () => {

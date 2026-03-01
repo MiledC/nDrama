@@ -19,12 +19,25 @@ class ProviderAsset:
     asset_id: str
     playback_id: str | None = None
     upload_url: str | None = None
+    upload_id: str | None = None
+
+
+@dataclass
+class UploadDetails:
+    asset_id: str
+    playback_id: str | None = None
+    status: AssetStatus = AssetStatus.waiting
 
 
 class VideoProvider(ABC):
     @abstractmethod
     async def create_upload(self, filename: str) -> ProviderAsset:
         """Create a direct upload URL. Returns asset info with upload URL."""
+        ...
+
+    @abstractmethod
+    async def get_upload_details(self, upload_id: str) -> UploadDetails:
+        """Check a completed upload to get asset_id and playback_id."""
         ...
 
     @abstractmethod
@@ -63,10 +76,48 @@ class MuxProvider(VideoProvider):
             )
             resp.raise_for_status()
             data = resp.json()["data"]
-            asset_id = data.get("asset_id", "")
             return ProviderAsset(
-                asset_id=asset_id,
+                asset_id=data.get("asset_id", ""),
+                upload_id=data["id"],
                 upload_url=data["url"],
+            )
+
+    async def get_upload_details(self, upload_id: str) -> UploadDetails:
+        async with httpx.AsyncClient() as client:
+            # Check upload to get the asset_id
+            resp = await client.get(
+                f"{self.BASE_URL}/video/v1/uploads/{upload_id}",
+                auth=self.auth,
+            )
+            resp.raise_for_status()
+            upload_data = resp.json()["data"]
+            asset_id = upload_data.get("asset_id", "")
+
+            if not asset_id:
+                return UploadDetails(asset_id="", status=AssetStatus.waiting)
+
+            # Fetch the asset for playback_id and status
+            asset_resp = await client.get(
+                f"{self.BASE_URL}/video/v1/assets/{asset_id}",
+                auth=self.auth,
+            )
+            asset_resp.raise_for_status()
+            asset_data = asset_resp.json()["data"]
+
+            playback_ids = asset_data.get("playback_ids", [])
+            playback_id = playback_ids[0]["id"] if playback_ids else None
+
+            mux_status = asset_data.get("status", "waiting")
+            status_map = {
+                "preparing": AssetStatus.processing,
+                "ready": AssetStatus.ready,
+                "errored": AssetStatus.errored,
+            }
+
+            return UploadDetails(
+                asset_id=asset_id,
+                playback_id=playback_id,
+                status=status_map.get(mux_status, AssetStatus.waiting),
             )
 
     async def get_status(self, asset_id: str) -> AssetStatus:
