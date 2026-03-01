@@ -7,8 +7,10 @@ Usage:
 import uuid
 from typing import Any
 
+from app.models.audio_track import AudioTrack
 from app.models.episode import Episode, EpisodeStatus
 from app.models.series import Series, SeriesStatus
+from app.models.subtitle import Subtitle, SubtitleFormat
 from app.models.tag import Tag, TagCategory
 from app.models.user import User, UserRole
 from app.services.auth_service import hash_password
@@ -81,3 +83,34 @@ def make_episode(
     }
     defaults.update(overrides)
     return Episode(**defaults)
+
+
+def make_audio_track(episode_id: uuid.UUID, **overrides: Any) -> AudioTrack:
+    """Create an AudioTrack instance with sensible defaults. Does NOT add to session."""
+    n = _next_id()
+    defaults: dict[str, Any] = {
+        "id": uuid.uuid4(),
+        "episode_id": episode_id,
+        "language_code": "ar",
+        "label": f"Arabic Track {n}",
+        "file_url": f"http://localhost:9000/test-bucket/audio-tracks/test-{n}.mp3",
+        "is_default": False,
+    }
+    defaults.update(overrides)
+    return AudioTrack(**defaults)
+
+
+def make_subtitle(episode_id: uuid.UUID, **overrides: Any) -> Subtitle:
+    """Create a Subtitle instance with sensible defaults. Does NOT add to session."""
+    n = _next_id()
+    defaults: dict[str, Any] = {
+        "id": uuid.uuid4(),
+        "episode_id": episode_id,
+        "language_code": "ar",
+        "label": f"Arabic Subtitles {n}",
+        "file_url": f"http://localhost:9000/test-bucket/subtitles/test-{n}.vtt",
+        "format": SubtitleFormat.vtt,
+        "is_default": False,
+    }
+    defaults.update(overrides)
+    return Subtitle(**defaults)

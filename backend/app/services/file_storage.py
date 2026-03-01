@@ -9,7 +9,9 @@ from app.config import settings
 
 class FileStorage(ABC):
     @abstractmethod
-    async def upload(self, file_data: bytes, filename: str, content_type: str) -> str:
+    async def upload(
+        self, file_data: bytes, filename: str, content_type: str, prefix: str = "thumbnails"
+    ) -> str:
         """Upload a file and return its public URL."""
         ...
 
@@ -33,9 +35,11 @@ class S3Storage(FileStorage):
         )
         self.bucket = settings.s3_bucket
 
-    async def upload(self, file_data: bytes, filename: str, content_type: str) -> str:
+    async def upload(
+        self, file_data: bytes, filename: str, content_type: str, prefix: str = "thumbnails"
+    ) -> str:
         ext = filename.rsplit(".", 1)[-1] if "." in filename else "bin"
-        key = f"thumbnails/{uuid.uuid4()}.{ext}"
+        key = f"{prefix}/{uuid.uuid4()}.{ext}"
         self.client.put_object(
             Bucket=self.bucket,
             Key=key,
