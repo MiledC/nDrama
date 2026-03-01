@@ -258,6 +258,49 @@ async def test_delete_audio_track_not_found(
     assert resp.status_code == 404
 
 
+# --- Create: auto-unset default ---
+
+
+@pytest.mark.asyncio
+@patch("app.routers.audio_tracks.storage")
+async def test_create_audio_track_unsets_existing_default(
+    mock_storage,
+    admin_client: httpx.AsyncClient,
+    db_session: AsyncSession,
+    episode_with_series,
+):
+    """Uploading a new track with is_default=true unsets the existing default."""
+    mock_storage.upload = AsyncMock(return_value="http://s3/audio-tracks/new.mp3")
+
+    # Create existing default track
+    track1 = make_audio_track(
+        episode_id=episode_with_series.id, language_code="ar", is_default=True
+    )
+    db_session.add(track1)
+    await db_session.commit()
+    await db_session.refresh(track1)
+
+    # Upload new track as default
+    resp = await admin_client.post(
+        f"/api/episodes/{episode_with_series.id}/audio-tracks",
+        data={"language_code": "en", "label": "English", "is_default": "true"},
+        files={"file": ("english.mp3", b"fake audio data", "audio/mpeg")},
+    )
+    assert resp.status_code == 201
+    assert resp.json()["is_default"] is True
+
+    # Verify old default was unset
+    resp2 = await admin_client.get(
+        f"/api/episodes/{episode_with_series.id}/audio-tracks"
+    )
+    items = resp2.json()["items"]
+    for item in items:
+        if item["id"] == str(track1.id):
+            assert item["is_default"] is False, "Old default track should be unset"
+        elif item["language_code"] == "en":
+            assert item["is_default"] is True, "New track should be default"
+
+
 # --- Auth ---
 
 
