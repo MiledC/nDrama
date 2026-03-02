@@ -75,8 +75,8 @@ export const useCoinPackageStore = defineStore('coinPackages', () => {
     error.value = null
     try {
       await api.delete(`/api/coin-packages/${id}`)
-      const index = packages.value.findIndex(p => p.id === id)
-      if (index !== -1) packages.value[index].is_active = false
+      const pkg = packages.value.find(p => p.id === id)
+      if (pkg) pkg.is_active = false
     } catch (e: unknown) {
       error.value = extractError(e, 'Failed to deactivate coin package')
       throw e
