@@ -11,6 +11,8 @@ import {
   PlayIcon,
   MagnifyingGlassIcon,
   FolderIcon,
+  UserGroupIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../../stores/auth'
 
@@ -52,6 +54,13 @@ const sections: NavSection[] = [
       { name: 'Series', href: '/series', icon: FilmIcon },
       { name: 'Tags & Genres', href: '/tags', icon: TagIcon },
       { name: 'Categories', href: '/categories', icon: FolderIcon },
+    ],
+  },
+  {
+    label: 'Subscribers',
+    items: [
+      { name: 'Subscribers', href: '/subscribers', icon: UserGroupIcon },
+      { name: 'Coin Packages', href: '/coin-packages', icon: CurrencyDollarIcon, adminOnly: true },
     ],
   },
   {

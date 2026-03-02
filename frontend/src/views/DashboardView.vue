@@ -13,6 +13,8 @@ import {
   PhotoIcon,
   ArrowTrendingUpIcon,
   ChevronRightIcon,
+  UserGroupIcon,
+  CurrencyDollarIcon,
 } from '@heroicons/vue/24/outline'
 
 interface DashboardStats {
@@ -20,6 +22,12 @@ interface DashboardStats {
   episode_count: number
   user_count: number
   published_series_count: number
+  subscriber_total: number
+  subscriber_active: number
+  subscriber_anonymous: number
+  subscriber_suspended: number
+  coins_in_circulation: number
+  transactions_today: number
 }
 
 interface RecentSeries {
@@ -43,6 +51,8 @@ const statCards = [
   { key: 'episode_count' as const, label: 'Total Episodes', icon: PlayCircleIcon, iconColor: 'text-blue-500', iconBg: 'bg-blue-50', blur: 'bg-blue-500/5', blurHover: 'group-hover:bg-blue-500/10' },
   { key: 'user_count' as const, label: 'Users', icon: UsersIcon, iconColor: 'text-amber-500', iconBg: 'bg-amber-50', blur: 'bg-amber-500/5', blurHover: 'group-hover:bg-amber-500/10' },
   { key: 'published_series_count' as const, label: 'Published', icon: CheckBadgeIcon, iconColor: 'text-emerald-600', iconBg: 'bg-emerald-50', blur: 'bg-emerald-100', blurHover: 'group-hover:bg-emerald-200' },
+  { key: 'subscriber_total' as const, label: 'Subscribers', icon: UserGroupIcon, iconColor: 'text-violet-500', iconBg: 'bg-violet-50', blur: 'bg-violet-500/5', blurHover: 'group-hover:bg-violet-500/10' },
+  { key: 'coins_in_circulation' as const, label: 'Coins in Circulation', icon: CurrencyDollarIcon, iconColor: 'text-yellow-600', iconBg: 'bg-yellow-50', blur: 'bg-yellow-500/5', blurHover: 'group-hover:bg-yellow-500/10' },
 ]
 
 function getStatusBadgeClass(status: string): string {
@@ -140,9 +150,9 @@ onMounted(fetchDashboard)
 
     <!-- Loading Skeleton -->
     <template v-if="loading">
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <div
-          v-for="i in 4"
+          v-for="i in 6"
           :key="i"
           class="bg-white rounded-xl border border-border p-5 animate-pulse"
         >
@@ -173,7 +183,7 @@ onMounted(fetchDashboard)
     <!-- Dashboard Content -->
     <template v-else-if="!error">
       <!-- Stats Cards -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
         <div
           v-for="card in statCards"
           :key="card.key"
