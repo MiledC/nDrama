@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import api from '../lib/api'
 import {
@@ -8,7 +8,6 @@ import {
   TrashIcon,
   ChevronRightIcon,
   ChevronDownIcon,
-  TagIcon,
 } from '@heroicons/vue/24/outline'
 import { useToastStore } from '../stores/toast'
 
@@ -66,9 +65,6 @@ const deletingCategory = ref<CategoryNode | null>(null)
 const deleteLoading = ref(false)
 const deleteError = ref('')
 
-// Computed
-const rootCategories = computed(() => tree.value.filter(c => !c.children || c.children.length === 0))
-
 async function fetchData() {
   loading.value = true
   error.value = ''
@@ -79,7 +75,7 @@ async function fetchData() {
     ])
     tree.value = treeRes.data
     allTags.value = tagsRes.data
-  } catch (e) {
+  } catch {
     error.value = 'Failed to load categories'
   } finally {
     loading.value = false
@@ -109,7 +105,7 @@ async function createCategory() {
   createLoading.value = true
   createError.value = ''
   try {
-    const payload: any = {
+    const payload: Record<string, unknown> = {
       name: createName.value,
       match_mode: createMatchMode.value,
     }
@@ -151,7 +147,7 @@ async function updateCategory() {
   editLoading.value = true
   editError.value = ''
   try {
-    const payload: any = {}
+    const payload: Record<string, unknown> = {}
     if (editName.value !== editingCategory.value.name) {
       payload.name = editName.value
     }
@@ -350,9 +346,9 @@ onMounted(fetchData)
                 class="flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 rounded px-2 py-1 cursor-pointer"
               >
                 <input
+                  v-model="createTagIds"
                   type="checkbox"
                   :value="tag.id"
-                  v-model="createTagIds"
                   class="rounded border-gray-300 text-accent focus:ring-accent"
                 >
                 {{ tag.name }}
@@ -469,9 +465,9 @@ onMounted(fetchData)
                 class="flex items-center gap-2 text-sm text-gray-700 hover:bg-gray-50 rounded px-2 py-1 cursor-pointer"
               >
                 <input
+                  v-model="editTagIds"
                   type="checkbox"
                   :value="tag.id"
-                  v-model="editTagIds"
                   class="rounded border-gray-300 text-accent focus:ring-accent"
                 >
                 {{ tag.name }}
@@ -582,8 +578,8 @@ onMounted(fetchData)
         <div class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50">
           <button
             v-if="root.children && root.children.length > 0"
-            @click="toggleExpand(root.id)"
             class="text-gray-400 hover:text-gray-600"
+            @click="toggleExpand(root.id)"
           >
             <ChevronDownIcon
               v-if="expandedIds.has(root.id)"
@@ -611,23 +607,23 @@ onMounted(fetchData)
           </span>
           <!-- Action buttons -->
           <button
-            @click="openCreateForm(root.id)"
             title="Add subcategory"
             class="text-gray-400 hover:text-accent"
+            @click="openCreateForm(root.id)"
           >
             <PlusIcon class="h-4 w-4" />
           </button>
           <button
-            @click="openEditForm(root)"
             title="Edit"
             class="text-gray-400 hover:text-gray-600"
+            @click="openEditForm(root)"
           >
             <PencilIcon class="h-4 w-4" />
           </button>
           <button
-            @click="openDeleteConfirm(root)"
             title="Delete"
             class="text-gray-400 hover:text-red-600"
+            @click="openDeleteConfirm(root)"
           >
             <TrashIcon class="h-4 w-4" />
           </button>
@@ -652,14 +648,14 @@ onMounted(fetchData)
               {{ child.match_mode }}
             </span>
             <button
-              @click="openEditForm(child)"
               class="text-gray-400 hover:text-gray-600"
+              @click="openEditForm(child)"
             >
               <PencilIcon class="h-4 w-4" />
             </button>
             <button
-              @click="openDeleteConfirm(child)"
               class="text-gray-400 hover:text-red-600"
+              @click="openDeleteConfirm(child)"
             >
               <TrashIcon class="h-4 w-4" />
             </button>

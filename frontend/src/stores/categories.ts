@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import axios from 'axios'
 import api from '@/lib/api'
 import type {
   Category,
@@ -9,6 +10,11 @@ import type {
   ReorderItem,
   SeriesListResponse,
 } from '@/types/category'
+
+function extractError(e: unknown, fallback: string): string {
+  if (axios.isAxiosError(e)) return e.response?.data?.detail ?? fallback
+  return fallback
+}
 
 export const useCategoryStore = defineStore('categories', () => {
   // State
@@ -31,8 +37,8 @@ export const useCategoryStore = defineStore('categories', () => {
     try {
       const { data } = await api.get<Category[]>('/api/categories')
       categories.value = data
-    } catch (e: any) {
-      error.value = e.response?.data?.detail || 'Failed to fetch categories'
+    } catch (e: unknown) {
+      error.value = extractError(e, 'Failed to fetch categories')
       throw e
     } finally {
       loading.value = false
@@ -45,8 +51,8 @@ export const useCategoryStore = defineStore('categories', () => {
     try {
       const { data } = await api.get<CategoryTreeNode[]>('/api/categories/tree')
       tree.value = data
-    } catch (e: any) {
-      error.value = e.response?.data?.detail || 'Failed to fetch category tree'
+    } catch (e: unknown) {
+      error.value = extractError(e, 'Failed to fetch category tree')
       throw e
     } finally {
       loading.value = false
@@ -60,8 +66,8 @@ export const useCategoryStore = defineStore('categories', () => {
       const { data } = await api.get<Category>(`/api/categories/${id}`)
       currentCategory.value = data
       return data
-    } catch (e: any) {
-      error.value = e.response?.data?.detail || 'Failed to fetch category'
+    } catch (e: unknown) {
+      error.value = extractError(e, 'Failed to fetch category')
       throw e
     } finally {
       loading.value = false
@@ -75,8 +81,8 @@ export const useCategoryStore = defineStore('categories', () => {
       const { data } = await api.post<Category>('/api/categories', payload)
       categories.value.push(data)
       return data
-    } catch (e: any) {
-      error.value = e.response?.data?.detail || 'Failed to create category'
+    } catch (e: unknown) {
+      error.value = extractError(e, 'Failed to create category')
       throw e
     } finally {
       loading.value = false
@@ -91,8 +97,8 @@ export const useCategoryStore = defineStore('categories', () => {
       const index = categories.value.findIndex(c => c.id === id)
       if (index !== -1) categories.value[index] = data
       return data
-    } catch (e: any) {
-      error.value = e.response?.data?.detail || 'Failed to update category'
+    } catch (e: unknown) {
+      error.value = extractError(e, 'Failed to update category')
       throw e
     } finally {
       loading.value = false
@@ -105,8 +111,8 @@ export const useCategoryStore = defineStore('categories', () => {
     try {
       await api.delete(`/api/categories/${id}`)
       categories.value = categories.value.filter(c => c.id !== id)
-    } catch (e: any) {
-      error.value = e.response?.data?.detail || 'Failed to delete category'
+    } catch (e: unknown) {
+      error.value = extractError(e, 'Failed to delete category')
       throw e
     } finally {
       loading.value = false
@@ -121,8 +127,8 @@ export const useCategoryStore = defineStore('categories', () => {
       const index = categories.value.findIndex(c => c.id === categoryId)
       if (index !== -1) categories.value[index] = data
       return data
-    } catch (e: any) {
-      error.value = e.response?.data?.detail || 'Failed to set category tags'
+    } catch (e: unknown) {
+      error.value = extractError(e, 'Failed to set category tags')
       throw e
     } finally {
       loading.value = false
@@ -138,8 +144,8 @@ export const useCategoryStore = defineStore('categories', () => {
         const cat = categories.value.find(c => c.id === item.id)
         if (cat) cat.sort_order = item.sort_order
       }
-    } catch (e: any) {
-      error.value = e.response?.data?.detail || 'Failed to reorder categories'
+    } catch (e: unknown) {
+      error.value = extractError(e, 'Failed to reorder categories')
       throw e
     }
   }
@@ -152,8 +158,8 @@ export const useCategoryStore = defineStore('categories', () => {
         params: { page, per_page: perPage },
       })
       return data
-    } catch (e: any) {
-      error.value = e.response?.data?.detail || 'Failed to fetch category series'
+    } catch (e: unknown) {
+      error.value = extractError(e, 'Failed to fetch category series')
       throw e
     } finally {
       loading.value = false

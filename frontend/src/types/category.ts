@@ -45,8 +45,19 @@ export interface ReorderItem {
   sort_order: number
 }
 
+export interface SeriesItem {
+  id: string
+  title: string
+  description: string | null
+  thumbnail_url: string | null
+  status: string
+  tags: CategoryTag[]
+  created_at: string
+  updated_at: string
+}
+
 export interface SeriesListResponse {
-  items: any[]
+  items: SeriesItem[]
   total: number
   page: number
   per_page: number
