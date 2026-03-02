@@ -86,7 +86,10 @@ async def get_category_tree(db: AsyncSession) -> list[Category]:
         select(Category)
         .options(
             selectinload(Category.tags),
-            selectinload(Category.children).selectinload(Category.tags),
+            selectinload(Category.children).options(
+                selectinload(Category.tags),
+                selectinload(Category.children)  # Load grandchildren too (though shouldn't exist)
+            ),
         )
         .where(Category.parent_id.is_(None))
         .order_by(Category.sort_order)

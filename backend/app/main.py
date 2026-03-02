@@ -5,6 +5,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from app.config import settings
 from app.routers.audio_tracks import router as audio_tracks_router
 from app.routers.auth import router as auth_router
+from app.routers.categories import router as categories_router
 from app.routers.dashboard import router as dashboard_router
 from app.routers.episodes import router as episodes_router
 from app.routers.search import router as search_router
@@ -32,6 +33,7 @@ app.add_middleware(SessionMiddleware, secret_key=settings.jwt_secret_key)
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(tags_router)
+app.include_router(categories_router)
 app.include_router(series_router)
 app.include_router(episodes_router)
 app.include_router(audio_tracks_router)
