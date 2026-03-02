@@ -1,16 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import {
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-} from '@headlessui/vue'
-import {
-  EllipsisVerticalIcon,
   PlusIcon,
   PencilIcon,
   ArchiveBoxXMarkIcon,
+  CheckCircleIcon,
   CurrencyDollarIcon,
 } from '@heroicons/vue/24/outline'
 import { useToastStore } from '../stores/toast'
@@ -144,6 +138,15 @@ async function handleDeactivate() {
     // Error is shown via store.error
   } finally {
     deactivateLoading.value = false
+  }
+}
+
+async function handleReactivate(pkg: CoinPackage) {
+  try {
+    await store.updatePackage(pkg.id, { is_active: true })
+    toast.success('Coin package reactivated')
+  } catch {
+    // Error is shown via store.error
   }
 }
 
@@ -440,147 +443,110 @@ onMounted(() => store.fetchPackages())
     <!-- Loading Skeleton -->
     <div
       v-if="store.loading && store.packages.length === 0"
-      class="overflow-hidden rounded-xl border border-border bg-white shadow-[--shadow-card] animate-pulse"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse"
     >
-      <div class="border-b border-gray-200 bg-[#F9FAFB] px-4 py-3">
-        <div class="h-4 w-32 bg-gray-200 rounded" />
-      </div>
       <div
         v-for="i in 4"
         :key="i"
-        class="flex items-center gap-4 px-4 py-3 border-b border-gray-200 last:border-0"
+        class="rounded-xl border border-border bg-white shadow-[--shadow-card] overflow-hidden"
       >
-        <div class="flex-1">
-          <div class="h-4 w-28 bg-gray-200 rounded mb-1" />
-          <div class="h-3 w-40 bg-gray-100 rounded" />
+        <div class="bg-gray-100 p-6 flex flex-col items-center gap-2">
+          <div class="h-8 w-8 bg-gray-200 rounded-full" />
+          <div class="h-6 w-20 bg-gray-200 rounded" />
         </div>
-        <div class="h-5 w-16 bg-gray-200 rounded-full" />
-        <div class="h-4 w-20 bg-gray-200 rounded" />
+        <div class="p-4 space-y-2">
+          <div class="h-4 w-3/4 bg-gray-200 rounded" />
+          <div class="h-3 w-1/2 bg-gray-100 rounded" />
+          <div class="h-3 w-2/3 bg-gray-100 rounded" />
+        </div>
+        <div class="px-4 pb-4 flex gap-2">
+          <div class="h-7 w-16 bg-gray-100 rounded-lg" />
+          <div class="h-7 w-20 bg-gray-100 rounded-lg" />
+        </div>
       </div>
     </div>
 
-    <!-- Packages Table -->
+    <!-- Packages Card Grid -->
     <div
       v-else-if="filteredPackages.length > 0"
-      class="overflow-hidden rounded-xl border border-border bg-white shadow-[--shadow-card]"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
     >
-      <table class="w-full">
-        <thead>
-          <tr class="border-b border-gray-200 bg-[#F9FAFB]">
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Package
-            </th>
-            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              <div class="flex items-center justify-end gap-1">
-                <CurrencyDollarIcon class="h-3.5 w-3.5" />
-                Coins
-              </div>
-            </th>
-            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Price
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Order
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Created
-            </th>
-            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr
-            v-for="pkg in filteredPackages"
-            :key="pkg.id"
+      <div
+        v-for="pkg in filteredPackages"
+        :key="pkg.id"
+        :class="[
+          'rounded-xl border border-border bg-white shadow-[--shadow-card] overflow-hidden hover:shadow-[--shadow-floating] transition-all',
+          !pkg.is_active ? 'opacity-60' : '',
+        ]"
+      >
+        <!-- Coin Visual Header -->
+        <div class="relative bg-gradient-to-br from-yellow-50 to-amber-50 p-6 text-center">
+          <CurrencyDollarIcon class="h-8 w-8 text-amber-500 mx-auto mb-1" />
+          <p class="text-2xl font-bold text-gray-900">
+            {{ pkg.coin_amount.toLocaleString() }}
+          </p>
+          <p class="text-xs text-amber-600 font-medium">
+            coins
+          </p>
+          <!-- Status badge -->
+          <span
             :class="[
-              'hover:bg-gray-50 transition-colors',
-              !pkg.is_active ? 'opacity-60' : '',
+              pkg.is_active
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                : 'bg-gray-100 text-gray-500 border border-gray-200',
+              'absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
             ]"
           >
-            <td class="px-4 py-3">
-              <div>
-                <p class="text-sm font-medium text-gray-900">
-                  {{ pkg.name }}
-                </p>
-                <p
-                  v-if="pkg.description"
-                  class="text-xs text-gray-500 mt-0.5"
-                >
-                  {{ pkg.description }}
-                </p>
-              </div>
-            </td>
-            <td class="px-4 py-3 text-right">
-              <span class="text-sm font-semibold text-gray-900">
-                {{ pkg.coin_amount.toLocaleString() }}
-              </span>
-            </td>
-            <td class="px-4 py-3 text-right">
-              <span class="text-sm text-gray-700">
-                {{ formatPrice(pkg.price_sar) }}
-              </span>
-            </td>
-            <td class="px-4 py-3">
-              <span
-                :class="[
-                  pkg.is_active
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    : 'bg-gray-100 text-gray-500 border border-gray-200',
-                  'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
-                ]"
-              >
-                {{ pkg.is_active ? 'Active' : 'Inactive' }}
-              </span>
-            </td>
-            <td class="px-4 py-3 text-sm text-gray-500">
-              {{ pkg.sort_order }}
-            </td>
-            <td class="px-4 py-3 text-sm text-gray-500">
-              {{ formatDate(pkg.created_at) }}
-            </td>
-            <td class="px-4 py-3 text-right">
-              <Menu
-                as="div"
-                class="relative inline-block text-left"
-              >
-                <MenuButton class="text-gray-400 hover:text-gray-600 transition-colors">
-                  <EllipsisVerticalIcon class="h-5 w-5" />
-                </MenuButton>
-                <MenuItems class="absolute right-0 z-10 mt-2 w-48 rounded-lg bg-white border border-gray-200 shadow-[--shadow-dropdown] focus:outline-none">
-                  <div class="py-1">
-                    <MenuItem v-slot="{ active }">
-                      <button
-                        :class="[active ? 'bg-gray-50' : '', 'block w-full px-4 py-2 text-left text-sm text-gray-700 flex items-center gap-2']"
-                        @click="openEditForm(pkg)"
-                      >
-                        <PencilIcon class="h-4 w-4" />
-                        Edit
-                      </button>
-                    </MenuItem>
-                    <MenuItem
-                      v-if="pkg.is_active"
-                      v-slot="{ active }"
-                    >
-                      <button
-                        :class="[active ? 'bg-gray-50' : '', 'block w-full px-4 py-2 text-left text-sm text-red-600 flex items-center gap-2']"
-                        @click="openDeactivateConfirm(pkg)"
-                      >
-                        <ArchiveBoxXMarkIcon class="h-4 w-4" />
-                        Deactivate
-                      </button>
-                    </MenuItem>
-                  </div>
-                </MenuItems>
-              </Menu>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            {{ pkg.is_active ? 'Active' : 'Inactive' }}
+          </span>
+        </div>
+
+        <!-- Content -->
+        <div class="p-4">
+          <p class="text-sm font-semibold text-gray-900">
+            {{ pkg.name }}
+          </p>
+          <p
+            v-if="pkg.description"
+            class="text-xs text-gray-500 mt-1"
+          >
+            {{ pkg.description }}
+          </p>
+          <p class="text-sm font-medium text-gray-900 mt-2">
+            {{ formatPrice(pkg.price_sar) }}
+          </p>
+          <p class="text-xs text-gray-400 mt-1">
+            Order {{ pkg.sort_order }} · {{ formatDate(pkg.created_at) }}
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="px-4 pb-4 flex gap-2">
+          <button
+            class="text-xs font-medium rounded-lg px-2.5 py-1.5 flex items-center gap-1 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+            @click.stop="openEditForm(pkg)"
+          >
+            <PencilIcon class="h-3.5 w-3.5" />
+            Edit
+          </button>
+          <button
+            v-if="pkg.is_active"
+            class="text-xs font-medium rounded-lg px-2.5 py-1.5 flex items-center gap-1 border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+            @click.stop="openDeactivateConfirm(pkg)"
+          >
+            <ArchiveBoxXMarkIcon class="h-3.5 w-3.5" />
+            Deactivate
+          </button>
+          <button
+            v-else
+            class="text-xs font-medium rounded-lg px-2.5 py-1.5 flex items-center gap-1 border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors"
+            @click.stop="handleReactivate(pkg)"
+          >
+            <CheckCircleIcon class="h-3.5 w-3.5" />
+            Activate
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Empty State -->
