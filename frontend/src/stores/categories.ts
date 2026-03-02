@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import axios from 'axios'
-import api from '@/lib/api'
+import api from '../lib/api'
 import type {
   Category,
   CategoryTreeNode,
@@ -9,7 +9,7 @@ import type {
   CategoryUpdate,
   ReorderItem,
   SeriesListResponse,
-} from '@/types/category'
+} from '../types/category'
 
 function extractError(e: unknown, fallback: string): string {
   if (axios.isAxiosError(e)) return e.response?.data?.detail ?? fallback
