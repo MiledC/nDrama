@@ -8,6 +8,7 @@ import uuid
 from typing import Any
 
 from app.models.audio_track import AudioTrack
+from app.models.category import Category
 from app.models.episode import Episode, EpisodeStatus
 from app.models.series import Series, SeriesStatus
 from app.models.subtitle import Subtitle, SubtitleFormat
@@ -114,3 +115,16 @@ def make_subtitle(episode_id: uuid.UUID, **overrides: Any) -> Subtitle:
     }
     defaults.update(overrides)
     return Subtitle(**defaults)
+
+
+def make_category(**overrides: Any) -> Category:
+    """Create a Category instance with sensible defaults. Does NOT add to session."""
+    n = _next_id()
+    defaults: dict[str, Any] = {
+        "id": uuid.uuid4(),
+        "name": f"category-{n}",
+        "sort_order": 0,
+        "match_mode": "any",
+    }
+    defaults.update(overrides)
+    return Category(**defaults)

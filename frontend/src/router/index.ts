@@ -52,9 +52,19 @@ const router = createRouter({
       component: () => import('../views/EpisodeEditView.vue'),
     },
     {
+      path: '/browse',
+      name: 'browse',
+      component: () => import('../views/BrowseView.vue'),
+    },
+    {
       path: '/tags',
       name: 'tags',
       component: () => import('../views/TagsView.vue'),
+    },
+    {
+      path: '/categories',
+      name: 'categories',
+      component: () => import('../views/CategoriesView.vue'),
     },
     {
       path: '/users',
