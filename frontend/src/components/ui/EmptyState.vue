@@ -15,17 +15,21 @@ const emit = defineEmits<{
 
 <template>
   <div class="text-center py-12">
-    <component
-      :is="icon"
+    <div
       v-if="icon"
-      class="mx-auto h-10 w-10 text-text-secondary mb-3"
-    />
-    <h3 class="text-base font-medium text-text-primary mb-1">
+      class="mx-auto h-16 w-16 bg-gray-50 rounded-full flex items-center justify-center mb-4"
+    >
+      <component
+        :is="icon"
+        class="h-8 w-8 text-gray-400"
+      />
+    </div>
+    <h3 class="text-base font-medium text-gray-900 mb-1">
       {{ title }}
     </h3>
     <p
       v-if="description"
-      class="text-sm text-text-secondary mb-4"
+      class="text-sm text-gray-500 mb-4"
     >
       {{ description }}
     </p>

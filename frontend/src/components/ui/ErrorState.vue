@@ -11,16 +11,21 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="bg-destructive/10 border border-destructive/30 rounded-lg px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <ExclamationTriangleIcon class="h-5 w-5 text-destructive flex-shrink-0" />
-      <span class="text-sm text-destructive">{{ message }}</span>
+  <div class="rounded-lg px-6 py-8 flex flex-col items-center text-center">
+    <div class="h-14 w-14 bg-red-100 rounded-full flex items-center justify-center mb-4">
+      <ExclamationTriangleIcon class="h-7 w-7 text-red-600 flex-shrink-0" />
     </div>
+    <h3 class="text-base font-medium text-gray-900 mb-1">
+      Something went wrong
+    </h3>
+    <p class="text-sm text-gray-500 mb-4">
+      {{ message }}
+    </p>
     <button
-      class="text-sm text-destructive underline hover:no-underline flex-shrink-0 ml-4"
+      class="text-sm font-medium text-accent hover:text-accent-hover underline hover:no-underline transition-colors"
       @click="emit('retry')"
     >
-      Retry
+      Try again
     </button>
   </div>
 </template>

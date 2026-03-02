@@ -18,17 +18,17 @@ const iconMap = {
 }
 
 const colorMap = {
-  success: 'border-green-500/30 bg-green-500/10',
-  error: 'border-destructive/30 bg-destructive/10',
-  warning: 'border-amber-500/30 bg-amber-500/10',
-  info: 'border-blue-500/30 bg-blue-500/10',
+  success: 'border-green-200 bg-green-50',
+  error: 'border-red-200 bg-red-50',
+  warning: 'border-amber-200 bg-amber-50',
+  info: 'border-blue-200 bg-blue-50',
 }
 
 const iconColorMap = {
-  success: 'text-green-400',
-  error: 'text-destructive',
-  warning: 'text-amber-400',
-  info: 'text-blue-400',
+  success: 'text-green-600',
+  error: 'text-red-600',
+  warning: 'text-amber-600',
+  info: 'text-blue-600',
 }
 </script>
 
@@ -54,11 +54,11 @@ const iconColorMap = {
           :is="iconMap[t.type]"
           :class="[iconColorMap[t.type], 'h-5 w-5 flex-shrink-0 mt-0.5']"
         />
-        <p class="text-sm text-text-primary flex-1">
+        <p class="text-sm text-gray-900 flex-1">
           {{ t.message }}
         </p>
         <button
-          class="text-text-secondary hover:text-text-primary transition-colors flex-shrink-0"
+          class="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
           @click="toast.remove(t.id)"
         >
           <XMarkIcon class="h-4 w-4" />

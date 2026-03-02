@@ -13,7 +13,7 @@ describe('LoadingSkeleton', () => {
     const wrapper = mount(LoadingSkeleton, {
       props: { variant: 'card', count: 2 },
     })
-    expect(wrapper.findAll('.animate-pulse').length).toBeGreaterThan(0)
+    expect(wrapper.findAll('.shimmer').length).toBeGreaterThan(0)
     // Should render 2 card skeletons
     expect(wrapper.findAll('.rounded-xl').length).toBe(2)
   })
@@ -22,14 +22,14 @@ describe('LoadingSkeleton', () => {
     const wrapper = mount(LoadingSkeleton, {
       props: { variant: 'row', count: 3 },
     })
-    expect(wrapper.findAll('.animate-pulse').length).toBeGreaterThan(0)
+    expect(wrapper.findAll('.shimmer').length).toBeGreaterThan(0)
   })
 
   it('renders text variant by default', () => {
     const wrapper = mount(LoadingSkeleton, {
       props: { count: 4 },
     })
-    expect(wrapper.findAll('.animate-pulse').length).toBeGreaterThan(0)
+    expect(wrapper.findAll('.shimmer').length).toBeGreaterThan(0)
   })
 })
 
@@ -39,7 +39,7 @@ describe('ErrorState', () => {
       props: { message: 'Something went wrong' },
     })
     expect(wrapper.text()).toContain('Something went wrong')
-    expect(wrapper.text()).toContain('Retry')
+    expect(wrapper.text()).toContain('Try again')
   })
 
   it('emits retry event on button click', async () => {

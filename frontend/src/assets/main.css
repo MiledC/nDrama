@@ -1,26 +1,123 @@
 @import "tailwindcss";
 
-/* Saudi Green Dark Theme Tokens */
+/* Draama Light Theme Tokens */
 @theme {
   /* Background colors */
-  --color-bg-primary: #0A0A0A;
-  --color-bg-secondary: #171717;
-  --color-bg-tertiary: #262626;
+  --color-bg-primary: #F8F9FA;
+  --color-bg-secondary: #FFFFFF;
+  --color-bg-tertiary: #F9FAFB;
+
+  /* Sidebar colors */
+  --color-sidebar: #0F172A;
+  --color-sidebar-light: #1E293B;
 
   /* Accent colors */
   --color-accent: #006C35;
-  --color-accent-hover: #008542;
+  --color-accent-hover: #005a2c;
+  --color-accent-light: #E6F0EA;
 
   /* Text colors */
-  --color-text-primary: #FAFAFA;
-  --color-text-secondary: #A3A3A3;
+  --color-text-primary: #1F2937;
+  --color-text-secondary: #6B7280;
 
   /* UI colors */
-  --color-border: #404040;
+  --color-border: #E5E7EB;
   --color-destructive: #DC2626;
+
+  /* Extended palette */
+  --color-gold: #B8960C;
+  --color-gold-light: #F8F4E5;
+  --color-info: #3B82F6;
+  --color-info-light: #EFF6FF;
+  --color-warning: #F59E0B;
+  --color-warning-light: #FFFBEB;
+
+  /* Shadows */
+  --shadow-subtle: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-input: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-floating: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-dropdown: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(0,0,0,0.05);
 }
 
-/* Apply dark theme to body */
+/* Apply light theme to body */
 body {
   @apply bg-bg-primary text-text-primary;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
+
+/* Glass header effect */
+.glass-header {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #E5E7EB;
+}
+
+/* Sidebar active item */
+.sidebar-item-active {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  border-left: 3px solid #006C35;
+}
+
+/* Sidebar hover */
+.sidebar-item:hover:not(.sidebar-item-active) {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #FFFFFF;
+}
+
+/* Loading shimmer animation */
+.shimmer {
+  background: #f6f7f8;
+  background-image: linear-gradient(to right, #f6f7f8 0%, #edeef1 20%, #f6f7f8 40%, #f6f7f8 100%);
+  background-repeat: no-repeat;
+  background-size: 800px 100%;
+  animation: placeholderShimmer 1.5s linear infinite;
+}
+
+@keyframes placeholderShimmer {
+  0% { background-position: -468px 0; }
+  100% { background-position: 468px 0; }
+}
+
+/* Form input focus style */
+.form-input:focus {
+  outline: none;
+  border-color: #006C35;
+  box-shadow: 0 0 0 3px rgba(0, 108, 53, 0.1);
+}
+
+/* Tag button styles */
+.tag-btn.selected {
+  background-color: #006C35;
+  color: white;
+  border-color: #006C35;
+}
+
+.tag-btn:not(.selected):hover {
+  background-color: #F3F4F6;
+  border-color: #D1D5DB;
+}
+
+/* Drag and drop zone active state */
+.drag-active {
+  border-color: #006C35;
+  background-color: #E6F0EA;
+}
+
+/* Badge pill style */
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94A3B8; }

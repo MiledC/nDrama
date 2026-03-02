@@ -104,8 +104,8 @@ describe('Episode Lock Indicators', () => {
     const badge = wrapper.find('[data-testid="episode-1-access"]')
     expect(badge.exists()).toBe(true)
     expect(badge.text()).toBe('Free')
-    expect(badge.classes().join(' ')).toContain('bg-green-500/10')
-    expect(badge.classes().join(' ')).toContain('text-green-400')
+    expect(badge.classes().join(' ')).toContain('bg-emerald-50')
+    expect(badge.classes().join(' ')).toContain('text-emerald-700')
   })
 
   it('locked episode shows coin cost badge with amber class', async () => {
@@ -127,8 +127,8 @@ describe('Episode Lock Indicators', () => {
     const badge = wrapper.find('[data-testid="episode-3-access"]')
     expect(badge.exists()).toBe(true)
     expect(badge.text()).toBe('10 coins')
-    expect(badge.classes().join(' ')).toContain('bg-amber-500/10')
-    expect(badge.classes().join(' ')).toContain('text-amber-400')
+    expect(badge.classes().join(' ')).toContain('bg-amber-50')
+    expect(badge.classes().join(' ')).toContain('text-amber-700')
   })
 
   it('boundary episode (number == free_count) shows "Free" badge', async () => {
@@ -150,6 +150,6 @@ describe('Episode Lock Indicators', () => {
     const badge = wrapper.find('[data-testid="episode-2-access"]')
     expect(badge.exists()).toBe(true)
     expect(badge.text()).toBe('Free')
-    expect(badge.classes().join(' ')).toContain('bg-green-500/10')
+    expect(badge.classes().join(' ')).toContain('bg-emerald-50')
   })
 })

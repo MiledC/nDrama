@@ -6,16 +6,16 @@ defineProps<{
 </script>
 
 <template>
-  <div class="animate-pulse">
+  <div>
     <!-- Card variant -->
     <template v-if="variant === 'card'">
       <div
         v-for="i in (count ?? 1)"
         :key="i"
-        class="rounded-xl border border-border bg-bg-secondary p-5 mb-4"
+        class="rounded-xl border border-gray-200 bg-white p-5 mb-4"
       >
-        <div class="h-4 w-24 bg-bg-tertiary rounded mb-3" />
-        <div class="h-8 w-16 bg-bg-tertiary rounded" />
+        <div class="h-4 w-24 bg-gray-200 shimmer rounded mb-3" />
+        <div class="h-8 w-16 bg-gray-100 shimmer rounded" />
       </div>
     </template>
 
@@ -26,10 +26,10 @@ defineProps<{
         :key="i"
         class="flex items-center gap-3 py-3"
       >
-        <div class="h-10 w-10 bg-bg-tertiary rounded-lg flex-shrink-0" />
+        <div class="h-10 w-10 bg-gray-200 shimmer rounded-lg flex-shrink-0" />
         <div class="flex-1">
-          <div class="h-4 w-40 bg-bg-tertiary rounded mb-1.5" />
-          <div class="h-3 w-24 bg-bg-tertiary rounded" />
+          <div class="h-4 w-40 bg-gray-200 shimmer rounded mb-1.5" />
+          <div class="h-3 w-24 bg-gray-100 shimmer rounded" />
         </div>
       </div>
     </template>
@@ -42,7 +42,7 @@ defineProps<{
         class="mb-3"
       >
         <div
-          class="h-4 bg-bg-tertiary rounded"
+          class="h-4 bg-gray-200 shimmer rounded"
           :style="{ width: `${70 + Math.random() * 30}%` }"
         />
       </div>

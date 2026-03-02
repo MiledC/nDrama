@@ -27,7 +27,27 @@ async function handleSubmit(data: Record<string, unknown>) {
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-text-primary mb-6">
+    <RouterLink
+      to="/series"
+      class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-accent transition-colors mb-4 group"
+    >
+      <svg
+        class="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+      Back to Series
+    </RouterLink>
+
+    <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-6">
       Create Series
     </h1>
     <div

@@ -146,13 +146,13 @@ async function confirmDelete() {
 function getStatusBadgeClass(status: string): string {
   switch (status) {
     case 'published':
-      return 'bg-green-500/15 text-green-400'
+      return 'bg-emerald-50 text-emerald-700 border border-emerald-200'
     case 'ready':
-      return 'bg-blue-500/15 text-blue-400'
+      return 'bg-blue-50 text-blue-700 border border-blue-200'
     case 'processing':
-      return 'bg-amber-500/15 text-amber-400'
+      return 'bg-amber-50 text-amber-700 border border-amber-200'
     default:
-      return 'bg-bg-tertiary text-text-secondary'
+      return 'bg-gray-100 text-gray-600 border border-gray-200'
   }
 }
 
@@ -166,12 +166,12 @@ function formatDuration(seconds: number | null): string {
 function getEpisodePricingBadge(episodeNumber: number): { label: string; class: string } {
   if (!series.value) return { label: '', class: '' }
   if (episodeNumber <= series.value.free_episode_count) {
-    return { label: 'Free', class: 'bg-green-500/10 text-green-400' }
+    return { label: 'Free', class: 'bg-emerald-50 text-emerald-700 border border-emerald-200' }
   }
   const cost = series.value.coin_cost_per_episode
   return {
     label: cost > 0 ? `${cost} coins` : 'Locked',
-    class: 'bg-amber-500/10 text-amber-400',
+    class: 'bg-amber-50 text-amber-700 border border-amber-200',
   }
 }
 
@@ -194,7 +194,7 @@ onMounted(() => {
     <!-- Back button + Series Header -->
     <div class="mb-6">
       <button
-        class="flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors mb-4"
+        class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-accent transition-colors mb-4"
         @click="router.push('/series')"
       >
         <ArrowLeftIcon class="h-4 w-4" />
@@ -206,11 +206,11 @@ onMounted(() => {
         v-if="seriesLoading"
         class="flex items-start gap-4 animate-pulse"
       >
-        <div class="h-20 w-20 bg-bg-tertiary rounded-lg flex-shrink-0" />
+        <div class="h-20 w-20 bg-gray-100 rounded-xl flex-shrink-0" />
         <div class="flex-1">
-          <div class="h-6 w-48 bg-bg-tertiary rounded mb-2" />
-          <div class="h-4 w-72 bg-bg-tertiary rounded mb-2" />
-          <div class="h-3 w-40 bg-bg-tertiary rounded" />
+          <div class="h-6 w-48 bg-gray-100 rounded mb-2" />
+          <div class="h-4 w-72 bg-gray-100 rounded mb-2" />
+          <div class="h-3 w-40 bg-gray-100 rounded" />
         </div>
       </div>
       <div
@@ -223,24 +223,26 @@ onMounted(() => {
       <!-- Series info header -->
       <div
         v-else-if="series"
-        class="flex items-start gap-4"
+        class="bg-white rounded-xl shadow-[--shadow-card] border border-border p-4 md:p-6 flex items-start gap-4"
       >
         <!-- Thumbnail -->
-        <div class="flex-shrink-0 h-20 w-20 rounded-lg bg-bg-tertiary flex items-center justify-center overflow-hidden border border-border">
+        <div class="flex-shrink-0 h-20 w-20 rounded-xl overflow-hidden shadow-sm border border-gray-100 group">
           <img
             v-if="series.thumbnail_url"
             :src="series.thumbnail_url"
             :alt="series.title"
-            class="h-full w-full object-cover"
+            class="h-full w-full object-cover group-hover:scale-105 transition-transform"
           >
-          <FilmIcon
+          <div
             v-else
-            class="h-8 w-8 text-text-secondary"
-          />
+            class="h-full w-full bg-gray-50 flex items-center justify-center"
+          >
+            <FilmIcon class="h-8 w-8 text-gray-400" />
+          </div>
         </div>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-3 mb-1">
-            <h1 class="text-2xl font-bold text-text-primary truncate">
+            <h1 class="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 tracking-tight truncate">
               {{ series.title }}
             </h1>
             <span
@@ -254,22 +256,29 @@ onMounted(() => {
           </div>
           <p
             v-if="series.description"
-            class="text-sm text-text-secondary line-clamp-2 mb-2"
+            class="text-sm text-gray-500 leading-relaxed line-clamp-2 mb-2"
           >
             {{ series.description }}
           </p>
-          <div class="flex items-center gap-4 text-xs text-text-secondary">
+          <div class="flex items-center gap-4 text-xs text-gray-600">
             <span>{{ total }} episode{{ total === 1 ? '' : 's' }}</span>
+            <span class="text-gray-300">&middot;</span>
             <span>{{ series.free_episode_count }} free</span>
+            <span class="text-gray-300">&middot;</span>
             <span>{{ series.coin_cost_per_episode }} coins/ep</span>
             <div
               v-if="series.tags.length"
               class="flex gap-1"
             >
               <span
-                v-for="tag in series.tags.slice(0, 3)"
+                v-for="(tag, index) in series.tags.slice(0, 3)"
                 :key="tag.id"
-                class="inline-flex items-center rounded-full bg-accent/15 text-accent px-2 py-0.5 text-xs font-medium"
+                :class="[
+                  index % 3 === 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' :
+                  index % 3 === 1 ? 'bg-purple-50 text-purple-700 border border-purple-100' :
+                  'bg-green-50 text-green-700 border border-green-100',
+                  'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
+                ]"
               >
                 {{ tag.name }}
               </span>
@@ -277,7 +286,7 @@ onMounted(() => {
           </div>
         </div>
         <button
-          class="flex-shrink-0 flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors border border-border rounded-lg px-3 py-1.5"
+          class="flex-shrink-0 flex items-center gap-1.5 text-sm border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors rounded-lg px-3 py-1.5"
           @click="router.push(`/series/${series.id}/edit`)"
         >
           <PencilIcon class="h-4 w-4" />
@@ -290,9 +299,14 @@ onMounted(() => {
     <div class="mt-8">
       <!-- Episodes Header -->
       <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-text-primary">
-          Episodes
-        </h2>
+        <div class="flex items-center gap-2">
+          <h2 class="text-lg font-semibold text-gray-900">
+            Episodes
+          </h2>
+          <span class="bg-gray-100 text-gray-600 border border-gray-200 rounded-full px-2 py-0.5 text-xs font-medium">
+            {{ total }}
+          </span>
+        </div>
         <button
           class="flex items-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-accent-hover transition-colors"
           @click="router.push(`/series/${seriesId}/episodes/create`)"
@@ -313,73 +327,73 @@ onMounted(() => {
       <!-- Episodes loading skeleton -->
       <div
         v-if="episodesLoading"
-        class="overflow-hidden rounded-xl border border-border animate-pulse"
+        class="overflow-hidden rounded-xl border border-border bg-white shadow-[--shadow-card] animate-pulse"
       >
-        <div class="border-b border-border bg-bg-secondary px-4 py-3">
-          <div class="h-4 w-32 bg-bg-tertiary rounded" />
+        <div class="border-b border-gray-200 bg-[#F9FAFB] px-4 py-3">
+          <div class="h-4 w-32 bg-gray-200 rounded" />
         </div>
         <div
           v-for="i in 3"
           :key="i"
-          class="flex items-center gap-4 px-4 py-3 border-b border-border last:border-0"
+          class="flex items-center gap-4 px-4 py-3 border-b border-gray-200 last:border-0"
         >
-          <div class="h-4 w-6 bg-bg-tertiary rounded" />
-          <div class="h-10 w-16 bg-bg-tertiary rounded" />
+          <div class="h-4 w-6 bg-gray-100 rounded" />
+          <div class="h-10 w-16 bg-gray-100 rounded" />
           <div class="flex-1">
-            <div class="h-4 w-36 bg-bg-tertiary rounded mb-1" />
-            <div class="h-3 w-24 bg-bg-tertiary rounded" />
+            <div class="h-4 w-36 bg-gray-100 rounded mb-1" />
+            <div class="h-3 w-24 bg-gray-100 rounded" />
           </div>
-          <div class="h-5 w-16 bg-bg-tertiary rounded-full" />
+          <div class="h-5 w-16 bg-gray-100 rounded-full" />
         </div>
       </div>
 
       <!-- Episodes Table -->
       <div
         v-else-if="episodes.length > 0"
-        class="overflow-hidden rounded-xl border border-border"
+        class="bg-white rounded-xl border border-border shadow-[--shadow-card] overflow-hidden"
       >
         <table class="w-full">
           <thead>
-            <tr class="border-b border-border bg-bg-secondary">
-              <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-12">
+            <tr class="border-b border-gray-200 bg-[#F9FAFB]">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-12">
                 #
               </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Episode
               </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-28">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-28">
                 Status
               </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-24">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-24">
                 Access
               </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-24">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-24">
                 Duration
               </th>
-              <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider w-32">
+              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-32">
                 Created
               </th>
-              <th class="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider w-16">
+              <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider w-16">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-border">
+          <tbody class="divide-y divide-gray-200">
             <tr
               v-for="ep in episodes"
               :key="ep.id"
-              class="hover:bg-bg-secondary/50 transition-colors cursor-pointer"
+              class="hover:bg-gray-50 transition-colors cursor-pointer"
               @click="router.push(`/series/${seriesId}/episodes/${ep.id}/edit`)"
             >
               <td class="px-4 py-3">
-                <span class="text-sm font-mono text-text-secondary">
+                <span class="text-sm font-mono text-gray-500">
                   {{ ep.episode_number }}
                 </span>
               </td>
               <td class="px-4 py-3">
                 <div class="flex items-center gap-3">
                   <!-- Video thumbnail / placeholder -->
-                  <div class="flex-shrink-0 h-10 w-16 rounded bg-bg-tertiary flex items-center justify-center overflow-hidden border border-border/50">
+                  <div class="flex-shrink-0 h-10 w-16 rounded bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
                     <img
                       v-if="ep.thumbnail_url"
                       :src="ep.thumbnail_url"
@@ -388,16 +402,16 @@ onMounted(() => {
                     >
                     <PlayCircleIcon
                       v-else
-                      class="h-5 w-5 text-text-secondary"
+                      class="h-5 w-5 text-gray-400"
                     />
                   </div>
                   <div class="min-w-0">
-                    <p class="text-sm font-medium text-text-primary truncate">
+                    <p class="text-sm font-medium text-gray-900 truncate">
                       {{ ep.title }}
                     </p>
                     <p
                       v-if="ep.description"
-                      class="text-xs text-text-secondary line-clamp-1"
+                      class="text-xs text-gray-500 line-clamp-1"
                     >
                       {{ ep.description }}
                     </p>
@@ -422,10 +436,10 @@ onMounted(() => {
                   {{ getEpisodePricingBadge(ep.episode_number).label }}
                 </span>
               </td>
-              <td class="px-4 py-3 text-sm text-text-secondary font-mono">
+              <td class="px-4 py-3 text-sm text-gray-500 font-mono">
                 {{ formatDuration(ep.duration_seconds) }}
               </td>
-              <td class="px-4 py-3 text-sm text-text-secondary">
+              <td class="px-4 py-3 text-sm text-gray-500">
                 {{ formatDate(ep.created_at) }}
               </td>
               <td
@@ -436,14 +450,14 @@ onMounted(() => {
                   as="div"
                   class="relative inline-block text-left"
                 >
-                  <MenuButton class="text-text-secondary hover:text-text-primary transition-colors">
+                  <MenuButton class="text-gray-400 hover:text-gray-700 transition-colors">
                     <EllipsisVerticalIcon class="h-5 w-5" />
                   </MenuButton>
-                  <MenuItems class="absolute right-0 z-10 mt-2 w-48 rounded-lg bg-bg-secondary border border-border shadow-lg focus:outline-none">
+                  <MenuItems class="absolute right-0 z-10 mt-2 w-48 rounded-lg bg-white border border-border shadow-lg focus:outline-none">
                     <div class="py-1">
                       <MenuItem v-slot="{ active }">
                         <button
-                          :class="[active ? 'bg-bg-tertiary' : '', 'block w-full px-4 py-2 text-left text-sm text-text-primary flex items-center gap-2']"
+                          :class="[active ? 'bg-gray-50' : '', 'block w-full px-4 py-2 text-left text-sm text-gray-700 flex items-center gap-2']"
                           @click="router.push(`/series/${seriesId}/episodes/${ep.id}/edit`)"
                         >
                           <PencilIcon class="h-4 w-4" />
@@ -452,7 +466,7 @@ onMounted(() => {
                       </MenuItem>
                       <MenuItem v-slot="{ active }">
                         <button
-                          :class="[active ? 'bg-bg-tertiary' : '', 'block w-full px-4 py-2 text-left text-sm text-destructive flex items-center gap-2']"
+                          :class="[active ? 'bg-gray-50' : '', 'block w-full px-4 py-2 text-left text-sm text-destructive flex items-center gap-2']"
                           @click="openDeleteConfirm(ep)"
                         >
                           <TrashIcon class="h-4 w-4" />
@@ -473,11 +487,13 @@ onMounted(() => {
         v-else-if="!episodesLoading"
         class="text-center py-16 border border-border/50 rounded-xl border-dashed"
       >
-        <FilmIcon class="mx-auto h-12 w-12 text-text-secondary mb-4" />
-        <h3 class="text-lg font-medium text-text-primary mb-2">
+        <div class="mx-auto h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center mb-4">
+          <FilmIcon class="h-6 w-6 text-gray-400" />
+        </div>
+        <h3 class="text-lg font-medium text-gray-900 mb-2">
           No episodes yet
         </h3>
-        <p class="text-text-secondary mb-6 text-sm">
+        <p class="text-gray-500 mb-6 text-sm">
           Add the first episode to this series
         </p>
         <button
@@ -493,30 +509,32 @@ onMounted(() => {
     <!-- Delete Confirmation Modal -->
     <div
       v-if="showDeleteConfirm"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/75 backdrop-blur-sm"
     >
-      <div class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-md">
-        <h2 class="text-lg font-semibold text-text-primary mb-4">
-          Delete Episode
-        </h2>
+      <div class="bg-white border border-gray-100 rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+        <div class="p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">
+            Delete Episode
+          </h2>
 
-        <p class="text-text-secondary mb-4">
-          Are you sure you want to delete episode {{ deletingEpisode?.episode_number }}
-          "{{ deletingEpisode?.title }}"? This will also remove the associated video.
-          This action cannot be undone.
-        </p>
+          <p class="text-gray-500 mb-4">
+            Are you sure you want to delete episode {{ deletingEpisode?.episode_number }}
+            "{{ deletingEpisode?.title }}"? This will also remove the associated video.
+            This action cannot be undone.
+          </p>
 
-        <div
-          v-if="deleteError"
-          class="bg-destructive/10 border border-destructive/30 text-destructive rounded-lg px-4 py-3 text-sm mb-4"
-        >
-          {{ deleteError }}
+          <div
+            v-if="deleteError"
+            class="bg-destructive/10 border border-destructive/30 text-destructive rounded-lg px-4 py-3 text-sm mb-4"
+          >
+            {{ deleteError }}
+          </div>
         </div>
 
-        <div class="flex justify-end gap-3">
+        <div class="flex justify-end gap-3 bg-gray-50 px-6 py-4">
           <button
             type="button"
-            class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-tertiary transition-colors"
+            class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             @click="showDeleteConfirm = false"
           >
             Cancel
