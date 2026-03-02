@@ -9,6 +9,7 @@ import {
   XMarkIcon,
   ChevronRightIcon,
   PlayIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../../stores/auth'
 
@@ -46,6 +47,7 @@ const sections: NavSection[] = [
   {
     label: 'Content',
     items: [
+      { name: 'Browse', href: '/browse', icon: MagnifyingGlassIcon },
       { name: 'Series', href: '/series', icon: FilmIcon },
       { name: 'Tags & Genres', href: '/tags', icon: TagIcon },
     ],
