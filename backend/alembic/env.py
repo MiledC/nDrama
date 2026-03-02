@@ -7,7 +7,19 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 from app.config import settings
-from app.models import Base
+# Import all models to ensure they're registered with metadata
+from app.models import (
+    AudioTrack,
+    Base,
+    Category,
+    Episode,
+    Series,
+    Subtitle,
+    Tag,
+    User,
+    category_tags,
+    series_tags,
+)
 
 config = context.config
 
