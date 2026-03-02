@@ -88,14 +88,47 @@ onMounted(fetchSeries)
 
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-text-primary mb-6">
-      Edit Series
-    </h1>
+    <RouterLink
+      to="/series"
+      class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-accent transition-colors mb-4 group"
+    >
+      <svg
+        class="h-4 w-4 transition-transform group-hover:-translate-x-0.5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+      Back to Series
+    </RouterLink>
+
+    <div class="flex items-center gap-3 mb-6">
+      <h1 class="text-2xl font-bold text-gray-900 tracking-tight">
+        Edit Series
+      </h1>
+      <span
+        v-if="series"
+        :class="[
+          'badge-pill',
+          series.status === 'published' ? 'bg-accent-light text-accent' :
+          series.status === 'archived' ? 'bg-gray-100 text-gray-600' :
+          'bg-warning-light text-warning'
+        ]"
+      >
+        {{ series.status }}
+      </span>
+    </div>
 
     <!-- Loading state -->
     <div
       v-if="fetchLoading"
-      class="text-text-secondary"
+      class="text-gray-500"
     >
       Loading series...
     </div>

@@ -143,26 +143,29 @@ onUnmounted(() => {
 <template>
   <div
     ref="dropdownRef"
-    class="relative"
+    class="hidden md:block relative max-w-md w-64 lg:w-96"
   >
     <!-- Search Input -->
     <div class="relative">
-      <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-secondary" />
+      <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
       <input
         ref="inputRef"
         v-model="query"
         type="text"
-        placeholder="Search… Ctrl+K"
-        class="w-64 rounded-lg border border-border bg-bg-tertiary pl-9 pr-3 py-1.5 text-sm text-text-primary placeholder-text-secondary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent transition-colors"
+        placeholder="Search series, users, or tags..."
+        class="block w-full pl-10 pr-16 py-2 border border-border rounded-lg leading-5 bg-white placeholder-gray-400 text-text-primary focus:outline-none focus:ring-1 focus:ring-accent focus:border-accent text-sm shadow-[--shadow-subtle] transition-all"
         @keydown="handleKeydown"
         @focus="() => { if (results.length > 0) isOpen = true }"
       >
+      <div class="absolute inset-y-0 right-0 pr-2 flex items-center">
+        <span class="text-gray-400 text-xs border border-gray-200 rounded px-1.5 py-0.5">Ctrl+K</span>
+      </div>
     </div>
 
     <!-- Results Dropdown -->
     <div
       v-if="isOpen"
-      class="absolute right-0 top-full mt-2 w-96 rounded-xl border border-border bg-bg-secondary shadow-2xl shadow-black/30 overflow-hidden z-50"
+      class="absolute left-0 top-full mt-2 w-96 rounded-xl border border-border bg-white shadow-[--shadow-dropdown] overflow-hidden z-50"
     >
       <!-- Loading -->
       <div
@@ -186,34 +189,34 @@ onUnmounted(() => {
       <template v-else>
         <!-- Series Group -->
         <div v-if="seriesResults.length > 0">
-          <div class="px-3 py-2 text-xs font-medium text-text-secondary uppercase tracking-wider bg-bg-primary/50">
+          <div class="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">
             Series
           </div>
           <button
             v-for="(item, i) in seriesResults"
             :key="item.id"
             :class="[
-              activeIndex === i ? 'bg-accent/10' : 'hover:bg-bg-tertiary/50',
+              activeIndex === i ? 'bg-accent/5' : 'hover:bg-gray-50',
               'flex items-center gap-3 w-full px-3 py-2.5 text-left transition-colors',
             ]"
             @click="navigateToResult(item)"
             @mouseenter="activeIndex = i"
           >
-            <FilmIcon class="h-4 w-4 text-text-secondary flex-shrink-0" />
+            <FilmIcon class="h-4 w-4 text-gray-400 flex-shrink-0" />
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium text-text-primary truncate">
+              <p class="text-sm font-medium text-gray-900 truncate">
                 {{ item.title }}
               </p>
               <p
                 v-if="item.description"
-                class="text-xs text-text-secondary truncate"
+                class="text-xs text-gray-500 truncate"
               >
                 {{ item.description }}
               </p>
             </div>
             <span
               v-if="item.status"
-              class="text-xs text-text-secondary capitalize flex-shrink-0"
+              class="text-xs text-gray-500 capitalize flex-shrink-0"
             >
               {{ item.status }}
             </span>
@@ -222,25 +225,25 @@ onUnmounted(() => {
 
         <!-- Episodes Group -->
         <div v-if="episodeResults.length > 0">
-          <div class="px-3 py-2 text-xs font-medium text-text-secondary uppercase tracking-wider bg-bg-primary/50">
+          <div class="px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50/80">
             Episodes
           </div>
           <button
             v-for="(item, j) in episodeResults"
             :key="item.id"
             :class="[
-              activeIndex === seriesResults.length + j ? 'bg-accent/10' : 'hover:bg-bg-tertiary/50',
+              activeIndex === seriesResults.length + j ? 'bg-accent/5' : 'hover:bg-gray-50',
               'flex items-center gap-3 w-full px-3 py-2.5 text-left transition-colors',
             ]"
             @click="navigateToResult(item)"
             @mouseenter="activeIndex = seriesResults.length + j"
           >
-            <PlayCircleIcon class="h-4 w-4 text-text-secondary flex-shrink-0" />
+            <PlayCircleIcon class="h-4 w-4 text-gray-400 flex-shrink-0" />
             <div class="min-w-0 flex-1">
-              <p class="text-sm font-medium text-text-primary truncate">
+              <p class="text-sm font-medium text-gray-900 truncate">
                 {{ item.title }}
               </p>
-              <p class="text-xs text-text-secondary truncate">
+              <p class="text-xs text-gray-500 truncate">
                 {{ item.series_title }} · Episode {{ item.episode_number }}
               </p>
             </div>

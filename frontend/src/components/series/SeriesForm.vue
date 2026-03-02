@@ -265,27 +265,6 @@ function getCategoryDisplayName(category: string): string {
   }
 }
 
-// Get tag chip classes
-function getTagChipClass(tagId: string, category: string | null): string {
-  const isSelected = selectedTagIds.value.has(tagId)
-  const baseClasses = 'inline-flex items-center rounded-full px-3 py-1 text-xs font-medium cursor-pointer transition-all'
-
-  if (isSelected) {
-    return `${baseClasses} bg-accent text-white hover:bg-accent-hover`
-  }
-
-  switch (category) {
-    case 'genre':
-      return `${baseClasses} bg-blue-500/15 text-blue-400 hover:bg-blue-500/25`
-    case 'mood':
-      return `${baseClasses} bg-purple-500/15 text-purple-400 hover:bg-purple-500/25`
-    case 'language':
-      return `${baseClasses} bg-green-500/15 text-green-400 hover:bg-green-500/25`
-    default:
-      return `${baseClasses} bg-bg-tertiary text-text-secondary hover:bg-bg-tertiary/70`
-  }
-}
-
 onMounted(fetchTags)
 </script>
 
@@ -294,141 +273,187 @@ onMounted(fetchTags)
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Left column: Form fields -->
       <div class="space-y-6">
-        <!-- Title -->
-        <div>
-          <label
-            for="title"
-            class="block text-sm font-medium text-text-secondary mb-1"
-          >
-            Title <span class="text-destructive">*</span>
-          </label>
-          <input
-            id="title"
-            v-model="title"
-            type="text"
-            maxlength="255"
-            class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-            placeholder="Enter series title"
-          >
-          <p
-            v-if="titleError"
-            class="mt-1 text-sm text-destructive"
-          >
-            {{ titleError }}
-          </p>
+        <!-- Basic Info Card -->
+        <div class="bg-white rounded-xl shadow-[--shadow-card] border border-border p-6 space-y-5">
+          <!-- Title -->
+          <div>
+            <label
+              for="title"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Title <span class="text-destructive">*</span>
+            </label>
+            <input
+              id="title"
+              v-model="title"
+              type="text"
+              maxlength="255"
+              class="form-input block w-full rounded-lg border-gray-300 shadow-[--shadow-input] sm:text-sm py-2.5 px-3 text-gray-900 placeholder-gray-400 transition-colors"
+              placeholder="Enter series title"
+            >
+            <p
+              v-if="titleError"
+              class="mt-1 text-sm text-destructive"
+            >
+              {{ titleError }}
+            </p>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label
+              for="description"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Description
+            </label>
+            <textarea
+              id="description"
+              v-model="description"
+              rows="4"
+              maxlength="2000"
+              class="form-input block w-full rounded-lg border-gray-300 shadow-[--shadow-input] sm:text-sm py-2.5 px-3 text-gray-900 placeholder-gray-400 transition-colors resize-none"
+              placeholder="Enter series description"
+            />
+            <p class="mt-1 text-xs text-gray-500">
+              {{ description.length }}/2000 characters
+            </p>
+          </div>
+
+          <!-- Status -->
+          <div>
+            <label
+              for="status"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Status
+            </label>
+            <div class="relative">
+              <select
+                id="status"
+                v-model="status"
+                class="form-input block w-full rounded-lg border-gray-300 shadow-[--shadow-input] sm:text-sm py-2.5 px-3 text-gray-900 bg-white appearance-none transition-colors"
+              >
+                <option value="draft">
+                  Draft
+                </option>
+                <option value="published">
+                  Published
+                </option>
+                <option value="archived">
+                  Archived
+                </option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <svg
+                  class="h-4 w-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Description -->
-        <div>
-          <label
-            for="description"
-            class="block text-sm font-medium text-text-secondary mb-1"
-          >
-            Description
-          </label>
-          <textarea
-            id="description"
-            v-model="description"
-            rows="4"
-            maxlength="2000"
-            class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-none"
-            placeholder="Enter series description"
-          />
-          <p class="mt-1 text-xs text-text-secondary">
-            {{ description.length }}/2000 characters
-          </p>
-        </div>
+        <!-- Monetization Card -->
+        <div class="bg-white rounded-xl shadow-[--shadow-card] border border-border p-6">
+          <!-- Monetization Header -->
+          <div class="flex items-center gap-3 mb-5">
+            <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gold-light">
+              <svg
+                class="w-5 h-5 text-gold"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.736 6.979C9.208 6.193 9.696 6 10 6c.304 0 .792.193 1.264.979a1 1 0 001.715-1.029C12.279 4.784 11.232 4 10 4s-2.279.784-2.979 1.95c-.285.475-.507 1-.67 1.55H6a1 1 0 000 2h.013a9.358 9.358 0 000 1H6a1 1 0 100 2h.351c.163.55.385 1.075.67 1.55C7.721 15.216 8.768 16 10 16s2.279-.784 2.979-1.95a1 1 0 10-1.715-1.029c-.472.786-.96.979-1.264.979-.304 0-.792-.193-1.264-.979a5.389 5.389 0 01-.421-.821H10a1 1 0 100-2H8.014a7.467 7.467 0 010-1H10a1 1 0 100-2H8.315c.12-.29.264-.562.421-.821z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-semibold text-gray-900">
+                Monetization
+              </h3>
+              <p class="text-xs text-gray-500">
+                Configure pricing for this series
+              </p>
+            </div>
+          </div>
 
-        <!-- Status -->
-        <div>
-          <label
-            for="status"
-            class="block text-sm font-medium text-text-secondary mb-1"
-          >
-            Status
-          </label>
-          <select
-            id="status"
-            v-model="status"
-            class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-          >
-            <option value="draft">
-              Draft
-            </option>
-            <option value="published">
-              Published
-            </option>
-            <option value="archived">
-              Archived
-            </option>
-          </select>
-        </div>
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Free Episode Count -->
+            <div>
+              <label
+                for="free-episodes"
+                class="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Free Episodes
+              </label>
+              <input
+                id="free-episodes"
+                v-model.number="freeEpisodeCount"
+                type="number"
+                min="0"
+                class="form-input block w-full rounded-lg border-gray-300 shadow-[--shadow-input] sm:text-sm py-2.5 px-3 text-gray-900 placeholder-gray-400 transition-colors"
+                placeholder="0"
+              >
+              <p class="mt-1 text-xs text-gray-500">
+                Episodes available for free
+              </p>
+            </div>
 
-        <!-- Free Episode Count -->
-        <div>
-          <label
-            for="free-episodes"
-            class="block text-sm font-medium text-text-secondary mb-1"
-          >
-            Free Episode Count
-          </label>
-          <input
-            id="free-episodes"
-            v-model.number="freeEpisodeCount"
-            type="number"
-            min="0"
-            class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-            placeholder="0"
-          >
-          <p class="mt-1 text-xs text-text-secondary">
-            Number of episodes available for free
-          </p>
-        </div>
+            <!-- Coin Cost Per Episode -->
+            <div>
+              <label
+                for="coin-cost"
+                class="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Coin Cost
+              </label>
+              <input
+                id="coin-cost"
+                v-model.number="coinCostPerEpisode"
+                type="number"
+                min="0"
+                class="form-input block w-full rounded-lg border-gray-300 shadow-[--shadow-input] sm:text-sm py-2.5 px-3 text-gray-900 placeholder-gray-400 transition-colors"
+                placeholder="0"
+              >
+              <p class="mt-1 text-xs text-gray-500">
+                Coins per premium episode
+              </p>
+            </div>
+          </div>
 
-        <!-- Coin Cost Per Episode -->
-        <div>
-          <label
-            for="coin-cost"
-            class="block text-sm font-medium text-text-secondary mb-1"
-          >
-            Coin Cost Per Episode
-          </label>
-          <input
-            id="coin-cost"
-            v-model.number="coinCostPerEpisode"
-            type="number"
-            min="0"
-            class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-            placeholder="0"
-          >
-          <p class="mt-1 text-xs text-text-secondary">
-            Cost in coins to unlock each premium episode
-          </p>
-        </div>
-
-        <!-- Pricing Preview -->
-        <div class="rounded-lg border border-border bg-bg-tertiary/50 px-4 py-3">
-          <p class="text-xs font-medium text-text-secondary uppercase tracking-wider mb-1">
-            Pricing Preview
-          </p>
-          <p
-            class="text-sm text-text-primary"
-            data-testid="pricing-preview"
-          >
-            {{ pricingPreview }}
-          </p>
+          <!-- Pricing Preview -->
+          <div class="mt-4 rounded-lg bg-accent-light border-l-4 border-accent px-4 py-3">
+            <p class="text-xs font-medium text-accent uppercase tracking-wider mb-1">
+              Pricing Preview
+            </p>
+            <p
+              class="text-sm font-medium text-accent"
+              data-testid="pricing-preview"
+            >
+              {{ pricingPreview }}
+            </p>
+          </div>
         </div>
       </div>
 
       <!-- Right column: Thumbnail and Tags -->
       <div class="space-y-6">
-        <!-- Thumbnail Upload -->
-        <div>
-          <label class="block text-sm font-medium text-text-secondary mb-1">
+        <!-- Thumbnail Upload Card -->
+        <div class="bg-white rounded-xl shadow-[--shadow-card] border border-border p-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
             Thumbnail
           </label>
           <div
-            class="relative w-full aspect-video rounded-lg border-2 border-dashed border-border hover:border-accent transition-colors cursor-pointer overflow-hidden bg-bg-tertiary"
+            class="relative w-full aspect-video rounded-lg border-2 border-dashed border-gray-300 hover:border-accent transition-colors cursor-pointer overflow-hidden bg-gray-50"
             @click="fileInput?.click()"
           >
             <!-- Preview -->
@@ -450,7 +475,7 @@ onMounted(fetchTags)
                   <div class="text-white text-sm mb-2">
                     Uploading...
                   </div>
-                  <div class="w-48 bg-bg-tertiary rounded-full h-2">
+                  <div class="w-48 bg-white/20 rounded-full h-2">
                     <div
                       class="bg-accent h-2 rounded-full transition-all"
                       :style="{ width: `${uploadProgress}%` }"
@@ -465,11 +490,11 @@ onMounted(fetchTags)
               v-else
               class="absolute inset-0 flex flex-col items-center justify-center"
             >
-              <PhotoIcon class="h-12 w-12 text-text-secondary mb-2" />
-              <p class="text-sm text-text-secondary">
+              <PhotoIcon class="h-12 w-12 text-gray-400 mb-2" />
+              <p class="text-sm text-gray-500">
                 Click to upload thumbnail
               </p>
-              <p class="text-xs text-text-secondary mt-1">
+              <p class="text-xs text-gray-400 mt-1">
                 Max 5MB, image files only
               </p>
             </div>
@@ -494,16 +519,16 @@ onMounted(fetchTags)
           </p>
         </div>
 
-        <!-- Tags -->
-        <div>
-          <label class="block text-sm font-medium text-text-secondary mb-3">
+        <!-- Tags Card -->
+        <div class="bg-white rounded-xl shadow-[--shadow-card] border border-border p-6">
+          <label class="block text-sm font-medium text-gray-700 mb-3">
             Tags
           </label>
 
           <!-- Tags loading -->
           <div
             v-if="tagsLoading"
-            class="text-text-secondary text-sm"
+            class="text-gray-500 text-sm"
           >
             Loading tags...
           </div>
@@ -525,7 +550,7 @@ onMounted(fetchTags)
               v-for="[category, categoryTags] in tagsByCategory"
               :key="category"
             >
-              <h4 class="text-xs font-medium text-text-secondary uppercase tracking-wider mb-2">
+              <h4 class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
                 {{ getCategoryDisplayName(category) }}
               </h4>
               <div class="flex flex-wrap gap-2">
@@ -533,7 +558,7 @@ onMounted(fetchTags)
                   v-for="tag in categoryTags"
                   :key="tag.id"
                   type="button"
-                  :class="getTagChipClass(tag.id, tag.category)"
+                  :class="['tag-btn', { 'selected': selectedTagIds.has(tag.id) }]"
                   @click="toggleTag(tag.id)"
                 >
                   {{ tag.name }}
@@ -542,7 +567,7 @@ onMounted(fetchTags)
             </div>
           </div>
 
-          <p class="mt-3 text-xs text-text-secondary">
+          <p class="mt-3 text-xs text-gray-500">
             {{ selectedTagIds.size }} tag{{ selectedTagIds.size === 1 ? '' : 's' }} selected
           </p>
         </div>
@@ -550,10 +575,10 @@ onMounted(fetchTags)
     </div>
 
     <!-- Form Actions -->
-    <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-border">
+    <div class="sticky bottom-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] -mx-6 px-6 py-4 mt-8 flex justify-end gap-3">
       <button
         type="button"
-        class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-tertiary transition-colors"
+        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         @click="emit('cancel')"
       >
         Cancel

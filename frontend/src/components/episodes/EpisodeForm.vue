@@ -272,104 +272,124 @@ onMounted(() => {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <!-- Left column: Form fields -->
       <div class="space-y-6">
-        <!-- Title -->
-        <div>
-          <label
-            for="ep-title"
-            class="block text-sm font-medium text-text-secondary mb-1"
-          >
-            Title <span class="text-destructive">*</span>
-          </label>
-          <input
-            id="ep-title"
-            v-model="title"
-            type="text"
-            maxlength="255"
-            class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-            placeholder="Enter episode title"
-          >
-          <p
-            v-if="titleError"
-            class="mt-1 text-sm text-destructive"
-          >
-            {{ titleError }}
-          </p>
-        </div>
+        <!-- Basic Info Card -->
+        <div class="bg-white rounded-xl shadow-[--shadow-card] border border-border p-6 space-y-5">
+          <!-- Title -->
+          <div>
+            <label
+              for="ep-title"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Title <span class="text-destructive">*</span>
+            </label>
+            <input
+              id="ep-title"
+              v-model="title"
+              type="text"
+              maxlength="255"
+              class="form-input block w-full rounded-lg border-gray-300 shadow-[--shadow-input] sm:text-sm py-2.5 px-3 text-gray-900 placeholder-gray-400 transition-colors"
+              placeholder="Enter episode title"
+            >
+            <p
+              v-if="titleError"
+              class="mt-1 text-sm text-destructive"
+            >
+              {{ titleError }}
+            </p>
+          </div>
 
-        <!-- Description -->
-        <div>
-          <label
-            for="ep-description"
-            class="block text-sm font-medium text-text-secondary mb-1"
-          >
-            Description
-          </label>
-          <textarea
-            id="ep-description"
-            v-model="description"
-            rows="4"
-            maxlength="2000"
-            class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-none"
-            placeholder="Enter episode description"
-          />
-          <p class="mt-1 text-xs text-text-secondary">
-            {{ description.length }}/2000 characters
-          </p>
-        </div>
+          <!-- Description -->
+          <div>
+            <label
+              for="ep-description"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Description
+            </label>
+            <textarea
+              id="ep-description"
+              v-model="description"
+              rows="4"
+              maxlength="2000"
+              class="form-input block w-full rounded-lg border-gray-300 shadow-[--shadow-input] sm:text-sm py-2.5 px-3 text-gray-900 placeholder-gray-400 transition-colors resize-none"
+              placeholder="Enter episode description"
+            />
+            <p class="mt-1 text-xs text-gray-500">
+              {{ description.length }}/2000 characters
+            </p>
+          </div>
 
-        <!-- Episode Number -->
-        <div>
-          <label
-            for="ep-number"
-            class="block text-sm font-medium text-text-secondary mb-1"
-          >
-            Episode Number
-          </label>
-          <input
-            id="ep-number"
-            v-model.number="episodeNumber"
-            type="number"
-            min="1"
-            class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-            placeholder="Auto-assigned if empty"
-          >
-          <p class="mt-1 text-xs text-text-secondary">
-            Leave empty to auto-assign the next number
-          </p>
-        </div>
+          <!-- Episode Number -->
+          <div>
+            <label
+              for="ep-number"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Episode Number
+            </label>
+            <input
+              id="ep-number"
+              v-model.number="episodeNumber"
+              type="number"
+              min="1"
+              class="form-input block w-full rounded-lg border-gray-300 shadow-[--shadow-input] sm:text-sm py-2.5 px-3 text-gray-900 placeholder-gray-400 transition-colors"
+              placeholder="Auto-assigned if empty"
+            >
+            <p class="mt-1 text-xs text-gray-500">
+              Leave empty to auto-assign the next number
+            </p>
+          </div>
 
-        <!-- Status -->
-        <div>
-          <label
-            for="ep-status"
-            class="block text-sm font-medium text-text-secondary mb-1"
-          >
-            Status
-          </label>
-          <select
-            id="ep-status"
-            v-model="status"
-            class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-          >
-            <option value="draft">
-              Draft
-            </option>
-            <option value="published">
-              Published
-            </option>
-          </select>
+          <!-- Status -->
+          <div>
+            <label
+              for="ep-status"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Status
+            </label>
+            <div class="relative">
+              <select
+                id="ep-status"
+                v-model="status"
+                class="form-input block w-full rounded-lg border-gray-300 shadow-[--shadow-input] sm:text-sm py-2.5 px-3 text-gray-900 bg-white appearance-none transition-colors"
+              >
+                <option value="draft">
+                  Draft
+                </option>
+                <option value="published">
+                  Published
+                </option>
+              </select>
+              <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                <svg
+                  class="h-4 w-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Right column: Thumbnail + Video Upload -->
       <div class="space-y-6">
-        <!-- Thumbnail Upload -->
-        <div>
-          <label class="block text-sm font-medium text-text-secondary mb-1">
+        <!-- Thumbnail Upload Card -->
+        <div class="bg-white rounded-xl shadow-[--shadow-card] border border-border p-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">
             Thumbnail
           </label>
           <div
-            class="relative w-full aspect-video rounded-lg border-2 border-dashed border-border hover:border-accent transition-colors cursor-pointer overflow-hidden bg-bg-tertiary"
+            class="relative w-full aspect-video rounded-lg border-2 border-dashed border-gray-300 hover:border-accent transition-colors cursor-pointer overflow-hidden bg-gray-50"
             @click="fileInput?.click()"
           >
             <div
@@ -389,7 +409,7 @@ onMounted(() => {
                   <div class="text-white text-sm mb-2">
                     Uploading...
                   </div>
-                  <div class="w-48 bg-bg-tertiary rounded-full h-2">
+                  <div class="w-48 bg-white/20 rounded-full h-2">
                     <div
                       class="bg-accent h-2 rounded-full transition-all"
                       :style="{ width: `${thumbnailUploadProgress}%` }"
@@ -402,11 +422,11 @@ onMounted(() => {
               v-else
               class="absolute inset-0 flex flex-col items-center justify-center"
             >
-              <PhotoIcon class="h-12 w-12 text-text-secondary mb-2" />
-              <p class="text-sm text-text-secondary">
+              <PhotoIcon class="h-12 w-12 text-gray-400 mb-2" />
+              <p class="text-sm text-gray-500">
                 Click to upload thumbnail
               </p>
-              <p class="text-xs text-text-secondary mt-1">
+              <p class="text-xs text-gray-400 mt-1">
                 Max 5MB, image files only
               </p>
             </div>
@@ -427,9 +447,12 @@ onMounted(() => {
           </p>
         </div>
 
-        <!-- Video Upload (only in edit mode) -->
-        <div v-if="isEditMode">
-          <label class="block text-sm font-medium text-text-secondary mb-1">
+        <!-- Video Upload Card (only in edit mode) -->
+        <div
+          v-if="isEditMode"
+          class="bg-white rounded-xl shadow-[--shadow-card] border border-border p-6"
+        >
+          <label class="block text-sm font-medium text-gray-700 mb-2">
             Video
           </label>
 
@@ -441,7 +464,7 @@ onMounted(() => {
             />
             <button
               type="button"
-              class="mt-3 w-full flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-tertiary transition-colors"
+              class="mt-3 w-full flex items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
               @click="isReplacingVideo = true"
             >
               <ArrowPathIcon class="h-4 w-4" />
@@ -452,20 +475,20 @@ onMounted(() => {
           <!-- Video file selection area -->
           <template v-else>
             <div
-              class="relative w-full rounded-lg border-2 border-dashed border-border hover:border-accent transition-colors cursor-pointer overflow-hidden bg-bg-tertiary p-6"
+              class="relative w-full rounded-lg border-2 border-dashed border-gray-300 hover:border-accent transition-colors cursor-pointer overflow-hidden bg-gray-50 p-6"
               @click="videoFileInput?.click()"
             >
               <div class="flex flex-col items-center justify-center text-center">
                 <!-- Upload success -->
                 <div
                   v-if="videoUploadSuccess"
-                  class="text-green-400"
+                  class="text-accent"
                 >
                   <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2" />
                   <p class="text-sm font-medium">
                     Video uploaded successfully
                   </p>
-                  <p class="text-xs text-text-secondary mt-1">
+                  <p class="text-xs text-gray-500 mt-1">
                     Processing may take a few minutes
                   </p>
                 </div>
@@ -476,38 +499,38 @@ onMounted(() => {
                   class="w-full"
                 >
                   <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2 text-accent animate-pulse" />
-                  <p class="text-sm text-text-primary mb-3">
+                  <p class="text-sm text-gray-900 mb-3">
                     Uploading video...
                   </p>
-                  <div class="w-full bg-bg-primary rounded-full h-3 mb-2">
+                  <div class="w-full bg-gray-200 rounded-full h-3 mb-2">
                     <div
                       class="bg-accent h-3 rounded-full transition-all duration-300"
                       :style="{ width: `${videoUploadProgress}%` }"
                     />
                   </div>
-                  <p class="text-xs text-text-secondary">
+                  <p class="text-xs text-gray-500">
                     {{ videoUploadProgress }}% complete
                   </p>
                 </div>
 
                 <!-- File selected, ready to upload -->
                 <div v-else-if="videoFile">
-                  <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2 text-text-secondary" />
-                  <p class="text-sm font-medium text-text-primary">
+                  <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2 text-gray-400" />
+                  <p class="text-sm font-medium text-gray-900">
                     {{ videoFileName }}
                   </p>
-                  <p class="text-xs text-text-secondary mt-1">
+                  <p class="text-xs text-gray-500 mt-1">
                     {{ formatFileSize(videoFile.size) }}
                   </p>
                 </div>
 
                 <!-- Empty state -->
                 <div v-else>
-                  <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2 text-text-secondary" />
-                  <p class="text-sm text-text-secondary">
+                  <CloudArrowUpIcon class="h-10 w-10 mx-auto mb-2 text-gray-400" />
+                  <p class="text-sm text-gray-500">
                     Click to select a video file
                   </p>
-                  <p class="text-xs text-text-secondary mt-1">
+                  <p class="text-xs text-gray-400 mt-1">
                     Max 2GB, video files only
                   </p>
                 </div>
@@ -537,7 +560,7 @@ onMounted(() => {
             <button
               v-if="videoPlaybackId && isReplacingVideo && !videoUploadLoading && !videoUploadSuccess"
               type="button"
-              class="mt-2 w-full text-center text-sm text-text-secondary hover:text-text-primary transition-colors"
+              class="mt-2 w-full text-center text-sm text-gray-500 hover:text-gray-700 transition-colors"
               @click="isReplacingVideo = false; videoFile = null; videoFileName = ''"
             >
               Cancel replacement
@@ -555,9 +578,9 @@ onMounted(() => {
         <!-- Info note for create mode -->
         <div
           v-else
-          class="rounded-lg bg-bg-tertiary/50 border border-border/50 p-4"
+          class="bg-white rounded-xl shadow-[--shadow-card] border border-border p-4"
         >
-          <p class="text-sm text-text-secondary">
+          <p class="text-sm text-gray-500">
             Video upload will be available after creating the episode.
           </p>
         </div>
@@ -577,10 +600,10 @@ onMounted(() => {
     </div>
 
     <!-- Form Actions -->
-    <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-border">
+    <div class="sticky bottom-0 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] -mx-6 px-6 py-4 mt-8 flex justify-end gap-3">
       <button
         type="button"
-        class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-tertiary transition-colors"
+        class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         @click="emit('cancel')"
       >
         Cancel

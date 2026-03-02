@@ -188,11 +188,11 @@ async function confirmDelete() {
 function getStatusBadgeClass(status: string): string {
   switch (status) {
     case 'published':
-      return 'bg-green-500/15 text-green-400'
+      return 'bg-emerald-50 text-emerald-700 border border-emerald-200'
     case 'archived':
-      return 'bg-amber-500/15 text-amber-400'
+      return 'bg-amber-50 text-amber-700 border border-amber-200'
     default:
-      return 'bg-bg-tertiary text-text-secondary'
+      return 'bg-gray-100 text-gray-600 border border-gray-200'
   }
 }
 
@@ -227,7 +227,7 @@ onMounted(() => {
   <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-text-primary">
+      <h1 class="text-2xl font-bold text-gray-900">
         Series
       </h1>
       <button
@@ -251,19 +251,19 @@ onMounted(() => {
     <div class="flex flex-wrap gap-4 mb-6">
       <!-- Search Input -->
       <div class="relative flex-1 min-w-[300px]">
-        <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-text-secondary" />
+        <MagnifyingGlassIcon class="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
         <input
           v-model="searchQuery"
           type="text"
           placeholder="Search series..."
-          class="w-full rounded-lg border border-border bg-bg-tertiary pl-10 pr-3 py-2 text-text-primary placeholder-text-secondary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+          class="w-full rounded-lg border border-border bg-white pl-10 pr-3 py-2 text-gray-900 placeholder-gray-400 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent shadow-[--shadow-subtle]"
         >
       </div>
 
       <!-- Status Filter -->
       <select
         v-model="statusFilter"
-        class="rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
       >
         <option value="all">
           All Status
@@ -283,7 +283,7 @@ onMounted(() => {
       <select
         v-model="selectedTag"
         :disabled="tagsLoading"
-        class="rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-50"
+        class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent disabled:opacity-50"
       >
         <option value="">
           All Tags
@@ -301,63 +301,63 @@ onMounted(() => {
     <!-- Loading Skeleton -->
     <div
       v-if="loading"
-      class="overflow-hidden rounded-xl border border-border animate-pulse"
+      class="overflow-hidden rounded-xl border border-border bg-white shadow-[--shadow-card] animate-pulse"
     >
-      <div class="border-b border-border bg-bg-secondary px-4 py-3">
-        <div class="h-4 w-32 bg-bg-tertiary rounded" />
+      <div class="border-b border-gray-200 bg-[#F9FAFB] px-4 py-3">
+        <div class="h-4 w-32 bg-gray-200 rounded" />
       </div>
       <div
         v-for="i in 5"
         :key="i"
-        class="flex items-center gap-4 px-4 py-3 border-b border-border last:border-0"
+        class="flex items-center gap-4 px-4 py-3 border-b border-gray-200 last:border-0"
       >
-        <div class="h-10 w-10 bg-bg-tertiary rounded-lg flex-shrink-0" />
+        <div class="h-10 w-10 bg-gray-100 rounded-lg flex-shrink-0" />
         <div class="flex-1">
-          <div class="h-4 w-40 bg-bg-tertiary rounded mb-1" />
-          <div class="h-3 w-24 bg-bg-tertiary rounded" />
+          <div class="h-4 w-40 bg-gray-100 rounded mb-1" />
+          <div class="h-3 w-24 bg-gray-100 rounded" />
         </div>
-        <div class="h-5 w-16 bg-bg-tertiary rounded-full" />
+        <div class="h-5 w-16 bg-gray-100 rounded-full" />
       </div>
     </div>
 
     <!-- Series Table -->
     <div
       v-else-if="series.length > 0"
-      class="overflow-hidden rounded-xl border border-border"
+      class="bg-white rounded-xl border border-border shadow-[--shadow-card] overflow-hidden"
     >
       <table class="w-full">
         <thead>
-          <tr class="border-b border-border bg-bg-secondary">
-            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+          <tr class="border-b border-gray-200 bg-[#F9FAFB]">
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Series
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Status
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Tags
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Pricing
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Created
             </th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-border">
+        <tbody class="divide-y divide-gray-200">
           <tr
             v-for="s in series"
             :key="s.id"
-            class="hover:bg-bg-secondary/50 transition-colors"
+            class="hover:bg-gray-50 transition-colors"
           >
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
                 <!-- Thumbnail -->
-                <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-bg-tertiary flex items-center justify-center overflow-hidden">
+                <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden">
                   <img
                     v-if="s.thumbnail_url"
                     :src="s.thumbnail_url"
@@ -366,20 +366,20 @@ onMounted(() => {
                   >
                   <PhotoIcon
                     v-else
-                    class="h-5 w-5 text-text-secondary"
+                    class="h-5 w-5 text-gray-400"
                   />
                 </div>
                 <!-- Title and Description -->
                 <div>
                   <button
-                    class="text-sm font-medium text-text-primary hover:text-accent transition-colors text-left"
+                    class="text-sm font-medium text-gray-900 hover:text-accent transition-colors text-left"
                     @click="router.push(`/series/${s.id}`)"
                   >
                     {{ s.title }}
                   </button>
                   <p
                     v-if="s.description"
-                    class="text-xs text-text-secondary line-clamp-1"
+                    class="text-xs text-gray-500 line-clamp-1"
                   >
                     {{ s.description }}
                   </p>
@@ -401,20 +401,20 @@ onMounted(() => {
                 <span
                   v-for="tag in s.tags.slice(0, 3)"
                   :key="tag.id"
-                  class="inline-flex items-center rounded-full bg-accent/15 text-accent px-2 py-0.5 text-xs font-medium"
+                  class="inline-flex items-center rounded-full bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 text-xs font-medium"
                 >
                   {{ tag.name }}
                 </span>
                 <span
                   v-if="s.tags.length > 3"
-                  class="inline-flex items-center rounded-full bg-bg-tertiary text-text-secondary px-2 py-0.5 text-xs font-medium"
+                  class="inline-flex items-center rounded-full bg-gray-100 text-gray-600 border border-gray-200 px-2 py-0.5 text-xs font-medium"
                 >
                   +{{ s.tags.length - 3 }}
                 </span>
               </div>
             </td>
             <td class="px-4 py-3">
-              <div class="text-sm text-text-secondary">
+              <div class="text-sm text-gray-500">
                 <div>
                   {{ s.free_episode_count }} free
                 </div>
@@ -423,7 +423,7 @@ onMounted(() => {
                 </div>
               </div>
             </td>
-            <td class="px-4 py-3 text-sm text-text-secondary">
+            <td class="px-4 py-3 text-sm text-gray-500">
               {{ formatDate(s.created_at) }}
             </td>
             <td class="px-4 py-3 text-right">
@@ -431,14 +431,14 @@ onMounted(() => {
                 as="div"
                 class="relative inline-block text-left"
               >
-                <MenuButton class="text-text-secondary hover:text-text-primary transition-colors">
+                <MenuButton class="text-gray-400 hover:text-gray-700 transition-colors">
                   <EllipsisVerticalIcon class="h-5 w-5" />
                 </MenuButton>
-                <MenuItems class="absolute right-0 z-10 mt-2 w-48 rounded-lg bg-bg-secondary border border-border shadow-lg focus:outline-none">
+                <MenuItems class="absolute right-0 z-10 mt-2 w-48 rounded-lg bg-white border border-border shadow-lg focus:outline-none">
                   <div class="py-1">
                     <MenuItem v-slot="{ active }">
                       <button
-                        :class="[active ? 'bg-bg-tertiary' : '', 'block w-full px-4 py-2 text-left text-sm text-text-primary flex items-center gap-2']"
+                        :class="[active ? 'bg-gray-50' : '', 'block w-full px-4 py-2 text-left text-sm text-gray-700 flex items-center gap-2']"
                         @click="router.push(`/series/${s.id}/edit`)"
                       >
                         <PencilIcon class="h-4 w-4" />
@@ -450,7 +450,7 @@ onMounted(() => {
                       v-slot="{ active }"
                     >
                       <button
-                        :class="[active ? 'bg-bg-tertiary' : '', 'block w-full px-4 py-2 text-left text-sm text-amber-400 flex items-center gap-2']"
+                        :class="[active ? 'bg-gray-50' : '', 'block w-full px-4 py-2 text-left text-sm text-amber-600 flex items-center gap-2']"
                         @click="openDeleteConfirm(s, 'archive')"
                       >
                         <ArchiveBoxIcon class="h-4 w-4" />
@@ -459,7 +459,7 @@ onMounted(() => {
                     </MenuItem>
                     <MenuItem v-slot="{ active }">
                       <button
-                        :class="[active ? 'bg-bg-tertiary' : '', 'block w-full px-4 py-2 text-left text-sm text-destructive flex items-center gap-2']"
+                        :class="[active ? 'bg-gray-50' : '', 'block w-full px-4 py-2 text-left text-sm text-destructive flex items-center gap-2']"
                         @click="openDeleteConfirm(s, 'delete')"
                       >
                         <TrashIcon class="h-4 w-4" />
@@ -480,11 +480,13 @@ onMounted(() => {
       v-else
       class="text-center py-12"
     >
-      <PhotoIcon class="mx-auto h-12 w-12 text-text-secondary mb-4" />
-      <h3 class="text-lg font-medium text-text-primary mb-2">
+      <div class="mx-auto h-12 w-12 rounded-full bg-gray-50 flex items-center justify-center mb-4">
+        <PhotoIcon class="h-6 w-6 text-gray-400" />
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">
         No series found
       </h3>
-      <p class="text-text-secondary mb-6">
+      <p class="text-gray-500 mb-6">
         {{ searchQuery || statusFilter !== 'all' || selectedTag ? 'Try adjusting your filters' : 'Get started by creating your first series' }}
       </p>
       <button
@@ -502,20 +504,20 @@ onMounted(() => {
       v-if="!loading && totalPages > 1"
       class="flex items-center justify-between mt-6"
     >
-      <div class="text-sm text-text-secondary">
+      <div class="text-sm text-gray-500">
         Page {{ page }} of {{ totalPages }}
       </div>
       <div class="flex gap-2">
         <button
           :disabled="!hasPrevious"
-          class="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-text-secondary hover:bg-bg-tertiary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          class="rounded-lg bg-white border border-border px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           @click="goToPreviousPage"
         >
           Previous
         </button>
         <button
           :disabled="!hasNext"
-          class="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-text-secondary hover:bg-bg-tertiary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          class="rounded-lg bg-white border border-border px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           @click="goToNextPage"
         >
           Next
@@ -526,31 +528,33 @@ onMounted(() => {
     <!-- Delete/Archive Confirmation Modal -->
     <div
       v-if="showDeleteConfirm"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/75 backdrop-blur-sm"
     >
-      <div class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-md">
-        <h2 class="text-lg font-semibold text-text-primary mb-4">
-          {{ deleteAction === 'archive' ? 'Archive' : 'Delete' }} Series
-        </h2>
+      <div class="bg-white border border-gray-100 rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+        <div class="p-6">
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">
+            {{ deleteAction === 'archive' ? 'Archive' : 'Delete' }} Series
+          </h2>
 
-        <p class="text-text-secondary mb-4">
-          Are you sure you want to {{ deleteAction }} the series "{{ deletingSeries?.title }}"?
-          <span v-if="deleteAction === 'delete'">
-            This action cannot be undone.
-          </span>
-        </p>
+          <p class="text-gray-500 mb-4">
+            Are you sure you want to {{ deleteAction }} the series "{{ deletingSeries?.title }}"?
+            <span v-if="deleteAction === 'delete'">
+              This action cannot be undone.
+            </span>
+          </p>
 
-        <div
-          v-if="deleteError"
-          class="bg-destructive/10 border border-destructive/30 text-destructive rounded-lg px-4 py-3 text-sm mb-4"
-        >
-          {{ deleteError }}
+          <div
+            v-if="deleteError"
+            class="bg-destructive/10 border border-destructive/30 text-destructive rounded-lg px-4 py-3 text-sm mb-4"
+          >
+            {{ deleteError }}
+          </div>
         </div>
 
-        <div class="flex justify-end gap-3">
+        <div class="flex justify-end gap-3 bg-gray-50 px-6 py-4">
           <button
             type="button"
-            class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-tertiary transition-colors"
+            class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             @click="showDeleteConfirm = false"
           >
             Cancel

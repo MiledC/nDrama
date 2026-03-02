@@ -5,9 +5,10 @@ import {
   FilmIcon,
   Cog6ToothIcon,
   UsersIcon,
-  ArrowRightStartOnRectangleIcon,
   TagIcon,
   XMarkIcon,
+  ChevronRightIcon,
+  PlayIcon,
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../../stores/auth'
 
@@ -23,16 +24,49 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const navigation = [
-  { name: 'Dashboard', href: '/', icon: HomeIcon },
-  { name: 'Series', href: '/series', icon: FilmIcon },
-  { name: 'Tags', href: '/tags', icon: TagIcon },
-  { name: 'Users', href: '/users', icon: UsersIcon, adminOnly: true },
-  { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
+interface NavItem {
+  name: string
+  href: string
+  icon: typeof HomeIcon
+  adminOnly?: boolean
+}
+
+interface NavSection {
+  label: string
+  items: NavItem[]
+}
+
+const sections: NavSection[] = [
+  {
+    label: 'Overview',
+    items: [
+      { name: 'Dashboard', href: '/', icon: HomeIcon },
+    ],
+  },
+  {
+    label: 'Content',
+    items: [
+      { name: 'Series', href: '/series', icon: FilmIcon },
+      { name: 'Tags & Genres', href: '/tags', icon: TagIcon },
+    ],
+  },
+  {
+    label: 'Users',
+    items: [
+      { name: 'Users', href: '/users', icon: UsersIcon, adminOnly: true },
+    ],
+  },
+  {
+    label: 'System',
+    items: [
+      { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
+    ],
+  },
 ]
 
 function isActive(href: string): boolean {
-  return route.path === href
+  if (href === '/') return route.path === '/'
+  return route.path.startsWith(href)
 }
 
 function handleLogout() {
@@ -43,27 +77,42 @@ function handleLogout() {
 function handleNavClick() {
   emit('close')
 }
+
+function getUserInitials(): string {
+  const name = auth.user?.name ?? ''
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
 </script>
 
 <template>
   <!-- Mobile overlay -->
   <div
     v-if="mobileOpen"
-    class="fixed inset-0 z-40 bg-black/50 lg:hidden"
+    class="fixed inset-0 z-40 bg-gray-900/50 lg:hidden"
     @click="emit('close')"
   />
 
   <aside
     :class="[
-      'fixed inset-y-0 left-0 z-50 w-64 bg-bg-secondary border-r border-bg-tertiary flex flex-col transition-transform duration-200',
+      'fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-slate-400 flex flex-col transition-transform duration-200 shadow-xl lg:shadow-none',
       mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
     ]"
   >
     <!-- Logo -->
-    <div class="flex h-16 items-center justify-between px-6 border-b border-bg-tertiary">
-      <span class="text-xl font-bold text-accent">nDrama</span>
+    <div class="flex h-16 items-center justify-between px-6 border-b border-white/10 shrink-0">
+      <div class="flex items-center gap-3 text-white">
+        <div class="w-8 h-8 bg-accent rounded-md flex items-center justify-center shadow-lg">
+          <PlayIcon class="h-3.5 w-3.5 text-white" />
+        </div>
+        <span class="text-xl font-bold tracking-tight">Draama</span>
+      </div>
       <button
-        class="lg:hidden text-text-secondary hover:text-text-primary transition-colors"
+        class="lg:hidden text-slate-400 hover:text-white transition-colors"
         @click="emit('close')"
       >
         <XMarkIcon class="h-5 w-5" />
@@ -71,10 +120,22 @@ function handleNavClick() {
     </div>
 
     <!-- Navigation -->
-    <nav class="mt-6 px-3 flex-1">
-      <ul class="space-y-1">
-        <li
-          v-for="item in navigation"
+    <nav class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+      <template
+        v-for="(section, sIdx) in sections"
+        :key="section.label"
+      >
+        <p
+          :class="[
+            'px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2',
+            sIdx > 0 ? 'mt-8' : '',
+          ]"
+        >
+          {{ section.label }}
+        </p>
+
+        <template
+          v-for="item in section.items"
           :key="item.name"
         >
           <RouterLink
@@ -82,44 +143,45 @@ function handleNavClick() {
             :to="item.href"
             :class="[
               isActive(item.href)
-                ? 'bg-accent text-white'
-                : 'text-text-secondary hover:bg-bg-tertiary hover:text-text-primary',
-              'group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                ? 'sidebar-item-active'
+                : 'sidebar-item',
+              'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all',
             ]"
             @click="handleNavClick"
           >
             <component
               :is="item.icon"
               :class="[
-                isActive(item.href) ? 'text-white' : 'text-text-secondary group-hover:text-text-primary',
+                isActive(item.href) ? 'text-white' : 'text-slate-400',
                 'h-5 w-5 shrink-0 transition-colors',
               ]"
             />
             {{ item.name }}
           </RouterLink>
-        </li>
-      </ul>
+        </template>
+      </template>
     </nav>
 
     <!-- User section at bottom -->
-    <div class="border-t border-bg-tertiary p-3">
-      <div class="flex items-center gap-3 px-3 py-2">
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-medium text-text-primary truncate">
+    <div class="p-4 border-t border-white/10 shrink-0">
+      <button
+        class="flex items-center gap-3 w-full p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer group"
+        title="Sign out"
+        @click="handleLogout"
+      >
+        <div class="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center border border-white/20 text-sm font-medium text-white">
+          {{ getUserInitials() }}
+        </div>
+        <div class="flex-1 min-w-0 text-left">
+          <p class="text-sm font-medium text-white truncate">
             {{ auth.user?.name }}
           </p>
-          <p class="text-xs text-text-secondary truncate">
+          <p class="text-xs text-slate-500 truncate group-hover:text-slate-400">
             {{ auth.user?.email }}
           </p>
         </div>
-        <button
-          class="text-text-secondary hover:text-text-primary transition-colors"
-          title="Sign out"
-          @click="handleLogout"
-        >
-          <ArrowRightStartOnRectangleIcon class="h-5 w-5" />
-        </button>
-      </div>
+        <ChevronRightIcon class="h-4 w-4 text-slate-600 group-hover:text-white transition-colors shrink-0" />
+      </button>
     </div>
   </aside>
 </template>

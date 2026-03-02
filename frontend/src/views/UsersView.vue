@@ -111,7 +111,7 @@ onMounted(fetchUsers)
   <div>
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-text-primary">
+      <h1 class="text-2xl font-bold text-gray-900">
         Users
       </h1>
       <button
@@ -126,7 +126,7 @@ onMounted(fetchUsers)
     <!-- Error -->
     <div
       v-if="error"
-      class="bg-destructive/10 border border-destructive/30 text-destructive rounded-lg px-4 py-3 text-sm mb-4"
+      class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm mb-4"
     >
       {{ error }}
     </div>
@@ -134,16 +134,16 @@ onMounted(fetchUsers)
     <!-- Invite Form Modal -->
     <div
       v-if="showInviteForm"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/75 backdrop-blur-sm"
     >
-      <div class="bg-bg-secondary border border-border rounded-xl p-6 w-full max-w-md">
-        <h2 class="text-lg font-semibold text-text-primary mb-4">
+      <div class="bg-white border border-gray-100 rounded-xl shadow-xl p-6 w-full max-w-md">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">
           Invite User
         </h2>
 
         <div
           v-if="inviteError"
-          class="bg-destructive/10 border border-destructive/30 text-destructive rounded-lg px-4 py-3 text-sm mb-4"
+          class="bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3 text-sm mb-4"
         >
           {{ inviteError }}
         </div>
@@ -153,37 +153,37 @@ onMounted(fetchUsers)
           @submit.prevent="inviteUser"
         >
           <div>
-            <label class="block text-sm font-medium text-text-secondary mb-1">Email</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <input
               v-model="inviteEmail"
               type="email"
               required
-              class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-[--shadow-input] placeholder-gray-400 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             >
           </div>
           <div>
-            <label class="block text-sm font-medium text-text-secondary mb-1">Name</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
             <input
               v-model="inviteName"
               type="text"
               required
-              class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-[--shadow-input] placeholder-gray-400 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             >
           </div>
           <div>
-            <label class="block text-sm font-medium text-text-secondary mb-1">Temporary Password</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Temporary Password</label>
             <input
               v-model="invitePassword"
               type="password"
               required
-              class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-[--shadow-input] placeholder-gray-400 focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             >
           </div>
           <div>
-            <label class="block text-sm font-medium text-text-secondary mb-1">Role</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
             <select
               v-model="inviteRole"
-              class="w-full rounded-lg border border-border bg-bg-tertiary px-3 py-2 text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-gray-900 shadow-[--shadow-input] focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
             >
               <option value="editor">
                 Editor
@@ -197,7 +197,7 @@ onMounted(fetchUsers)
           <div class="flex justify-end gap-3 pt-2">
             <button
               type="button"
-              class="rounded-lg border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg-tertiary transition-colors"
+              class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
               @click="showInviteForm = false"
             >
               Cancel
@@ -217,79 +217,79 @@ onMounted(fetchUsers)
     <!-- Loading Skeleton -->
     <div
       v-if="loading"
-      class="overflow-hidden rounded-xl border border-border animate-pulse"
+      class="overflow-hidden rounded-xl border border-border bg-white shadow-[--shadow-card] animate-pulse"
     >
-      <div class="border-b border-border bg-bg-secondary px-4 py-3">
-        <div class="h-4 w-32 bg-bg-tertiary rounded" />
+      <div class="border-b border-gray-200 bg-[#F9FAFB] px-4 py-3">
+        <div class="h-4 w-32 bg-gray-200 rounded" />
       </div>
       <div
         v-for="i in 5"
         :key="i"
-        class="flex items-center gap-4 px-4 py-3 border-b border-border last:border-0"
+        class="flex items-center gap-4 px-4 py-3 border-b border-gray-200 last:border-0"
       >
         <div class="flex-1">
-          <div class="h-4 w-32 bg-bg-tertiary rounded mb-1" />
-          <div class="h-3 w-48 bg-bg-tertiary rounded" />
+          <div class="h-4 w-32 bg-gray-200 rounded mb-1" />
+          <div class="h-3 w-48 bg-gray-200 rounded" />
         </div>
-        <div class="h-5 w-14 bg-bg-tertiary rounded-full" />
-        <div class="h-5 w-14 bg-bg-tertiary rounded-full" />
+        <div class="h-5 w-14 bg-gray-200 rounded-full" />
+        <div class="h-5 w-14 bg-gray-200 rounded-full" />
       </div>
     </div>
 
     <!-- Users Table -->
     <div
       v-else
-      class="overflow-hidden rounded-xl border border-border"
+      class="overflow-hidden rounded-xl border border-border bg-white shadow-[--shadow-card]"
     >
       <table class="w-full">
         <thead>
-          <tr class="border-b border-border bg-bg-secondary">
-            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+          <tr class="border-b border-gray-200 bg-[#F9FAFB]">
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Name
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Email
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Role
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
             </th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-text-secondary uppercase tracking-wider">
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Joined
             </th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-text-secondary uppercase tracking-wider">
+            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
             </th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-border">
+        <tbody class="divide-y divide-gray-200">
           <tr
             v-for="u in users"
             :key="u.id"
-            class="hover:bg-bg-secondary/50 transition-colors"
+            class="hover:bg-gray-50 transition-colors"
           >
             <td class="px-4 py-3">
               <div class="flex items-center gap-2">
-                <span class="text-sm font-medium text-text-primary">{{ u.name }}</span>
+                <span class="text-sm font-medium text-gray-900">{{ u.name }}</span>
                 <span
                   v-if="u.oauth_provider"
-                  class="inline-flex items-center rounded-full bg-bg-tertiary px-2 py-0.5 text-xs text-text-secondary"
+                  class="inline-flex items-center rounded-full bg-gray-100 border border-gray-200 px-2 py-0.5 text-xs text-gray-500"
                 >
                   {{ u.oauth_provider }}
                 </span>
               </div>
             </td>
-            <td class="px-4 py-3 text-sm text-text-secondary">
+            <td class="px-4 py-3 text-sm text-gray-500">
               {{ u.email }}
             </td>
             <td class="px-4 py-3">
               <span
                 :class="[
                   u.role === 'admin'
-                    ? 'bg-accent/15 text-accent'
-                    : 'bg-bg-tertiary text-text-secondary',
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-blue-50 text-blue-700 border border-blue-200',
                   'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
                 ]"
               >
@@ -300,15 +300,15 @@ onMounted(fetchUsers)
               <span
                 :class="[
                   u.is_active
-                    ? 'bg-green-500/15 text-green-400'
-                    : 'bg-destructive/15 text-destructive',
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-red-50 text-red-700 border border-red-200',
                   'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium',
                 ]"
               >
                 {{ u.is_active ? 'Active' : 'Disabled' }}
               </span>
             </td>
-            <td class="px-4 py-3 text-sm text-text-secondary">
+            <td class="px-4 py-3 text-sm text-gray-500">
               {{ formatDate(u.created_at) }}
             </td>
             <td class="px-4 py-3 text-right">
@@ -316,14 +316,14 @@ onMounted(fetchUsers)
                 as="div"
                 class="relative inline-block text-left"
               >
-                <MenuButton class="text-text-secondary hover:text-text-primary transition-colors">
+                <MenuButton class="text-gray-400 hover:text-gray-600 transition-colors">
                   <EllipsisVerticalIcon class="h-5 w-5" />
                 </MenuButton>
-                <MenuItems class="absolute right-0 z-10 mt-2 w-48 rounded-lg bg-bg-secondary border border-border shadow-lg focus:outline-none">
+                <MenuItems class="absolute right-0 z-10 mt-2 w-48 rounded-lg bg-white border border-gray-200 shadow-[--shadow-dropdown] focus:outline-none">
                   <div class="py-1">
                     <MenuItem v-slot="{ active }">
                       <button
-                        :class="[active ? 'bg-bg-tertiary' : '', 'block w-full px-4 py-2 text-left text-sm text-text-primary']"
+                        :class="[active ? 'bg-gray-50' : '', 'block w-full px-4 py-2 text-left text-sm text-gray-700']"
                         @click="changeRole(u.id, u.role === 'admin' ? 'editor' : 'admin')"
                       >
                         Make {{ u.role === 'admin' ? 'Editor' : 'Admin' }}
@@ -331,7 +331,7 @@ onMounted(fetchUsers)
                     </MenuItem>
                     <MenuItem v-slot="{ active }">
                       <button
-                        :class="[active ? 'bg-bg-tertiary' : '', 'block w-full px-4 py-2 text-left text-sm', u.is_active ? 'text-destructive' : 'text-green-400']"
+                        :class="[active ? 'bg-gray-50' : '', 'block w-full px-4 py-2 text-left text-sm', u.is_active ? 'text-red-600' : 'text-emerald-600']"
                         @click="toggleActive(u.id, u.is_active)"
                       >
                         {{ u.is_active ? 'Disable Account' : 'Enable Account' }}

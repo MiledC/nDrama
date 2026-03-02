@@ -31,14 +31,14 @@ async function handleSubmit(data: Record<string, unknown>) {
 <template>
   <div>
     <button
-      class="flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary transition-colors mb-4"
+      class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-accent transition-colors mb-4 group"
       @click="router.push(`/series/${seriesId}`)"
     >
-      <ArrowLeftIcon class="h-4 w-4" />
+      <ArrowLeftIcon class="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
       Back to Episodes
     </button>
 
-    <h1 class="text-2xl font-bold text-text-primary mb-6">
+    <h1 class="text-2xl font-bold text-gray-900 tracking-tight mb-6">
       Add Episode
     </h1>
     <div
