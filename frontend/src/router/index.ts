@@ -67,6 +67,22 @@ const router = createRouter({
       component: () => import('../views/CategoriesView.vue'),
     },
     {
+      path: '/subscribers',
+      name: 'subscribers',
+      component: () => import('../views/SubscribersView.vue'),
+    },
+    {
+      path: '/subscribers/:id',
+      name: 'subscriber-detail',
+      component: () => import('../views/SubscriberDetailView.vue'),
+    },
+    {
+      path: '/coin-packages',
+      name: 'coin-packages',
+      component: () => import('../views/CoinPackagesView.vue'),
+      meta: { requiresAdmin: true },
+    },
+    {
       path: '/users',
       name: 'users',
       component: () => import('../views/UsersView.vue'),

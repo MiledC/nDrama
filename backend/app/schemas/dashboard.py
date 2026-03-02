@@ -11,6 +11,12 @@ class DashboardStats(BaseModel):
     episode_count: int
     user_count: int
     published_series_count: int
+    subscriber_total: int = 0
+    subscriber_active: int = 0
+    subscriber_anonymous: int = 0
+    subscriber_suspended: int = 0
+    coins_in_circulation: int = 0
+    transactions_today: int = 0
 
 
 class RecentSeriesItem(BaseModel):

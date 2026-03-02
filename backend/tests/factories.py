@@ -5,12 +5,16 @@ Usage:
 """
 
 import uuid
+from decimal import Decimal
 from typing import Any
 
 from app.models.audio_track import AudioTrack
 from app.models.category import Category
+from app.models.coin_package import CoinPackage
+from app.models.coin_transaction import CoinTransaction, TransactionType
 from app.models.episode import Episode, EpisodeStatus
 from app.models.series import Series, SeriesStatus
+from app.models.subscriber import Subscriber, SubscriberStatus
 from app.models.subtitle import Subtitle, SubtitleFormat
 from app.models.tag import Tag, TagCategory
 from app.models.user import User, UserRole
@@ -128,3 +132,45 @@ def make_category(**overrides: Any) -> Category:
     }
     defaults.update(overrides)
     return Category(**defaults)
+
+
+def make_subscriber(**overrides: Any) -> Subscriber:
+    """Create a Subscriber instance with sensible defaults. Does NOT add to session."""
+    defaults: dict[str, Any] = {
+        "id": uuid.uuid4(),
+        "device_id": f"device-{uuid.uuid4().hex[:12]}",
+        "status": SubscriberStatus.anonymous,
+        "coin_balance": 0,
+    }
+    defaults.update(overrides)
+    return Subscriber(**defaults)
+
+
+def make_coin_transaction(subscriber_id: uuid.UUID, **overrides: Any) -> CoinTransaction:
+    """Create a CoinTransaction instance with sensible defaults. Does NOT add to session."""
+    defaults: dict[str, Any] = {
+        "id": uuid.uuid4(),
+        "subscriber_id": subscriber_id,
+        "type": TransactionType.purchase,
+        "amount": 100,
+        "balance_after": 100,
+        "description": "Test transaction",
+    }
+    defaults.update(overrides)
+    return CoinTransaction(**defaults)
+
+
+def make_coin_package(created_by: uuid.UUID, **overrides: Any) -> CoinPackage:
+    """Create a CoinPackage instance with sensible defaults. Does NOT add to session."""
+    n = _next_id()
+    defaults: dict[str, Any] = {
+        "id": uuid.uuid4(),
+        "name": f"Test Package {n}",
+        "coin_amount": 100,
+        "price_sar": Decimal("9.99"),
+        "is_active": True,
+        "sort_order": 0,
+        "created_by": created_by,
+    }
+    defaults.update(overrides)
+    return CoinPackage(**defaults)
