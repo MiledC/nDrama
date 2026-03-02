@@ -2,11 +2,11 @@
 
 import uuid
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.category import Category, category_tags
+from app.models.category import Category
 from app.models.series import Series, series_tags
 from app.models.tag import Tag
 

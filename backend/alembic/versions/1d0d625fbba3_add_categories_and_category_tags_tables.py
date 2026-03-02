@@ -5,17 +5,17 @@ Revises: 8b3a93e53149
 Create Date: 2026-03-02 13:08:51.716352
 
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = '1d0d625fbba3'
-down_revision: Union[str, Sequence[str], None] = '8b3a93e53149'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = '8b3a93e53149'
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -29,8 +29,14 @@ def upgrade() -> None:
     sa.Column('sort_order', sa.Integer(), nullable=False),
     sa.Column('match_mode', sa.String(length=5), nullable=False),
     sa.Column('id', sa.Uuid(), nullable=False),
-    sa.Column('created_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
-    sa.Column('updated_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
+    sa.Column(
+        'created_at', sa.DateTime(timezone=True),
+        server_default=sa.text('now()'), nullable=False,
+    ),
+    sa.Column(
+        'updated_at', sa.DateTime(timezone=True),
+        server_default=sa.text('now()'), nullable=False,
+    ),
     sa.ForeignKeyConstraint(['parent_id'], ['categories.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('parent_id', 'name', name='uq_category_parent_name')

@@ -8,8 +8,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.category import Category, category_tags
-from app.models.series import Series, series_tags
-from app.models.tag import Tag, TagCategory
+from app.models.series import series_tags
+from app.models.tag import TagCategory
 from app.models.user import User
 from tests.factories import make_category, make_series, make_tag
 
@@ -630,7 +630,8 @@ async def test_get_category_series_pagination(
     await db_session.commit()
 
     # Test pagination
-    response = await client.get(f"/api/categories/{category.id}/series", params={"page": 1, "per_page": 2})
+    url = f"/api/categories/{category.id}/series"
+    response = await client.get(url, params={"page": 1, "per_page": 2})
     assert response.status_code == 200
     data = response.json()
     assert data["total"] == 5
@@ -639,7 +640,7 @@ async def test_get_category_series_pagination(
     assert len(data["items"]) == 2
 
     # Get second page
-    response = await client.get(f"/api/categories/{category.id}/series", params={"page": 2, "per_page": 2})
+    response = await client.get(url, params={"page": 2, "per_page": 2})
     assert response.status_code == 200
     data = response.json()
     assert data["total"] == 5
@@ -647,7 +648,7 @@ async def test_get_category_series_pagination(
     assert len(data["items"]) == 2
 
     # Get third page
-    response = await client.get(f"/api/categories/{category.id}/series", params={"page": 3, "per_page": 2})
+    response = await client.get(url, params={"page": 3, "per_page": 2})
     assert response.status_code == 200
     data = response.json()
     assert data["total"] == 5
