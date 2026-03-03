@@ -1,0 +1,88 @@
+name: Deploy
+
+on:
+  push:
+    branches: [production]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/ndrama
+
+jobs:
+  test:
+    name: Run Tests
+    uses: ./.github/workflows/ci.yml
+
+  build-and-push:
+    name: Build & Push Images
+    runs-on: ubuntu-latest
+    needs: test
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - context: backend
+            image: ndrama-backend
+          - context: subscriber-api
+            image: ndrama-subscriber-api
+          - context: frontend
+            image: ndrama-frontend
+            build-args: VITE_API_BASE_URL=${{ vars.VITE_API_BASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          build-args: ${{ matrix.build-args }}
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}:latest
+            ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}:${{ github.sha }}
+
+  deploy:
+    name: Deploy to Linode
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.LINODE_HOST }}
+          username: ndrama
+          key: ${{ secrets.LINODE_SSH_KEY }}
+          script: |
+            cd ~/app
+            git pull origin production
+
+            # Pull new images
+            docker compose -f docker-compose.prod.yml pull
+
+            # Run migrations
+            docker compose -f docker-compose.prod.yml up -d postgres
+            sleep 5
+            docker compose -f docker-compose.prod.yml run --rm backend alembic upgrade head
+
+            # Restart services (rolling)
+            docker compose -f docker-compose.prod.yml up -d
+
+            # Health checks
+            sleep 5
+            curl -sf http://127.0.0.1:8000/health || exit 1
+            curl -sf http://127.0.0.1:8001/health || exit 1
+            curl -sf -o /dev/null http://127.0.0.1:3000 || exit 1
+
+            # Cleanup old images
+            docker image prune -f
+
+            echo "Deploy successful!"
