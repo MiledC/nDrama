@@ -4,13 +4,6 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import api from '../lib/api'
 import {
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-} from '@headlessui/vue'
-import {
-  EllipsisVerticalIcon,
   PlusIcon,
   MagnifyingGlassIcon,
   PhotoIcon,
@@ -196,14 +189,6 @@ function getStatusBadgeClass(status: string): string {
   }
 }
 
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
-}
-
 // Watchers
 watch(searchQuery, debouncedSearch)
 
@@ -301,178 +286,126 @@ onMounted(() => {
     <!-- Loading Skeleton -->
     <div
       v-if="loading"
-      class="overflow-hidden rounded-xl border border-border bg-white shadow-[--shadow-card] animate-pulse"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 animate-pulse"
     >
-      <div class="border-b border-gray-200 bg-[#F9FAFB] px-4 py-3">
-        <div class="h-4 w-32 bg-gray-200 rounded" />
-      </div>
       <div
-        v-for="i in 5"
+        v-for="i in 8"
         :key="i"
-        class="flex items-center gap-4 px-4 py-3 border-b border-gray-200 last:border-0"
+        class="rounded-xl border border-border bg-white shadow-[--shadow-card] overflow-hidden"
       >
-        <div class="h-10 w-10 bg-gray-100 rounded-lg flex-shrink-0" />
-        <div class="flex-1">
-          <div class="h-4 w-40 bg-gray-100 rounded mb-1" />
-          <div class="h-3 w-24 bg-gray-100 rounded" />
+        <div class="aspect-video bg-gray-100" />
+        <div class="p-4 space-y-2">
+          <div class="h-4 w-3/4 bg-gray-200 rounded" />
+          <div class="h-3 w-full bg-gray-100 rounded" />
+          <div class="h-3 w-1/2 bg-gray-100 rounded" />
         </div>
-        <div class="h-5 w-16 bg-gray-100 rounded-full" />
+        <div class="px-4 pb-4 flex gap-2">
+          <div class="h-7 w-16 bg-gray-100 rounded-lg" />
+          <div class="h-7 w-16 bg-gray-100 rounded-lg" />
+        </div>
       </div>
     </div>
 
-    <!-- Series Table -->
+    <!-- Series Card Grid -->
     <div
       v-else-if="series.length > 0"
-      class="bg-white rounded-xl border border-border shadow-[--shadow-card] overflow-hidden"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
     >
-      <table class="w-full">
-        <thead>
-          <tr class="border-b border-gray-200 bg-[#F9FAFB]">
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Series
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Tags
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Pricing
-            </th>
-            <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Created
-            </th>
-            <th class="px-4 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr
-            v-for="s in series"
-            :key="s.id"
-            class="hover:bg-gray-50 transition-colors"
+      <div
+        v-for="s in series"
+        :key="s.id"
+        class="rounded-xl border border-border bg-white shadow-[--shadow-card] overflow-hidden hover:shadow-[--shadow-floating] transition-all"
+      >
+        <!-- Thumbnail -->
+        <div class="relative aspect-video bg-gray-50 flex items-center justify-center overflow-hidden">
+          <img
+            v-if="s.thumbnail_url"
+            :src="s.thumbnail_url"
+            :alt="s.title"
+            class="h-full w-full object-cover"
           >
-            <td class="px-4 py-3">
-              <div class="flex items-center gap-3">
-                <!-- Thumbnail -->
-                <div class="flex-shrink-0 h-10 w-10 rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden">
-                  <img
-                    v-if="s.thumbnail_url"
-                    :src="s.thumbnail_url"
-                    :alt="s.title"
-                    class="h-full w-full object-cover"
-                  >
-                  <PhotoIcon
-                    v-else
-                    class="h-5 w-5 text-gray-400"
-                  />
-                </div>
-                <!-- Title and Description -->
-                <div>
-                  <button
-                    class="text-sm font-medium text-gray-900 hover:text-accent transition-colors text-left"
-                    @click="router.push(`/series/${s.id}`)"
-                  >
-                    {{ s.title }}
-                  </button>
-                  <p
-                    v-if="s.description"
-                    class="text-xs text-gray-500 line-clamp-1"
-                  >
-                    {{ s.description }}
-                  </p>
-                </div>
-              </div>
-            </td>
-            <td class="px-4 py-3">
-              <span
-                :class="[
-                  getStatusBadgeClass(s.status),
-                  'inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize',
-                ]"
-              >
-                {{ s.status }}
-              </span>
-            </td>
-            <td class="px-4 py-3">
-              <div class="flex flex-wrap gap-1">
-                <span
-                  v-for="tag in s.tags.slice(0, 3)"
-                  :key="tag.id"
-                  class="inline-flex items-center rounded-full bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 text-xs font-medium"
-                >
-                  {{ tag.name }}
-                </span>
-                <span
-                  v-if="s.tags.length > 3"
-                  class="inline-flex items-center rounded-full bg-gray-100 text-gray-600 border border-gray-200 px-2 py-0.5 text-xs font-medium"
-                >
-                  +{{ s.tags.length - 3 }}
-                </span>
-              </div>
-            </td>
-            <td class="px-4 py-3">
-              <div class="text-sm text-gray-500">
-                <div>
-                  {{ s.free_episode_count }} free
-                </div>
-                <div class="text-xs">
-                  {{ s.coin_cost_per_episode }} coins/ep
-                </div>
-              </div>
-            </td>
-            <td class="px-4 py-3 text-sm text-gray-500">
-              {{ formatDate(s.created_at) }}
-            </td>
-            <td class="px-4 py-3 text-right">
-              <Menu
-                as="div"
-                class="relative inline-block text-left"
-              >
-                <MenuButton class="text-gray-400 hover:text-gray-700 transition-colors">
-                  <EllipsisVerticalIcon class="h-5 w-5" />
-                </MenuButton>
-                <MenuItems class="absolute right-0 z-10 mt-2 w-48 rounded-lg bg-white border border-border shadow-lg focus:outline-none">
-                  <div class="py-1">
-                    <MenuItem v-slot="{ active }">
-                      <button
-                        :class="[active ? 'bg-gray-50' : '', 'block w-full px-4 py-2 text-left text-sm text-gray-700 flex items-center gap-2']"
-                        @click="router.push(`/series/${s.id}/edit`)"
-                      >
-                        <PencilIcon class="h-4 w-4" />
-                        Edit
-                      </button>
-                    </MenuItem>
-                    <MenuItem
-                      v-if="s.status !== 'archived'"
-                      v-slot="{ active }"
-                    >
-                      <button
-                        :class="[active ? 'bg-gray-50' : '', 'block w-full px-4 py-2 text-left text-sm text-amber-600 flex items-center gap-2']"
-                        @click="openDeleteConfirm(s, 'archive')"
-                      >
-                        <ArchiveBoxIcon class="h-4 w-4" />
-                        Archive
-                      </button>
-                    </MenuItem>
-                    <MenuItem v-slot="{ active }">
-                      <button
-                        :class="[active ? 'bg-gray-50' : '', 'block w-full px-4 py-2 text-left text-sm text-destructive flex items-center gap-2']"
-                        @click="openDeleteConfirm(s, 'delete')"
-                      >
-                        <TrashIcon class="h-4 w-4" />
-                        Delete
-                      </button>
-                    </MenuItem>
-                  </div>
-                </MenuItems>
-              </Menu>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+          <PhotoIcon
+            v-else
+            class="h-10 w-10 text-gray-300"
+          />
+          <!-- Status badge -->
+          <span
+            :class="[
+              getStatusBadgeClass(s.status),
+              'absolute top-2 right-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium capitalize',
+            ]"
+          >
+            {{ s.status }}
+          </span>
+        </div>
+
+        <!-- Content -->
+        <div class="p-4">
+          <button
+            class="text-sm font-semibold text-gray-900 hover:text-accent transition-colors text-left line-clamp-1"
+            @click="router.push(`/series/${s.id}`)"
+          >
+            {{ s.title }}
+          </button>
+          <p
+            v-if="s.description"
+            class="text-xs text-gray-500 mt-1 line-clamp-2"
+          >
+            {{ s.description }}
+          </p>
+
+          <!-- Tags -->
+          <div
+            v-if="s.tags.length > 0"
+            class="flex flex-wrap gap-1 mt-2"
+          >
+            <span
+              v-for="tag in s.tags.slice(0, 3)"
+              :key="tag.id"
+              class="inline-flex items-center rounded-full bg-blue-50 text-blue-700 border border-blue-100 px-2 py-0.5 text-xs font-medium"
+            >
+              {{ tag.name }}
+            </span>
+            <span
+              v-if="s.tags.length > 3"
+              class="inline-flex items-center rounded-full bg-gray-100 text-gray-600 border border-gray-200 px-2 py-0.5 text-xs font-medium"
+            >
+              +{{ s.tags.length - 3 }}
+            </span>
+          </div>
+
+          <!-- Pricing -->
+          <p class="text-xs text-gray-500 mt-2">
+            {{ s.free_episode_count }} free · {{ s.coin_cost_per_episode }} coins/ep
+          </p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="px-4 pb-4 flex gap-2">
+          <button
+            class="text-xs font-medium rounded-lg px-2.5 py-1.5 flex items-center gap-1 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+            @click.stop="router.push(`/series/${s.id}/edit`)"
+          >
+            <PencilIcon class="h-3.5 w-3.5" />
+            Edit
+          </button>
+          <button
+            v-if="s.status !== 'archived'"
+            class="text-xs font-medium rounded-lg px-2.5 py-1.5 flex items-center gap-1 border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 transition-colors"
+            @click.stop="openDeleteConfirm(s, 'archive')"
+          >
+            <ArchiveBoxIcon class="h-3.5 w-3.5" />
+            Archive
+          </button>
+          <button
+            class="text-xs font-medium rounded-lg px-2.5 py-1.5 flex items-center gap-1 border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+            @click.stop="openDeleteConfirm(s, 'delete')"
+          >
+            <TrashIcon class="h-3.5 w-3.5" />
+            Delete
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Empty State -->

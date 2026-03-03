@@ -36,6 +36,35 @@ jobs:
       - name: Build Docker image
         run: docker build -t ndrama-backend:ci .
 
+  subscriber-api:
+    name: Subscriber API
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: subscriber-api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint with ruff
+        run: ruff check .
+
+      - name: Run tests
+        run: pytest -v --cov=app --cov-report=term-missing
+
+      - name: Build Docker image
+        run: docker build -t ndrama-subscriber-api:ci .
+
   frontend:
     name: Frontend
     runs-on: ubuntu-latest
