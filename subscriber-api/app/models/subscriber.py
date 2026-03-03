@@ -28,12 +28,12 @@ class Subscriber(Base, UUIDMixin, TimestampMixin):
         Enum(SubscriberStatus), default=SubscriberStatus.anonymous, nullable=False
     )
     coin_balance: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+    password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    language: Mapped[str | None] = mapped_column(String(5), nullable=True, default="ar")
     registered_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
     last_active_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
-    language: Mapped[str | None] = mapped_column(String(5), nullable=True, default="ar")
     admin_notes: Mapped[str | None] = mapped_column(Text, nullable=True)

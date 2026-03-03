@@ -10,7 +10,7 @@ from app.models.series import Series, SeriesStatus, series_tags
 from app.models.subscriber import Subscriber, SubscriberStatus
 from app.models.subtitle import Subtitle, SubtitleFormat
 from app.models.tag import Tag, TagCategory
-from app.models.user import User, UserRole
+from app.models.user import User
 from app.models.watch_history import WatchHistory
 
 __all__ = [
@@ -18,17 +18,16 @@ __all__ = [
     "Base",
     "TimestampMixin",
     "UUIDMixin",
+    "Category",
+    "category_tags",
     "CoinPackage",
     "CoinTransaction",
     "TransactionType",
+    "Episode",
+    "EpisodeStatus",
+    "VideoProviderEnum",
     "EpisodeUnlock",
     "Favorite",
-    "User",
-    "UserRole",
-    "Tag",
-    "TagCategory",
-    "Category",
-    "category_tags",
     "Series",
     "SeriesStatus",
     "series_tags",
@@ -36,8 +35,8 @@ __all__ = [
     "SubscriberStatus",
     "Subtitle",
     "SubtitleFormat",
-    "Episode",
-    "EpisodeStatus",
-    "VideoProviderEnum",
+    "Tag",
+    "TagCategory",
+    "User",
     "WatchHistory",
 ]

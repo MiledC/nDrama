@@ -1,8 +1,4 @@
-"""Factory functions for creating test model instances.
-
-Usage:
-    user = make_user(email="custom@test.com", role=UserRole.admin)
-"""
+"""Factory functions for subscriber-api test data."""
 
 import uuid
 from decimal import Decimal
@@ -19,9 +15,8 @@ from app.models.series import Series, SeriesStatus
 from app.models.subscriber import Subscriber, SubscriberStatus
 from app.models.subtitle import Subtitle, SubtitleFormat
 from app.models.tag import Tag, TagCategory
-from app.models.user import User, UserRole
+from app.models.user import User
 from app.models.watch_history import WatchHistory
-from app.services.auth_service import hash_password
 
 _counter = 0
 
@@ -33,22 +28,28 @@ def _next_id() -> int:
 
 
 def make_user(**overrides: Any) -> User:
-    """Create a User instance with sensible defaults. Does NOT add to session."""
     n = _next_id()
     defaults: dict[str, Any] = {
         "id": uuid.uuid4(),
-        "email": f"user{n}@test.com",
-        "password_hash": hash_password("testpass123"),
-        "name": f"Test User {n}",
-        "role": UserRole.editor,
-        "is_active": True,
+        "email": f"admin{n}@test.com",
+        "name": f"Admin User {n}",
     }
     defaults.update(overrides)
     return User(**defaults)
 
 
+def make_subscriber(**overrides: Any) -> Subscriber:
+    defaults: dict[str, Any] = {
+        "id": uuid.uuid4(),
+        "device_id": f"device-{uuid.uuid4().hex[:12]}",
+        "status": SubscriberStatus.anonymous,
+        "coin_balance": 0,
+    }
+    defaults.update(overrides)
+    return Subscriber(**defaults)
+
+
 def make_tag(**overrides: Any) -> Tag:
-    """Create a Tag instance with sensible defaults. Does NOT add to session."""
     n = _next_id()
     defaults: dict[str, Any] = {
         "id": uuid.uuid4(),
@@ -60,13 +61,12 @@ def make_tag(**overrides: Any) -> Tag:
 
 
 def make_series(created_by: uuid.UUID, **overrides: Any) -> Series:
-    """Create a Series instance with sensible defaults. Does NOT add to session."""
     n = _next_id()
     defaults: dict[str, Any] = {
         "id": uuid.uuid4(),
         "title": f"Test Series {n}",
         "description": f"Description for series {n}",
-        "status": SeriesStatus.draft,
+        "status": SeriesStatus.published,
         "free_episode_count": 3,
         "coin_cost_per_episode": 10,
         "created_by": created_by,
@@ -78,7 +78,6 @@ def make_series(created_by: uuid.UUID, **overrides: Any) -> Series:
 def make_episode(
     series_id: uuid.UUID, created_by: uuid.UUID, **overrides: Any
 ) -> Episode:
-    """Create an Episode instance with sensible defaults. Does NOT add to session."""
     n = _next_id()
     defaults: dict[str, Any] = {
         "id": uuid.uuid4(),
@@ -86,7 +85,8 @@ def make_episode(
         "title": f"Test Episode {n}",
         "description": f"Description for episode {n}",
         "episode_number": n,
-        "status": EpisodeStatus.draft,
+        "status": EpisodeStatus.published,
+        "duration_seconds": 600,
         "created_by": created_by,
     }
     defaults.update(overrides)
@@ -94,77 +94,35 @@ def make_episode(
 
 
 def make_audio_track(episode_id: uuid.UUID, **overrides: Any) -> AudioTrack:
-    """Create an AudioTrack instance with sensible defaults. Does NOT add to session."""
     n = _next_id()
     defaults: dict[str, Any] = {
         "id": uuid.uuid4(),
         "episode_id": episode_id,
         "language_code": "ar",
         "label": f"Arabic Track {n}",
-        "file_url": f"http://localhost:9000/test-bucket/audio-tracks/test-{n}.mp3",
-        "is_default": False,
+        "file_url": f"http://localhost:9000/test/audio-{n}.mp3",
+        "is_default": True,
     }
     defaults.update(overrides)
     return AudioTrack(**defaults)
 
 
 def make_subtitle(episode_id: uuid.UUID, **overrides: Any) -> Subtitle:
-    """Create a Subtitle instance with sensible defaults. Does NOT add to session."""
     n = _next_id()
     defaults: dict[str, Any] = {
         "id": uuid.uuid4(),
         "episode_id": episode_id,
         "language_code": "ar",
-        "label": f"Arabic Subtitles {n}",
-        "file_url": f"http://localhost:9000/test-bucket/subtitles/test-{n}.vtt",
+        "label": f"Arabic Subs {n}",
+        "file_url": f"http://localhost:9000/test/sub-{n}.vtt",
         "format": SubtitleFormat.vtt,
-        "is_default": False,
+        "is_default": True,
     }
     defaults.update(overrides)
     return Subtitle(**defaults)
 
 
-def make_category(**overrides: Any) -> Category:
-    """Create a Category instance with sensible defaults. Does NOT add to session."""
-    n = _next_id()
-    defaults: dict[str, Any] = {
-        "id": uuid.uuid4(),
-        "name": f"category-{n}",
-        "sort_order": 0,
-        "match_mode": "any",
-    }
-    defaults.update(overrides)
-    return Category(**defaults)
-
-
-def make_subscriber(**overrides: Any) -> Subscriber:
-    """Create a Subscriber instance with sensible defaults. Does NOT add to session."""
-    defaults: dict[str, Any] = {
-        "id": uuid.uuid4(),
-        "device_id": f"device-{uuid.uuid4().hex[:12]}",
-        "status": SubscriberStatus.anonymous,
-        "coin_balance": 0,
-    }
-    defaults.update(overrides)
-    return Subscriber(**defaults)
-
-
-def make_coin_transaction(subscriber_id: uuid.UUID, **overrides: Any) -> CoinTransaction:
-    """Create a CoinTransaction instance with sensible defaults. Does NOT add to session."""
-    defaults: dict[str, Any] = {
-        "id": uuid.uuid4(),
-        "subscriber_id": subscriber_id,
-        "type": TransactionType.purchase,
-        "amount": 100,
-        "balance_after": 100,
-        "description": "Test transaction",
-    }
-    defaults.update(overrides)
-    return CoinTransaction(**defaults)
-
-
 def make_coin_package(created_by: uuid.UUID, **overrides: Any) -> CoinPackage:
-    """Create a CoinPackage instance with sensible defaults. Does NOT add to session."""
     n = _next_id()
     defaults: dict[str, Any] = {
         "id": uuid.uuid4(),
@@ -179,13 +137,37 @@ def make_coin_package(created_by: uuid.UUID, **overrides: Any) -> CoinPackage:
     return CoinPackage(**defaults)
 
 
+def make_coin_transaction(subscriber_id: uuid.UUID, **overrides: Any) -> CoinTransaction:
+    defaults: dict[str, Any] = {
+        "id": uuid.uuid4(),
+        "subscriber_id": subscriber_id,
+        "type": TransactionType.purchase,
+        "amount": 100,
+        "balance_after": 100,
+        "description": "Test transaction",
+    }
+    defaults.update(overrides)
+    return CoinTransaction(**defaults)
+
+
+def make_category(**overrides: Any) -> Category:
+    n = _next_id()
+    defaults: dict[str, Any] = {
+        "id": uuid.uuid4(),
+        "name": f"category-{n}",
+        "sort_order": 0,
+        "match_mode": "any",
+    }
+    defaults.update(overrides)
+    return Category(**defaults)
+
+
 def make_episode_unlock(
     subscriber_id: uuid.UUID,
     episode_id: uuid.UUID,
     coin_transaction_id: uuid.UUID,
     **overrides: Any,
 ) -> EpisodeUnlock:
-    """Create an EpisodeUnlock instance with sensible defaults. Does NOT add to session."""
     defaults: dict[str, Any] = {
         "id": uuid.uuid4(),
         "subscriber_id": subscriber_id,
@@ -199,7 +181,6 @@ def make_episode_unlock(
 def make_favorite(
     subscriber_id: uuid.UUID, series_id: uuid.UUID, **overrides: Any
 ) -> Favorite:
-    """Create a Favorite instance with sensible defaults. Does NOT add to session."""
     defaults: dict[str, Any] = {
         "id": uuid.uuid4(),
         "subscriber_id": subscriber_id,
@@ -212,7 +193,6 @@ def make_favorite(
 def make_watch_history(
     subscriber_id: uuid.UUID, episode_id: uuid.UUID, **overrides: Any
 ) -> WatchHistory:
-    """Create a WatchHistory instance with sensible defaults. Does NOT add to session."""
     defaults: dict[str, Any] = {
         "id": uuid.uuid4(),
         "subscriber_id": subscriber_id,
