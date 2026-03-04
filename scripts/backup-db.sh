@@ -10,7 +10,7 @@ BACKUP_DIR="${HOME}/backups"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="${BACKUP_DIR}/ndrama_${TIMESTAMP}.sql.gz"
 RETENTION_DAYS=30
-COMPOSE_FILE="${HOME}/app/docker-compose.prod.yml"
+COMPOSE_FILE="${HOME}/app/docker-compose.staging.yml"
 
 mkdir -p "$BACKUP_DIR"
 

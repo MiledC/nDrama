@@ -11,7 +11,7 @@
 set -euo pipefail
 
 APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-COMPOSE_FILE="${APP_DIR}/docker-compose.prod.yml"
+COMPOSE_FILE="${APP_DIR}/docker-compose.staging.yml"
 
 echo "=== nDrama Manual Deploy ==="
 echo "Directory: ${APP_DIR}"
@@ -20,7 +20,7 @@ echo ""
 # Pull latest code
 echo "[1/5] Pulling latest code..."
 cd "$APP_DIR"
-git pull origin production
+git pull origin staging
 
 # Pull latest images
 echo "[2/5] Pulling latest Docker images..."
