@@ -108,7 +108,7 @@ jobs:
 
             # Seed admin account (skips if already exists)
             docker compose --env-file .env.staging -f docker-compose.staging.yml run --rm backend \
-              python -m app.cli seed-admin \
+              python -m app seed-admin \
                 --email "${{ secrets.ADMIN_EMAIL }}" \
                 --password "${{ secrets.ADMIN_PASSWORD }}" \
                 --name "Admin"
