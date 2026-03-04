@@ -12,9 +12,9 @@ export const ProfileScreen = () => React.createElement(PlaceholderScreen, {name:
 export {default as SplashScreen} from './SplashScreen';
 export {default as SeriesDetailScreen} from './SeriesDetailScreen';
 export {default as VideoPlayerScreen} from './VideoPlayerScreen';
-export const LockedEpisodeScreen = () => React.createElement(PlaceholderScreen, {name: 'Locked Episode'});
-export const CoinStoreScreen = () => React.createElement(PlaceholderScreen, {name: 'Coin Store'});
-export const SubscriptionsScreen = () => React.createElement(PlaceholderScreen, {name: 'Subscriptions'});
+export {default as LockedEpisodeScreen} from './LockedEpisodeScreen';
+export {default as CoinStoreScreen} from './CoinStoreScreen';
+export {default as SubscriptionsScreen} from './SubscriptionsScreen';
 export const DailyRewardsScreen = () => React.createElement(PlaceholderScreen, {name: 'Daily Rewards'});
 export const ReferralScreen = () => React.createElement(PlaceholderScreen, {name: 'Referral'});
 export const NotificationsScreen = () => React.createElement(PlaceholderScreen, {name: 'Notifications'});
