@@ -16,6 +16,11 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# SSH keys
+*_id_ed25519
+*_id_rsa
+*.pem
+
 # Logs
 *.log
 logs/
