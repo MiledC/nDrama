@@ -29,7 +29,6 @@ jobs:
             image: ndrama-subscriber-api
           - context: frontend
             image: ndrama-frontend
-            build-args: VITE_API_BASE_URL=${{ vars.VITE_API_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
 
@@ -48,7 +47,8 @@ jobs:
         with:
           context: ${{ matrix.context }}
           push: true
-          build-args: ${{ matrix.build-args }}
+          build-args: |
+            ${{ matrix.context == 'frontend' && format('VITE_API_BASE_URL={0}', vars.VITE_API_BASE_URL) || '' }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.image }}:latest
             ${{ env.REGISTRY }}/${{ env.OWNER }}/${{ matrix.image }}:${{ github.sha }}
