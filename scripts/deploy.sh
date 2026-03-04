@@ -11,7 +11,9 @@
 set -euo pipefail
 
 APP_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+ENV_FILE="${APP_DIR}/.env.staging"
 COMPOSE_FILE="${APP_DIR}/docker-compose.staging.yml"
+COMPOSE="docker compose --env-file ${ENV_FILE} -f ${COMPOSE_FILE}"
 
 echo "=== nDrama Manual Deploy ==="
 echo "Directory: ${APP_DIR}"
@@ -24,17 +26,17 @@ git pull origin staging
 
 # Pull latest images
 echo "[2/5] Pulling latest Docker images..."
-docker compose -f "$COMPOSE_FILE" pull
+$COMPOSE pull
 
 # Run migrations before restarting
 echo "[3/5] Running database migrations..."
-docker compose -f "$COMPOSE_FILE" up -d postgres
+$COMPOSE up -d postgres
 sleep 5
-docker compose -f "$COMPOSE_FILE" run --rm backend alembic upgrade head
+$COMPOSE run --rm backend alembic upgrade head
 
 # Restart services
 echo "[4/5] Restarting services..."
-docker compose -f "$COMPOSE_FILE" up -d
+$COMPOSE up -d
 
 # Health checks
 echo "[5/5] Running health checks..."
@@ -71,6 +73,6 @@ if [ "$HEALTHY" = true ]; then
     echo "=== Deploy successful! ==="
 else
     echo "=== Deploy completed with health check failures. Check logs: ==="
-    echo "  docker compose -f $COMPOSE_FILE logs --tail=50"
+    echo "  $COMPOSE logs --tail=50"
     exit 1
 fi

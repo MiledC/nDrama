@@ -10,6 +10,7 @@ BACKUP_DIR="${HOME}/backups"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="${BACKUP_DIR}/ndrama_${TIMESTAMP}.sql.gz"
 RETENTION_DAYS=30
+ENV_FILE="${HOME}/app/.env.staging"
 COMPOSE_FILE="${HOME}/app/docker-compose.staging.yml"
 
 mkdir -p "$BACKUP_DIR"
@@ -17,7 +18,7 @@ mkdir -p "$BACKUP_DIR"
 echo "[$(date)] Starting database backup..."
 
 # Dump via the running postgres container
-docker compose -f "$COMPOSE_FILE" exec -T postgres \
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T postgres \
     pg_dump -U "${POSTGRES_USER:-ndrama}" "${POSTGRES_DB:-ndrama}" \
     | gzip > "$BACKUP_FILE"
 

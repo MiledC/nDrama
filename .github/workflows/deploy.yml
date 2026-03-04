@@ -54,6 +54,7 @@ jobs:
     name: Deploy to Linode
     runs-on: ubuntu-latest
     needs: build-and-push
+    environment: staging
     steps:
       - uses: actions/checkout@v4
 
@@ -95,15 +96,15 @@ jobs:
             cd ~/app
 
             # Pull new images
-            docker compose -f docker-compose.staging.yml pull
+            docker compose --env-file .env.staging -f docker-compose.staging.yml pull
 
             # Run migrations
-            docker compose -f docker-compose.staging.yml up -d postgres
+            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d postgres
             sleep 5
-            docker compose -f docker-compose.staging.yml run --rm backend alembic upgrade head
+            docker compose --env-file .env.staging -f docker-compose.staging.yml run --rm backend alembic upgrade head
 
             # Restart services (rolling)
-            docker compose -f docker-compose.staging.yml up -d
+            docker compose --env-file .env.staging -f docker-compose.staging.yml up -d
 
             # Health checks
             sleep 5

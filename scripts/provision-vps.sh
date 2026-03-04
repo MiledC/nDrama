@@ -89,14 +89,30 @@ ssh_run "
     systemctl enable nginx
 "
 
-# --- Step 4: Create app user ---
-echo "[4/9] Creating app user '${APP_USER}'..."
+# --- Step 4: Create app user + SSH key ---
+echo "[4/9] Creating app user '${APP_USER}' and SSH keypair..."
 ssh_run "
     if ! id -u ${APP_USER} &>/dev/null; then
         useradd -m -s /bin/bash ${APP_USER}
         usermod -aG docker ${APP_USER}
     fi
+
+    # Generate SSH keypair if not already present
+    if [ ! -f /home/${APP_USER}/.ssh/id_ed25519 ]; then
+        sudo -u ${APP_USER} mkdir -p /home/${APP_USER}/.ssh
+        sudo -u ${APP_USER} ssh-keygen -t ed25519 -f /home/${APP_USER}/.ssh/id_ed25519 -N '' -C '${APP_USER}@\$(hostname)'
+        cat /home/${APP_USER}/.ssh/id_ed25519.pub >> /home/${APP_USER}/.ssh/authorized_keys
+        chmod 600 /home/${APP_USER}/.ssh/authorized_keys
+        chown ${APP_USER}:${APP_USER} /home/${APP_USER}/.ssh/authorized_keys
+    fi
 "
+
+# Copy private key to local machine
+LOCAL_KEY_PATH="${REPO_ROOT}/${APP_USER}_id_ed25519"
+scp $SSH_OPTS "root@${HOST}:/home/${APP_USER}/.ssh/id_ed25519" "${LOCAL_KEY_PATH}"
+chmod 600 "${LOCAL_KEY_PATH}"
+echo "  SSH private key saved to: ${LOCAL_KEY_PATH}"
+echo "  Use this for LINODE_SSH_KEY GitHub Secret and local SSH access."
 
 # --- Step 5: Configure UFW firewall ---
 echo "[5/9] Configuring firewall (UFW)..."
