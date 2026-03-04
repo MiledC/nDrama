@@ -16,24 +16,28 @@ from app.services.auth_service import hash_password
 
 
 async def _seed_admin(email: str, password: str, name: str) -> None:
-    async with async_session_maker() as session:
-        result = await session.execute(select(User).where(User.email == email))
-        if result.scalar_one_or_none() is not None:
-            print(f"User with email '{email}' already exists. Skipping.")
-            return
+    try:
+        async with async_session_maker() as session:
+            result = await session.execute(select(User).where(User.email == email))
+            if result.scalar_one_or_none() is not None:
+                print(f"User with email '{email}' already exists. Skipping.")
+                return
 
-        user = User(
-            email=email,
-            password_hash=hash_password(password),
-            name=name,
-            role=UserRole.admin,
-            is_active=True,
-        )
-        session.add(user)
-        await session.commit()
-        print(f"Admin user '{email}' created successfully.")
-
-    await engine.dispose()
+            user = User(
+                email=email,
+                password_hash=hash_password(password),
+                name=name,
+                role=UserRole.admin,
+                is_active=True,
+            )
+            session.add(user)
+            await session.commit()
+            print(f"Admin user '{email}' created successfully.")
+    except Exception as e:
+        print(f"ERROR: {e}", file=sys.stderr)
+        sys.exit(1)
+    finally:
+        await engine.dispose()
 
 
 def main(argv: list[str] | None = None) -> None:
