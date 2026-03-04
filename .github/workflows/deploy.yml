@@ -105,6 +105,13 @@ jobs:
             sleep 5
             docker compose --env-file .env.staging -f docker-compose.staging.yml run --rm backend alembic upgrade head
 
+            # Seed admin account (skips if already exists)
+            docker compose --env-file .env.staging -f docker-compose.staging.yml run --rm backend \
+              python -m app.cli seed-admin \
+                --email "${{ secrets.ADMIN_EMAIL }}" \
+                --password "${{ secrets.ADMIN_PASSWORD }}" \
+                --name "Admin"
+
             # Restart services (rolling)
             docker compose --env-file .env.staging -f docker-compose.staging.yml up -d
 
