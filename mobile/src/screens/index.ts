@@ -2,14 +2,14 @@ import React from 'react';
 import PlaceholderScreen from './PlaceholderScreen';
 
 // Tab screens
-export const HomeScreen = () => React.createElement(PlaceholderScreen, {name: 'Home'});
+export {default as HomeScreen} from './HomeScreen';
 export const DiscoverScreen = () => React.createElement(PlaceholderScreen, {name: 'Discover'});
-export const SearchScreen = () => React.createElement(PlaceholderScreen, {name: 'Search'});
+export {default as SearchScreen} from './SearchScreen';
 export const MyListScreen = () => React.createElement(PlaceholderScreen, {name: 'My List'});
 export const ProfileScreen = () => React.createElement(PlaceholderScreen, {name: 'Profile'});
 
 // Stack screens
-export const SplashScreen = () => React.createElement(PlaceholderScreen, {name: 'Splash'});
+export {default as SplashScreen} from './SplashScreen';
 export const SeriesDetailScreen = () => React.createElement(PlaceholderScreen, {name: 'Series Detail'});
 export const VideoPlayerScreen = () => React.createElement(PlaceholderScreen, {name: 'Video Player'});
 export const LockedEpisodeScreen = () => React.createElement(PlaceholderScreen, {name: 'Locked Episode'});
