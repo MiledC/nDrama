@@ -10,8 +10,8 @@ export const ProfileScreen = () => React.createElement(PlaceholderScreen, {name:
 
 // Stack screens
 export {default as SplashScreen} from './SplashScreen';
-export const SeriesDetailScreen = () => React.createElement(PlaceholderScreen, {name: 'Series Detail'});
-export const VideoPlayerScreen = () => React.createElement(PlaceholderScreen, {name: 'Video Player'});
+export {default as SeriesDetailScreen} from './SeriesDetailScreen';
+export {default as VideoPlayerScreen} from './VideoPlayerScreen';
 export const LockedEpisodeScreen = () => React.createElement(PlaceholderScreen, {name: 'Locked Episode'});
 export const CoinStoreScreen = () => React.createElement(PlaceholderScreen, {name: 'Coin Store'});
 export const SubscriptionsScreen = () => React.createElement(PlaceholderScreen, {name: 'Subscriptions'});
@@ -20,7 +20,7 @@ export const ReferralScreen = () => React.createElement(PlaceholderScreen, {name
 export const NotificationsScreen = () => React.createElement(PlaceholderScreen, {name: 'Notifications'});
 export const SettingsScreen = () => React.createElement(PlaceholderScreen, {name: 'Settings'});
 export const WatchHistoryScreen = () => React.createElement(PlaceholderScreen, {name: 'Watch History'});
-export const LoginScreen = () => React.createElement(PlaceholderScreen, {name: 'Login'});
-export const OtpScreen = () => React.createElement(PlaceholderScreen, {name: 'OTP Verification'});
+export {default as LoginScreen} from './LoginScreen';
+export {default as OtpScreen} from './OtpScreen';
 export const ShareRateScreen = () => React.createElement(PlaceholderScreen, {name: 'Share & Rate'});
 export const CommentsScreen = () => React.createElement(PlaceholderScreen, {name: 'Comments'});
