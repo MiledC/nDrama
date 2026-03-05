@@ -1,0 +1,166 @@
+{
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "retry": "إعادة المحاولة",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "save": "حفظ",
+    "delete": "حذف",
+    "back": "رجوع",
+    "done": "تم",
+    "seeAll": "عرض الكل",
+    "noResults": "لا توجد نتائج"
+  },
+  "tabs": {
+    "home": "الرئيسية",
+    "discover": "اكتشف",
+    "search": "بحث",
+    "myList": "قائمتي",
+    "profile": "حسابي"
+  },
+  "home": {
+    "continueWatching": "متابعة المشاهدة",
+    "trending": "الأكثر رواجاً",
+    "newReleases": "إصدارات جديدة",
+    "forYou": "مقترح لك",
+    "dailyReward": "المكافأة اليومية",
+    "claimDailyReward": "استلم مكافأتك اليومية",
+    "allSeries": "جميع المسلسلات"
+  },
+  "search": {
+    "searchPlaceholder": "ابحث عن مسلسلات، ممثلين...",
+    "recentSearches": "عمليات البحث الأخيرة",
+    "trendingNow": "الرائج الآن",
+    "categories": "التصنيفات"
+  },
+  "series": {
+    "episodes": "الحلقات",
+    "favorite": "المفضلة",
+    "share": "مشاركة",
+    "watchNow": "شاهد الآن",
+    "continueEp": "متابعة الحلقة {{episode}}",
+    "locked": "مقفل",
+    "free": "مجاني",
+    "episodesRange": "الحلقات {{start}}-{{end}}",
+    "related": "ذات صلة"
+  },
+  "player": {
+    "nextEpisode": "الحلقة التالية",
+    "autoPlay": "تشغيل تلقائي",
+    "audioTrack": "المسار الصوتي",
+    "subtitles": "الترجمة"
+  },
+  "coins": {
+    "coinStore": "متجر العملات",
+    "balance": "الرصيد",
+    "buyCoins": "شراء عملات",
+    "unlock": "فتح",
+    "insufficientCoins": "رصيد العملات غير كافٍ",
+    "earnFreeCoins": "اكسب عملات مجانية"
+  },
+  "splash": {
+    "tagline": "مسلسلات قصيرة. دراما كبيرة.",
+    "connecting": "جاري الاتصال...",
+    "errorTitle": "حدث خطأ ما",
+    "errorMessage": "تعذر الاتصال بالخادم. يرجى التحقق من اتصالك والمحاولة مرة أخرى."
+  },
+  "auth": {
+    "login": "تسجيل الدخول إلى دراما",
+    "loginSubtext": "شاهد مسلسلات قصيرة حصرية في أي وقت وأي مكان",
+    "signUp": "إنشاء حساب",
+    "phone": "رقم الهاتف",
+    "phonePlaceholder": "5X XXX XXXX",
+    "continue": "متابعة",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "otp": "رمز التحقق",
+    "otpTitle": "أدخل رمز التحقق",
+    "otpSubtext": "أرسلنا رمزاً مكوناً من 6 أرقام إلى",
+    "resendOtp": "إعادة إرسال الرمز",
+    "resendIn": "إعادة الإرسال خلال {{seconds}} ثانية",
+    "verifying": "جاري التحقق...",
+    "invalidOtp": "رمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.",
+    "loginWithGoogle": "الدخول عبر جوجل",
+    "loginWithApple": "الدخول عبر آبل",
+    "orContinueWith": "أو المتابعة عبر",
+    "skipForNow": "تخطي الآن",
+    "termsPrefix": "بالمتابعة، أنت توافق على ",
+    "termsOfService": "شروط الخدمة",
+    "and": " و ",
+    "privacyPolicy": "سياسة الخصوصية"
+  },
+  "profile": {
+    "editProfile": "تعديل الملف الشخصي",
+    "watchHistory": "سجل المشاهدة",
+    "notifications": "الإشعارات",
+    "settings": "الإعدادات",
+    "logout": "تسجيل الخروج",
+    "language": "اللغة",
+    "about": "حول التطبيق"
+  },
+  "rewards": {
+    "dailyReward": "المكافأة اليومية",
+    "streak": "أيام متتالية",
+    "claim": "استلام المكافأة",
+    "streakDays": "{{count}} يوم متتالي",
+    "comeBackTomorrow": "عد غداً لاستلام مكافأتك"
+  },
+  "lockedEpisode": {
+    "teaser": "ماذا سيحدث بعد ذلك؟",
+    "title": "هذه الحلقة مقفلة",
+    "episodeLabel": "الحلقة {{number}}",
+    "cost": "التكلفة",
+    "yourBalance": "رصيدك",
+    "deficit": "تحتاج {{amount}} عملة إضافية",
+    "unlockEpisode": "فتح الحلقة",
+    "or": "أو",
+    "unlimitedAccess": "وصول غير محدود",
+    "subscriptionDescription": "اشترك وشاهد جميع الحلقات بدون إنفاق عملات.",
+    "dailyReward": "استلم المكافأة اليومية",
+    "referFriend": "ادعُ صديقاً",
+    "getMoreCoins": "احصل على المزيد من العملات",
+    "signInToWatch": "سجّل الدخول للمشاهدة",
+    "signInDescription": "أنشئ حساباً أو سجّل الدخول لفتح الحلقات والبدء بالمشاهدة."
+  },
+  "comments": {
+    "title": "التعليقات",
+    "newest": "الأحدث",
+    "mostLiked": "الأكثر إعجاباً",
+    "episodeContext": "ح. {{number}} — {{title}}",
+    "spoilerTapToReveal": "حرق أحداث — اضغط للكشف",
+    "inputPlaceholder": "أضف تعليقاً...",
+    "signInToComment": "سجّل الدخول للتعليق"
+  },
+  "share": {
+    "whatsapp": "واتساب",
+    "x": "إكس",
+    "instagram": "انستقرام",
+    "telegram": "تيليقرام",
+    "sms": "رسالة",
+    "copyLink": "نسخ الرابط",
+    "more": "المزيد",
+    "earnCoins": "شارك واكسب 3 عملات",
+    "episodeLabel": "ح. {{number}}: {{title}}",
+    "message": "شاهد {{series}} على دراما!",
+    "messageWithEpisode": "شاهد {{series}} ح. {{episode}} على دراما!"
+  },
+  "rating": {
+    "poor": "سيء",
+    "okay": "مقبول",
+    "good": "جيد",
+    "great": "رائع!",
+    "loveIt": "أحببته!",
+    "reviewPlaceholder": "اكتب مراجعة (اختياري)",
+    "submit": "إرسال التقييم",
+    "ratingsCount": "{{count}} تقييم"
+  },
+  "subscriptions": {
+    "subscribe": "اشتراك",
+    "freePlan": "الباقة المجانية",
+    "monthlyPlan": "الباقة الشهرية",
+    "annualPlan": "الباقة السنوية",
+    "currentPlan": "الباقة الحالية",
+    "manageSub": "إدارة الاشتراك"
+  }
+}
