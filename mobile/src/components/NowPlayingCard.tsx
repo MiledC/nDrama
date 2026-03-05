@@ -26,8 +26,8 @@ interface NowPlayingCardProps {
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const THUMBNAIL_WIDTH = 120;
-const THUMBNAIL_HEIGHT = 68;
+const THUMBNAIL_WIDTH = 80;
+const THUMBNAIL_HEIGHT = 120; // 2:3 portrait
 const PROGRESS_HEIGHT = 3;
 
 // ---------------------------------------------------------------------------
@@ -132,13 +132,13 @@ const styles = StyleSheet.create({
   /* Green right border accent (RTL leading) */
   accentBorder: {
     position: 'absolute',
-    right: 0,
+    end: 0,
     top: 0,
     bottom: 0,
     width: 3,
     backgroundColor: colors.cta,
-    borderTopRightRadius: radii.card,
-    borderBottomRightRadius: radii.card,
+    borderTopEndRadius: radii.card,
+    borderBottomEndRadius: radii.card,
   },
 
   /* Thumbnail */
@@ -194,7 +194,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.bold,
     color: colors.cta,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   epTitle: {
     fontSize: fontSizes.body,
@@ -202,13 +201,11 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginTop: 2,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   duration: {
     fontSize: fontSizes.caption,
     color: colors.textDim,
     marginTop: spacing.xs,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
 });

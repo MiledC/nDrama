@@ -233,8 +233,8 @@ export default SearchScreen;
 // Styles
 // ---------------------------------------------------------------------------
 
-const THUMBNAIL_WIDTH = 80;
-const THUMBNAIL_HEIGHT = 45;
+const THUMBNAIL_WIDTH = 55;
+const THUMBNAIL_HEIGHT = 82; // ~2:3 portrait
 
 const styles = StyleSheet.create({
   root: {
@@ -325,21 +325,18 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontWeight: fontWeights.medium,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   resultGenre: {
     fontSize: fontSizes.caption,
     color: colors.textMuted,
     marginTop: 2,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   resultEpisodes: {
     fontSize: fontSizes.caption,
     color: colors.textDim,
     marginTop: 2,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
 
   /* ---- Empty state ---- */

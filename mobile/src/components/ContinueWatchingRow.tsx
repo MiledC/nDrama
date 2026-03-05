@@ -22,8 +22,8 @@ interface ContinueWatchingRowProps {
   items: ContinueWatchingItem[];
 }
 
-const CARD_WIDTH = 160;
-const CARD_HEIGHT = CARD_WIDTH * (9 / 16); // 16:9 ratio
+const CARD_WIDTH = 110;
+const CARD_HEIGHT = CARD_WIDTH * 1.5; // 2:3 portrait
 
 export default function ContinueWatchingRow({items}: ContinueWatchingRowProps) {
   const navigation = useNavigation<Nav>();
@@ -107,7 +107,6 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.sectionTitle,
     fontWeight: fontWeights.bold,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   listContent: {
     paddingHorizontal: spacing.xs,
@@ -145,7 +144,7 @@ const styles = StyleSheet.create({
   playIcon: {
     color: colors.text,
     fontSize: 12,
-    marginLeft: 2,
+    marginStart: 2,
   },
   progressBarTrack: {
     position: 'absolute',
@@ -165,13 +164,11 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.medium,
     marginTop: spacing.sm,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   caption: {
     color: colors.textMuted,
     fontSize: fontSizes.caption,
     marginTop: spacing.xs,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
 });

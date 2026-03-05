@@ -141,8 +141,8 @@ const INITIAL_HISTORY: HistorySection[] = [
 // Constants
 // ---------------------------------------------------------------------------
 
-const THUMBNAIL_WIDTH = 80;
-const THUMBNAIL_HEIGHT = 45;
+const THUMBNAIL_WIDTH = 55;
+const THUMBNAIL_HEIGHT = 82; // ~2:3 portrait
 
 // ---------------------------------------------------------------------------
 // Sub-components
@@ -391,7 +391,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.semibold,
     color: colors.textMuted,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
 
   /* ---- List ---- */
@@ -451,19 +450,16 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.semibold,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   historyEpisode: {
     fontSize: fontSizes.caption,
     color: colors.textMuted,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   historyDuration: {
     fontSize: fontSizes.caption,
     color: colors.textDim,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
 
   /* ---- Separator ---- */
