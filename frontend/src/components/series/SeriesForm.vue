@@ -453,7 +453,7 @@ onMounted(fetchTags)
             Thumbnail
           </label>
           <div
-            class="relative w-full aspect-video rounded-lg border-2 border-dashed border-gray-300 hover:border-accent transition-colors cursor-pointer overflow-hidden bg-gray-50"
+            class="relative w-full aspect-[2/3] rounded-lg border-2 border-dashed border-gray-300 hover:border-accent transition-colors cursor-pointer overflow-hidden bg-gray-50"
             @click="fileInput?.click()"
           >
             <!-- Preview -->

@@ -210,7 +210,7 @@ function clearSelection() {
           :key="i"
           class="rounded-xl border border-border bg-white shadow-[--shadow-card] overflow-hidden animate-pulse"
         >
-          <div class="aspect-video bg-gray-200" />
+          <div class="aspect-[2/3] bg-gray-200" />
           <div class="p-4 space-y-2">
             <div class="h-4 bg-gray-200 rounded w-3/4" />
             <div class="h-3 bg-gray-200 rounded" />
@@ -233,7 +233,7 @@ function clearSelection() {
             :key="s.id"
             class="rounded-xl border border-border bg-white shadow-[--shadow-card] overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
           >
-            <div class="aspect-video bg-gray-100 flex items-center justify-center">
+            <div class="aspect-[2/3] bg-gray-100 flex items-center justify-center">
               <img
                 v-if="s.thumbnail_url"
                 :src="s.thumbnail_url"

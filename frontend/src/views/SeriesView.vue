@@ -10,6 +10,7 @@ import {
   PencilIcon,
   ArchiveBoxIcon,
   TrashIcon,
+  FilmIcon,
 } from '@heroicons/vue/24/outline'
 import { useToastStore } from '../stores/toast'
 
@@ -293,13 +294,14 @@ onMounted(() => {
         :key="i"
         class="rounded-xl border border-border bg-white shadow-[--shadow-card] overflow-hidden"
       >
-        <div class="aspect-video bg-gray-100" />
+        <div class="aspect-[2/3] bg-gray-100" />
         <div class="p-4 space-y-2">
           <div class="h-4 w-3/4 bg-gray-200 rounded" />
           <div class="h-3 w-full bg-gray-100 rounded" />
           <div class="h-3 w-1/2 bg-gray-100 rounded" />
         </div>
-        <div class="px-4 pb-4 flex gap-2">
+        <div class="px-4 pb-4 flex flex-wrap gap-2">
+          <div class="h-7 w-16 bg-gray-100 rounded-lg" />
           <div class="h-7 w-16 bg-gray-100 rounded-lg" />
           <div class="h-7 w-16 bg-gray-100 rounded-lg" />
         </div>
@@ -317,7 +319,7 @@ onMounted(() => {
         class="rounded-xl border border-border bg-white shadow-[--shadow-card] overflow-hidden hover:shadow-[--shadow-floating] transition-all"
       >
         <!-- Thumbnail -->
-        <div class="relative aspect-video bg-gray-50 flex items-center justify-center overflow-hidden">
+        <div class="relative aspect-[2/3] bg-gray-50 flex items-center justify-center overflow-hidden">
           <img
             v-if="s.thumbnail_url"
             :src="s.thumbnail_url"
@@ -381,7 +383,14 @@ onMounted(() => {
         </div>
 
         <!-- Action Buttons -->
-        <div class="px-4 pb-4 flex gap-2">
+        <div class="px-4 pb-4 flex flex-wrap gap-2">
+          <button
+            class="text-xs font-medium rounded-lg px-2.5 py-1.5 flex items-center gap-1 bg-accent-light text-accent hover:bg-accent hover:text-white transition-colors"
+            @click.stop="router.push(`/series/${s.id}`)"
+          >
+            <FilmIcon class="h-3.5 w-3.5" />
+            Episodes
+          </button>
           <button
             class="text-xs font-medium rounded-lg px-2.5 py-1.5 flex items-center gap-1 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
             @click.stop="router.push(`/series/${s.id}/edit`)"
