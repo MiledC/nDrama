@@ -4,7 +4,22 @@ import { NavigationContainer } from "@react-navigation/native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { useFonts } from "expo-font";
+import {
+  NotoSansArabic_400Regular,
+  NotoSansArabic_500Medium,
+  NotoSansArabic_600SemiBold,
+  NotoSansArabic_700Bold,
+  NotoSansArabic_800ExtraBold,
+} from "@expo-google-fonts/noto-sans-arabic";
+import {
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+  Inter_800ExtraBold,
+} from "@expo-google-fonts/inter";
 
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { useAuthStore } from "./src/stores/authStore";
@@ -36,6 +51,27 @@ function AppContent() {
 }
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    "NotoSansArabic-Regular": NotoSansArabic_400Regular,
+    "NotoSansArabic-Medium": NotoSansArabic_500Medium,
+    "NotoSansArabic-SemiBold": NotoSansArabic_600SemiBold,
+    "NotoSansArabic-Bold": NotoSansArabic_700Bold,
+    "NotoSansArabic-ExtraBold": NotoSansArabic_800ExtraBold,
+    "Inter-Regular": Inter_400Regular,
+    "Inter-Medium": Inter_500Medium,
+    "Inter-SemiBold": Inter_600SemiBold,
+    "Inter-Bold": Inter_700Bold,
+    "Inter-ExtraBold": Inter_800ExtraBold,
+  });
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#8B5CF6" />
+      </View>
+    );
+  }
+
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
@@ -52,10 +88,10 @@ export default function App() {
                 notification: "#00B856",
               },
               fonts: {
-                regular: { fontFamily: "System", fontWeight: "400" },
-                medium: { fontFamily: "System", fontWeight: "500" },
-                bold: { fontFamily: "System", fontWeight: "700" },
-                heavy: { fontFamily: "System", fontWeight: "800" },
+                regular: { fontFamily: "NotoSansArabic-Regular", fontWeight: "400" },
+                medium: { fontFamily: "NotoSansArabic-Medium", fontWeight: "500" },
+                bold: { fontFamily: "NotoSansArabic-Bold", fontWeight: "700" },
+                heavy: { fontFamily: "NotoSansArabic-ExtraBold", fontWeight: "800" },
               },
             }}
           >
@@ -76,5 +112,11 @@ const styles = StyleSheet.create({
   fallback: {
     flex: 1,
     backgroundColor: "#0D0D0D",
+  },
+  loading: {
+    flex: 1,
+    backgroundColor: "#0D0D0D",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
