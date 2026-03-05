@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   I18nManager,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SeriesCard } from "./SeriesCard";
 
 interface Series {
@@ -29,13 +30,14 @@ export function CategoryRow({
   onSeriesPress,
   onSeeAll,
 }: CategoryRowProps) {
+  const { t } = useTranslation();
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
         {onSeeAll && (
           <TouchableOpacity onPress={onSeeAll}>
-            <Text style={styles.seeAll}>See All</Text>
+            <Text style={styles.seeAll}>{t("common.seeAll")}</Text>
           </TouchableOpacity>
         )}
       </View>

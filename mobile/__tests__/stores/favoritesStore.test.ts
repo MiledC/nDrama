@@ -5,7 +5,7 @@ const makeFavorite = (overrides = {}) => ({
   series_id: "series-1",
   title: "Desert Shadows",
   thumbnail_url: "https://example.com/thumb.jpg",
-  episode_count: 40,
+  free_episode_count: 40,
   created_at: "2026-01-01T00:00:00Z",
   ...overrides,
 });

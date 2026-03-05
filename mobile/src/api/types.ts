@@ -9,14 +9,13 @@
 export interface PaginatedResponse<T> {
   items: T[];
   total: number;
-  page: number;
-  per_page: number;
-  pages: number;
+  offset: number;
+  limit: number;
 }
 
 export interface PaginationParams {
-  page?: number;
-  per_page?: number;
+  offset?: number;
+  limit?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -82,8 +81,7 @@ export interface UpdateProfileRequest {
 export interface Category {
   id: string;
   name: string;
-  name_ar: string | null;
-  slug: string;
+  slug?: string;
   parent_id: string | null;
   children?: Category[];
 }
@@ -95,17 +93,11 @@ export interface Category {
 export interface Series {
   id: string;
   title: string;
-  title_ar: string | null;
   description: string | null;
-  description_ar: string | null;
-  poster_url: string | null;
-  banner_url: string | null;
-  category_id: string | null;
+  thumbnail_url: string | null;
   tags: Tag[];
-  episode_count: number;
-  status: string;
-  release_date: string | null;
-  is_favorited: boolean;
+  free_episode_count: number;
+  coin_cost_per_episode: number;
   created_at: string;
 }
 
@@ -116,16 +108,10 @@ export interface SeriesDetail extends Series {
 export interface Tag {
   id: string;
   name: string;
-  name_ar: string | null;
 }
 
 export interface SeriesListParams extends PaginationParams {
-  category_id?: string;
-}
-
-export interface SeriesSearchParams extends PaginationParams {
-  q: string;
-  category_id?: string;
+  search?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -136,7 +122,6 @@ export interface Episode {
   id: string;
   series_id: string;
   title: string;
-  title_ar: string | null;
   description: string | null;
   episode_number: number;
   season_number: number;

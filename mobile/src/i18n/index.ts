@@ -1,7 +1,9 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { getLocales } from 'expo-localization';
-import { I18nManager } from 'react-native';
+import { I18nManager, Platform } from 'react-native';
+// expo-updates is only available in production builds
+let Updates: { reloadAsync: () => Promise<void> } | null = null;
+try { Updates = require('expo-updates'); } catch {}
 
 import ar from './ar.json';
 import en from './en.json';
@@ -11,16 +13,20 @@ const resources = {
   en: { translation: en },
 };
 
-const deviceLocales = getLocales();
-const deviceLanguage = deviceLocales?.[0]?.languageCode ?? 'ar';
-
-// Use device language if we support it, otherwise fall back to Arabic
-const selectedLanguage = deviceLanguage in resources ? deviceLanguage : 'ar';
+// Always default to Arabic — this is a Saudi-market app
+const selectedLanguage = 'ar';
 
 // Force RTL layout for Arabic
-const isRTL = selectedLanguage === 'ar';
-I18nManager.forceRTL(isRTL);
-I18nManager.allowRTL(isRTL);
+if (!I18nManager.isRTL) {
+  I18nManager.allowRTL(true);
+  I18nManager.forceRTL(true);
+  // Android requires a restart for RTL to take effect
+  if (Platform.OS === 'android') {
+    if (!__DEV__ && Updates) {
+      Updates.reloadAsync().catch(() => {});
+    }
+  }
+}
 
 i18n.use(initReactI18next).init({
   resources,

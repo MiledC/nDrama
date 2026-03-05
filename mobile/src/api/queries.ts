@@ -19,7 +19,6 @@ import type {
   PurchaseCoinsRequest,
   RegisterRequest,
   SeriesListParams,
-  SeriesSearchParams,
   SpendCoinsRequest,
   UpdateProfileRequest,
   UpdateProgressRequest,
@@ -38,7 +37,7 @@ export const queryKeys = {
     detail: (id: string) => ['series', 'detail', id] as const,
     episodes: (seriesId: string, params?: EpisodeListParams) =>
       ['series', seriesId, 'episodes', params] as const,
-    search: (params: SeriesSearchParams) => ['series', 'search', params] as const,
+    search: (params: { q: string }) => ['series', 'search', params] as const,
   },
   categories: ['categories'] as const,
   episodes: {
@@ -54,13 +53,13 @@ export const queryKeys = {
   // Favorites
   favorites: {
     all: ['favorites'] as const,
-    list: (page?: number) => ['favorites', 'list', page] as const,
+    list: (offset?: number) => ['favorites', 'list', offset] as const,
   },
 
   // History
   history: {
     all: ['history'] as const,
-    list: (page?: number) => ['history', 'list', page] as const,
+    list: (offset?: number) => ['history', 'list', offset] as const,
   },
 
   // Profile
@@ -101,10 +100,12 @@ export function useInfiniteEpisodes(seriesId: string) {
   return useInfiniteQuery({
     queryKey: ['series', seriesId, 'episodes', 'infinite'] as const,
     queryFn: ({ pageParam }) =>
-      contentApi.getEpisodes(seriesId, { page: pageParam }),
-    initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
-      lastPage.page < lastPage.pages ? lastPage.page + 1 : undefined,
+      contentApi.getEpisodes(seriesId, { offset: pageParam }),
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) => {
+      const nextOffset = lastPage.offset + lastPage.limit;
+      return nextOffset < lastPage.total ? nextOffset : undefined;
+    },
     enabled: !!seriesId,
     staleTime: STALE_TIMES.seriesDetail,
   });
@@ -126,7 +127,7 @@ export function useCategories() {
   });
 }
 
-export function useSearch(params: SeriesSearchParams) {
+export function useSearch(params: { q: string; offset?: number; limit?: number }) {
   return useQuery({
     queryKey: queryKeys.series.search(params),
     queryFn: () => contentApi.searchSeries(params),
@@ -159,10 +160,10 @@ export function useCoinPackages() {
 // Favorites queries
 // ---------------------------------------------------------------------------
 
-export function useFavorites(page?: number) {
+export function useFavorites(offset?: number) {
   return useQuery({
-    queryKey: queryKeys.favorites.list(page),
-    queryFn: () => favoritesApi.getFavorites({ page }),
+    queryKey: queryKeys.favorites.list(offset),
+    queryFn: () => favoritesApi.getFavorites({ offset }),
   });
 }
 
@@ -170,10 +171,10 @@ export function useFavorites(page?: number) {
 // History queries
 // ---------------------------------------------------------------------------
 
-export function useWatchHistory(page?: number) {
+export function useWatchHistory(offset?: number) {
   return useQuery({
-    queryKey: queryKeys.history.list(page),
-    queryFn: () => historyApi.getWatchHistory({ page }),
+    queryKey: queryKeys.history.list(offset),
+    queryFn: () => historyApi.getWatchHistory({ offset }),
   });
 }
 

@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 interface ShareSheetProps {
   visible: boolean;
   onClose: () => void;
-  series: { title: string; poster_url: string | null };
+  series: { title: string; thumbnail_url: string | null };
   episode?: { title: string; episode_number: number };
 }
 
@@ -100,9 +100,9 @@ export function ShareSheet({
       <View style={styles.container}>
         {/* Share preview card */}
         <View style={styles.previewCard}>
-          {series.poster_url ? (
+          {series.thumbnail_url ? (
             <Image
-              source={{ uri: series.poster_url }}
+              source={{ uri: series.thumbnail_url }}
               style={styles.thumbnail}
             />
           ) : (

@@ -19,7 +19,7 @@ import { DailyRewardModal } from "../components/rewards/DailyRewardModal";
 import { useSeriesList, useCategories, useWatchHistory } from "../api/queries";
 import { useRewardsStore } from "../stores/rewardsStore";
 import type { HomeStackParamList } from "../navigation/types";
-import type { Series, WatchHistory } from "../api/types";
+import type { Series } from "../api/types";
 
 type HomeNav = NativeStackNavigationProp<HomeStackParamList, "Home">;
 
@@ -34,22 +34,9 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   // --- Data queries ---
-  const featuredQuery = useSeriesList({ per_page: 5 });
+  const featuredQuery = useSeriesList({ limit: 5 });
   const categoriesQuery = useCategories();
   const watchHistoryQuery = useWatchHistory();
-
-  // Category-specific queries — we load series for first 3 categories
-  const categories = categoriesQuery.data ?? [];
-  const cat0Query = useSeriesList(
-    categories[0] ? { category_id: categories[0].id, per_page: 10 } : undefined
-  );
-  const cat1Query = useSeriesList(
-    categories[1] ? { category_id: categories[1].id, per_page: 10 } : undefined
-  );
-  const cat2Query = useSeriesList(
-    categories[2] ? { category_id: categories[2].id, per_page: 10 } : undefined
-  );
-  const categoryQueries = [cat0Query, cat1Query, cat2Query];
 
   // --- Derived data ---
   const showRewardBanner = !hasClaimedToday && !rewardBannerDismissed;
@@ -60,26 +47,27 @@ export default function HomeScreen() {
       id: s.id,
       title: s.title,
       description: s.description ?? "",
-      thumbnailUrl: s.poster_url,
-      episodeCount: s.episode_count,
+      thumbnailUrl: s.thumbnail_url,
+      episodeCount: s.free_episode_count,
     }));
   }, [featuredQuery.data]);
 
-  const continueWatchingItems = useMemo(() => {
-    const items = watchHistoryQuery.data?.items ?? [];
-    return items
-      .filter((h: WatchHistory) => !h.completed)
-      .map((h: WatchHistory) => ({
-        id: h.episode.series_id,
-        title: h.episode.series_title,
-        thumbnail_url: h.episode.series_poster_url,
-        episode_count: 0,
-        progress:
-          h.duration_seconds && h.duration_seconds > 0
-            ? Math.round((h.progress_seconds / h.duration_seconds) * 100)
-            : 0,
-      }));
-  }, [watchHistoryQuery.data]);
+  // Tags from series to use as "categories" in the UI
+  const allSeries = featuredQuery.data?.items ?? [];
+  const tagGroups = useMemo(() => {
+    const tagMap = new Map<string, { name: string; series: Series[] }>();
+    for (const s of allSeries) {
+      for (const tag of s.tags) {
+        const existing = tagMap.get(tag.id);
+        if (existing) {
+          existing.series.push(s);
+        } else {
+          tagMap.set(tag.id, { name: tag.name, series: [s] });
+        }
+      }
+    }
+    return Array.from(tagMap.values());
+  }, [allSeries]);
 
   // --- Handlers ---
   const handleSeriesPress = useCallback(
@@ -90,10 +78,10 @@ export default function HomeScreen() {
   );
 
   const handleSeeAll = useCallback(
-    (categoryId: string, categoryName: string) => {
-      navigation.navigate("CategoryList", { categoryId, categoryName });
+    (_tagId: string, _tagName: string) => {
+      // Could navigate to a tag-filtered list in the future
     },
-    [navigation]
+    []
   );
 
   const handleClaimReward = useCallback(() => {
@@ -107,10 +95,9 @@ export default function HomeScreen() {
       featuredQuery.refetch(),
       categoriesQuery.refetch(),
       watchHistoryQuery.refetch(),
-      ...categoryQueries.map((q) => q.refetch()),
     ]);
     setRefreshing(false);
-  }, [featuredQuery, categoriesQuery, watchHistoryQuery, categoryQueries]);
+  }, [featuredQuery, categoriesQuery, watchHistoryQuery]);
 
   // --- Loading state ---
   const isLoading =
@@ -167,44 +154,37 @@ export default function HomeScreen() {
           <HeroCarousel items={heroItems} onPress={handleSeriesPress} />
         )}
 
-        {/* Continue Watching */}
-        {continueWatchingItems.length > 0 && (
+        {/* All Series */}
+        {allSeries.length > 0 && (
           <View style={styles.sectionSpacing}>
             <CategoryRow
-              title={t("home.continueWatching")}
-              series={continueWatchingItems.map((item) => ({
-                id: item.id,
-                title: item.title,
-                thumbnail_url: item.thumbnail_url,
-                episode_count: item.episode_count,
+              title={t("home.allSeries")}
+              series={allSeries.map((s: Series) => ({
+                id: s.id,
+                title: s.title,
+                thumbnail_url: s.thumbnail_url,
+                episode_count: s.free_episode_count,
               }))}
               onSeriesPress={handleSeriesPress}
             />
           </View>
         )}
 
-        {/* Dynamic Category Rows */}
-        {categories.slice(0, 3).map((category, index) => {
-          const query = categoryQueries[index];
-          const seriesItems = query?.data?.items ?? [];
-          if (seriesItems.length === 0) return null;
-
-          return (
-            <View key={category.id} style={styles.sectionSpacing}>
-              <CategoryRow
-                title={category.name}
-                series={seriesItems.map((s: Series) => ({
-                  id: s.id,
-                  title: s.title,
-                  thumbnail_url: s.poster_url,
-                  episode_count: s.episode_count,
-                }))}
-                onSeriesPress={handleSeriesPress}
-                onSeeAll={() => handleSeeAll(category.id, category.name)}
-              />
-            </View>
-          );
-        })}
+        {/* Tag-based rows */}
+        {tagGroups.map((group) => (
+          <View key={group.name} style={styles.sectionSpacing}>
+            <CategoryRow
+              title={group.name}
+              series={group.series.map((s: Series) => ({
+                id: s.id,
+                title: s.title,
+                thumbnail_url: s.thumbnail_url,
+                episode_count: s.free_episode_count,
+              }))}
+              onSeriesPress={handleSeriesPress}
+            />
+          </View>
+        ))}
       </ScrollView>
 
       {/* Daily Reward Modal */}

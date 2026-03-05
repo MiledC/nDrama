@@ -63,9 +63,8 @@ export default function SearchScreen() {
   const searchParams = useMemo(
     () => ({
       q: debouncedQuery,
-      category_id: selectedCategoryId,
     }),
-    [debouncedQuery, selectedCategoryId],
+    [debouncedQuery],
   );
 
   const { data: searchResults, isLoading: isSearching } = useSearch(searchParams);
@@ -146,8 +145,8 @@ export default function SearchScreen() {
         <SeriesCard
           id={item.id}
           title={item.title}
-          thumbnailUrl={item.poster_url}
-          episodeCount={item.episode_count}
+          thumbnailUrl={item.thumbnail_url}
+          episodeCount={item.free_episode_count}
           onPress={handleSeriesPress}
         />
       </View>
@@ -174,7 +173,7 @@ export default function SearchScreen() {
               isSelected && styles.categoryPillTextSelected,
             ]}
           >
-            {I18nManager.isRTL && category.name_ar ? category.name_ar : category.name}
+            {category.name}
           </Text>
         </TouchableOpacity>
       );

@@ -9,6 +9,7 @@ import {
   ViewToken,
 } from "react-native";
 import { Image } from "expo-image";
+import { useTranslation } from "react-i18next";
 import { Button } from "../ui/Button";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -29,6 +30,7 @@ interface HeroCarouselProps {
 }
 
 export function HeroCarousel({ items, onPress }: HeroCarouselProps) {
+  const { t } = useTranslation();
   const flatListRef = useRef<FlatList>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -70,10 +72,12 @@ export function HeroCarousel({ items, onPress }: HeroCarouselProps) {
             {item.description}
           </Text>
           <View style={styles.heroMeta}>
-            <Text style={styles.episodeCount}>{item.episodeCount} episodes</Text>
+            <Text style={styles.episodeCount}>
+              {item.episodeCount} {t("series.episodes")}
+            </Text>
           </View>
           <Button
-            title="Watch Now"
+            title={t("series.watchNow")}
             onPress={() => onPress(item.id)}
             variant="primary"
             size="md"

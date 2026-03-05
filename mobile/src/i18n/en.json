@@ -25,7 +25,8 @@
     "newReleases": "New Releases",
     "forYou": "For You",
     "dailyReward": "Daily Reward",
-    "claimDailyReward": "Claim your daily reward"
+    "claimDailyReward": "Claim your daily reward",
+    "allSeries": "All Series"
   },
   "search": {
     "searchPlaceholder": "Search series, actors...",

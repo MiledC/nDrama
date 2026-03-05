@@ -120,8 +120,8 @@ export default function SeriesDetailScreen() {
       id: `fav-${seriesId}`,
       series_id: seriesId,
       title: series.title,
-      thumbnail_url: series.poster_url,
-      episode_count: series.episode_count,
+      thumbnail_url: series.thumbnail_url,
+      free_episode_count: series.free_episode_count,
       created_at: new Date().toISOString(),
     });
   }, [series, isFavorite, seriesId, toggleFavoriteMutation]);
@@ -183,7 +183,7 @@ export default function SeriesDetailScreen() {
         {/* Hero Image */}
         <View style={styles.heroContainer}>
           <Image
-            source={series.banner_url ?? series.poster_url ? { uri: series.banner_url ?? series.poster_url ?? "" } : undefined}
+            source={series.thumbnail_url ? { uri: series.thumbnail_url } : undefined}
             style={styles.heroImage}
             contentFit="cover"
             transition={300}
@@ -221,7 +221,7 @@ export default function SeriesDetailScreen() {
                 <Badge
                   key={tag.id}
                   type="new"
-                  label={I18nManager.isRTL && tag.name_ar ? tag.name_ar : tag.name}
+                  label={tag.name}
                 />
               ))}
             </ScrollView>
@@ -229,15 +229,13 @@ export default function SeriesDetailScreen() {
 
           {/* Episode count */}
           <Text style={styles.episodeCountText}>
-            {series.episode_count} {t("series.episodes")}
+            {episodes.length} {t("series.episodes")}
           </Text>
 
           {/* Description */}
           {series.description && (
             <Text style={styles.description} numberOfLines={4}>
-              {I18nManager.isRTL && series.description_ar
-                ? series.description_ar
-                : series.description}
+              {series.description}
             </Text>
           )}
 

@@ -8,10 +8,9 @@ import type {
   Series,
   SeriesDetail,
   SeriesListParams,
-  SeriesSearchParams,
 } from './types';
 
-/** List series with optional category filter and pagination. */
+/** List series with optional search and pagination. */
 export async function getSeriesList(
   params?: SeriesListParams,
 ): Promise<PaginatedResponse<Series>> {
@@ -43,18 +42,18 @@ export async function getEpisodeDetail(episodeId: string): Promise<EpisodeDetail
   return data;
 }
 
-/** Get all categories. */
+/** Get category tree. */
 export async function getCategories(): Promise<Category[]> {
-  const { data } = await apiClient.get<Category[]>('/categories');
+  const { data } = await apiClient.get<Category[]>('/categories/tree');
   return data;
 }
 
 /** Search series by query string. */
 export async function searchSeries(
-  params: SeriesSearchParams,
+  params: { q: string } & SeriesListParams,
 ): Promise<PaginatedResponse<Series>> {
-  const { data } = await apiClient.get<PaginatedResponse<Series>>('/series/search', {
-    params,
+  const { data } = await apiClient.get<PaginatedResponse<Series>>('/series', {
+    params: { search: params.q, offset: params.offset, limit: params.limit },
   });
   return data;
 }

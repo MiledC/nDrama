@@ -1,7 +1,6 @@
 import React from "react";
 import {
   View,
-  Text,
   StyleSheet,
   FlatList,
   Dimensions,
@@ -20,7 +19,7 @@ export default function CategoryListScreen() {
   const route = useRoute<HomeScreenProps<"CategoryList">["route"]>();
   const { categoryId, categoryName } = route.params;
   const insets = useSafeAreaInsets();
-  const { data, isLoading, refetch } = useSeriesList({ category_id: categoryId });
+  const { data, isLoading, refetch } = useSeriesList();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -37,8 +36,8 @@ export default function CategoryListScreen() {
           <SeriesCard
             id={item.id}
             title={item.title}
-            thumbnailUrl={item.poster_url}
-            episodeCount={item.episode_count}
+            thumbnailUrl={item.thumbnail_url}
+            episodeCount={item.free_episode_count}
             onPress={(id) =>
               navigation.navigate("SeriesDetail" as any, { seriesId: id })
             }

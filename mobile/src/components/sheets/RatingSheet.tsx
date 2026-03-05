@@ -14,7 +14,7 @@ import { Button } from "../ui/Button";
 interface RatingSheetProps {
   visible: boolean;
   onClose: () => void;
-  series: { id: string; title: string; poster_url: string | null };
+  series: { id: string; title: string; thumbnail_url: string | null };
   averageRating?: number;
   totalRatings?: number;
   existingRating?: number;
@@ -99,9 +99,9 @@ export function RatingSheet({
       <View style={styles.container}>
         {/* Series info */}
         <View style={styles.seriesRow}>
-          {series.poster_url ? (
+          {series.thumbnail_url ? (
             <Image
-              source={{ uri: series.poster_url }}
+              source={{ uri: series.thumbnail_url }}
               style={styles.thumbnail}
             />
           ) : (

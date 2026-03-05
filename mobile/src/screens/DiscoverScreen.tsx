@@ -63,7 +63,7 @@ export default function DiscoverScreen() {
         style={[styles.card, { height: cardHeight }]}
       >
         <Image
-          source={item.poster_url ? { uri: item.poster_url } : undefined}
+          source={item.thumbnail_url ? { uri: item.thumbnail_url } : undefined}
           style={styles.cardImage}
           contentFit="cover"
           transition={300}
@@ -76,7 +76,7 @@ export default function DiscoverScreen() {
             {item.title}
           </Text>
           <Text style={styles.cardMeta}>
-            {item.episode_count} {t("series.episodes").toLowerCase()}
+            {item.free_episode_count} {t("series.episodes").toLowerCase()}
           </Text>
           <Button
             title={t("series.watchNow")}

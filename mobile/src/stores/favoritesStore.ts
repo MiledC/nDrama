@@ -5,7 +5,7 @@ export interface FavoriteSeries {
   series_id: string;
   title: string;
   thumbnail_url: string | null;
-  episode_count: number;
+  free_episode_count: number;
   created_at: string;
 }
 

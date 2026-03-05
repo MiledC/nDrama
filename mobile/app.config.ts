@@ -6,11 +6,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   slug: "draama",
   version: "1.0.0",
   orientation: "portrait",
-  icon: "./assets/images/icon.png",
+  icon: "./assets/icon.png",
   userInterfaceStyle: "dark",
   scheme: "draama",
   splash: {
-    image: "./assets/images/splash.png",
+    image: "./assets/splash-icon.png",
     resizeMode: "contain",
     backgroundColor: "#0D0D0D",
   },
@@ -24,7 +24,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     package: "com.draama.app",
     adaptiveIcon: {
-      foregroundImage: "./assets/images/adaptive-icon.png",
+      foregroundImage: "./assets/android-icon-foreground.png",
+      backgroundImage: "./assets/android-icon-background.png",
+      monochromeImage: "./assets/android-icon-monochrome.png",
       backgroundColor: "#0D0D0D",
     },
   },
