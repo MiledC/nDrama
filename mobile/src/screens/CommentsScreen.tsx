@@ -12,7 +12,7 @@ import {
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/types';
-import {colors, fontSizes, fontWeights, spacing, radii, sizes} from '../theme';
+import {colors, fontSizes, fontWeights, spacing, radii} from '../theme';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -403,8 +403,8 @@ const styles = StyleSheet.create({
   },
   commentContent: {
     flex: 1,
-    marginRight: spacing.md,
-    alignItems: 'flex-end',
+    marginEnd: spacing.md,
+    alignItems: 'flex-start',
   },
   commentMeta: {
     flexDirection: 'row',
@@ -427,7 +427,6 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.body,
     color: colors.textMuted,
     writingDirection: 'rtl',
-    textAlign: 'right',
     lineHeight: 22,
     marginBottom: spacing.sm,
   },
