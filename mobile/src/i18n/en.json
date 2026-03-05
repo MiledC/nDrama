@@ -1,0 +1,165 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "back": "Back",
+    "done": "Done",
+    "seeAll": "See All",
+    "noResults": "No results found"
+  },
+  "tabs": {
+    "home": "Home",
+    "discover": "Discover",
+    "search": "Search",
+    "myList": "My List",
+    "profile": "Profile"
+  },
+  "home": {
+    "continueWatching": "Continue Watching",
+    "trending": "Trending",
+    "newReleases": "New Releases",
+    "forYou": "For You",
+    "dailyReward": "Daily Reward",
+    "claimDailyReward": "Claim your daily reward"
+  },
+  "search": {
+    "searchPlaceholder": "Search series, actors...",
+    "recentSearches": "Recent Searches",
+    "trendingNow": "Trending Now",
+    "categories": "Categories"
+  },
+  "series": {
+    "episodes": "Episodes",
+    "favorite": "Favorite",
+    "share": "Share",
+    "watchNow": "Watch Now",
+    "continueEp": "Continue Episode {{episode}}",
+    "locked": "Locked",
+    "free": "Free",
+    "episodesRange": "Episodes {{start}}-{{end}}",
+    "related": "Related"
+  },
+  "player": {
+    "nextEpisode": "Next Episode",
+    "autoPlay": "Auto Play",
+    "audioTrack": "Audio Track",
+    "subtitles": "Subtitles"
+  },
+  "coins": {
+    "coinStore": "Coin Store",
+    "balance": "Balance",
+    "buyCoins": "Buy Coins",
+    "unlock": "Unlock",
+    "insufficientCoins": "Insufficient coins",
+    "earnFreeCoins": "Earn Free Coins"
+  },
+  "splash": {
+    "tagline": "Short Series. Big Drama.",
+    "connecting": "Connecting...",
+    "errorTitle": "Something went wrong",
+    "errorMessage": "Could not connect to the server. Please check your connection and try again."
+  },
+  "auth": {
+    "login": "Sign in to Draama",
+    "loginSubtext": "Watch exclusive short series anytime, anywhere",
+    "signUp": "Sign Up",
+    "phone": "Phone Number",
+    "phonePlaceholder": "5X XXX XXXX",
+    "continue": "Continue",
+    "email": "Email",
+    "password": "Password",
+    "otp": "Verification Code",
+    "otpTitle": "Enter Verification Code",
+    "otpSubtext": "We sent a 6-digit code to",
+    "resendOtp": "Resend Code",
+    "resendIn": "Resend in {{seconds}}s",
+    "verifying": "Verifying...",
+    "invalidOtp": "Invalid verification code. Please try again.",
+    "loginWithGoogle": "Continue with Google",
+    "loginWithApple": "Continue with Apple",
+    "orContinueWith": "or continue with",
+    "skipForNow": "Skip for now",
+    "termsPrefix": "By continuing, you agree to our ",
+    "termsOfService": "Terms of Service",
+    "and": " and ",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "profile": {
+    "editProfile": "Edit Profile",
+    "watchHistory": "Watch History",
+    "notifications": "Notifications",
+    "settings": "Settings",
+    "logout": "Log Out",
+    "language": "Language",
+    "about": "About"
+  },
+  "rewards": {
+    "dailyReward": "Daily Reward",
+    "streak": "Streak",
+    "claim": "Claim Reward",
+    "streakDays": "{{count}} day streak",
+    "comeBackTomorrow": "Come back tomorrow for your reward"
+  },
+  "lockedEpisode": {
+    "teaser": "What happens next?",
+    "title": "This Episode is Locked",
+    "episodeLabel": "Episode {{number}}",
+    "cost": "Cost",
+    "yourBalance": "Your Balance",
+    "deficit": "You need {{amount}} more coins",
+    "unlockEpisode": "Unlock Episode",
+    "or": "or",
+    "unlimitedAccess": "Unlimited Access",
+    "subscriptionDescription": "Subscribe and watch all episodes without spending coins.",
+    "dailyReward": "Claim Daily Reward",
+    "referFriend": "Refer a Friend",
+    "getMoreCoins": "Get More Coins",
+    "signInToWatch": "Sign in to Watch",
+    "signInDescription": "Create an account or sign in to unlock episodes and start watching."
+  },
+  "comments": {
+    "title": "Comments",
+    "newest": "Newest",
+    "mostLiked": "Most Liked",
+    "episodeContext": "Ep. {{number}} — {{title}}",
+    "spoilerTapToReveal": "Spoiler — tap to reveal",
+    "inputPlaceholder": "Add a comment...",
+    "signInToComment": "Sign in to comment"
+  },
+  "share": {
+    "whatsapp": "WhatsApp",
+    "x": "X",
+    "instagram": "Instagram",
+    "telegram": "Telegram",
+    "sms": "SMS",
+    "copyLink": "Copy Link",
+    "more": "More",
+    "earnCoins": "Share and earn 3 coins",
+    "episodeLabel": "Ep. {{number}}: {{title}}",
+    "message": "Check out {{series}} on Draama!",
+    "messageWithEpisode": "Check out {{series}} Ep. {{episode}} on Draama!"
+  },
+  "rating": {
+    "poor": "Poor",
+    "okay": "Okay",
+    "good": "Good",
+    "great": "Great!",
+    "loveIt": "Love it!",
+    "reviewPlaceholder": "Write a review (optional)",
+    "submit": "Submit Rating",
+    "ratingsCount": "{{count}} ratings"
+  },
+  "subscriptions": {
+    "subscribe": "Subscribe",
+    "freePlan": "Free Plan",
+    "monthlyPlan": "Monthly Plan",
+    "annualPlan": "Annual Plan",
+    "currentPlan": "Current Plan",
+    "manageSub": "Manage Subscription"
+  }
+}
