@@ -50,4 +50,4 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 
 jest.mock('react-native-video', () => 'Video');
 
-jest.mock('@react-native-vector-icons/feather', () => 'Feather');
+jest.mock('@react-native-vector-icons/feather', () => 'Feather', {virtual: true});
