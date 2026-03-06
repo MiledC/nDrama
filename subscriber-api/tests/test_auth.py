@@ -140,3 +140,64 @@ async def test_logout(client, active_subscriber):
         "/api/me", headers={"X-Session-Token": token}
     )
     assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_otp_request(client):
+    """OTP request returns success message."""
+    response = await client.post(
+        "/api/auth/otp/request", json={"phone": "+966512345678"}
+    )
+    assert response.status_code == 200
+    assert response.json()["message"] == "OTP sent"
+
+
+@pytest.mark.asyncio
+async def test_otp_verify_stub_code(client):
+    """Stub OTP code 1234 creates new subscriber and returns session."""
+    response = await client.post(
+        "/api/auth/otp/verify",
+        json={"phone": "+966512345678", "code": "1234"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "session_token" in data
+    assert data["subscriber"]["status"] == "active"
+    assert data["is_new_account"] is True
+
+
+@pytest.mark.asyncio
+async def test_otp_verify_returning_user(client):
+    """Existing phone returns same subscriber, is_new_account=False."""
+    # First verify creates account
+    await client.post(
+        "/api/auth/otp/verify",
+        json={"phone": "+966598765432", "code": "1234"},
+    )
+    # Second verify returns existing
+    r2 = await client.post(
+        "/api/auth/otp/verify",
+        json={"phone": "+966598765432", "code": "1234"},
+    )
+    assert r2.status_code == 200
+    assert r2.json()["is_new_account"] is False
+
+
+@pytest.mark.asyncio
+async def test_otp_verify_wrong_code(client):
+    """Wrong OTP code returns 401."""
+    response = await client.post(
+        "/api/auth/otp/verify",
+        json={"phone": "+966512345678", "code": "9999"},
+    )
+    assert response.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_otp_verify_invalid_phone(client):
+    """Invalid phone format returns 422."""
+    response = await client.post(
+        "/api/auth/otp/verify",
+        json={"phone": "12345", "code": "1234"},
+    )
+    assert response.status_code == 422
