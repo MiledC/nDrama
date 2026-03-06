@@ -1,11 +1,6 @@
 import api, {STORAGE_KEYS} from './client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-/** Generate a random device identifier (32-char hex string). */
-function generateDeviceId(): string {
-  const seg = () => Math.random().toString(16).slice(2, 10);
-  return `${seg()}${seg()}${seg()}${seg()}`;
-}
+import DeviceInfo from 'react-native-device-info';
 
 export interface SubscriberProfile {
   id: string;
@@ -34,11 +29,7 @@ interface OtpVerifyResponse {
 
 /** Register device — creates anonymous subscriber or returns existing. */
 export async function registerDevice(): Promise<DeviceRegisterResponse> {
-  let deviceId = await AsyncStorage.getItem(STORAGE_KEYS.deviceId);
-  if (!deviceId) {
-    deviceId = generateDeviceId();
-    await AsyncStorage.setItem(STORAGE_KEYS.deviceId, deviceId);
-  }
+  const deviceId = await DeviceInfo.getUniqueId();
   const {data} = await api.post<DeviceRegisterResponse>('/auth/device', {
     device_id: deviceId,
   });

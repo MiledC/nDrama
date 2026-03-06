@@ -52,6 +52,10 @@ jest.mock('react-native-video', () => 'Video');
 
 jest.mock('@react-native-vector-icons/feather', () => 'Feather', {virtual: true});
 
+jest.mock('react-native-device-info', () => ({
+  getUniqueId: jest.fn(() => Promise.resolve('test-device-id')),
+}));
+
 jest.mock('@tanstack/react-query', () => ({
   QueryClient: jest.fn(() => ({
     defaultOptions: {},

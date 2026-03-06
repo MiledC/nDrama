@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEYS = {
   sessionToken: 'draama_session_token',
-  deviceId: 'draama_device_id',
 } as const;
 
 /**
