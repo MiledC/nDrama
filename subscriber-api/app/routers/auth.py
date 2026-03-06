@@ -9,6 +9,10 @@ from app.schemas.auth import (
     DeviceRegisterRequest,
     DeviceRegisterResponse,
     LoginRequest,
+    OtpRequestRequest,
+    OtpRequestResponse,
+    OtpVerifyRequest,
+    OtpVerifyResponse,
     RegisterRequest,
     SubscriberProfile,
 )
@@ -94,3 +98,35 @@ async def logout(
     """Invalidate current session token."""
     token = request.state.session_token
     await auth_service.logout(token)
+
+
+@router.post("/otp/request", response_model=OtpRequestResponse)
+async def otp_request(request: OtpRequestRequest):
+    """Request OTP for phone number."""
+    await auth_service.request_otp(request.phone)
+    return OtpRequestResponse()
+
+
+@router.post("/otp/verify", response_model=OtpVerifyResponse)
+async def otp_verify(
+    request: OtpVerifyRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """Verify OTP and create/login subscriber."""
+    try:
+        subscriber, token, is_new = await auth_service.verify_otp_and_login(
+            db, phone=request.phone, code=request.code
+        )
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid OTP code"
+        )
+    except PermissionError as e:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail=str(e)
+        )
+    return OtpVerifyResponse(
+        session_token=token,
+        subscriber=SubscriberProfile.model_validate(subscriber),
+        is_new_account=is_new,
+    )
