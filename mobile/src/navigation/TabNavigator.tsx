@@ -1,6 +1,7 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {Text, StyleSheet} from 'react-native';
+import {StyleSheet} from 'react-native';
+import Feather from '@react-native-vector-icons/feather';
 import {colors, sizes, fontSizes} from '../theme';
 import type {TabParamList} from './types';
 import {
@@ -12,6 +13,8 @@ import {
 } from '../screens';
 
 const Tab = createBottomTabNavigator<TabParamList>();
+
+const ICON_SIZE = 22;
 
 /**
  * 5-tab bottom navigator matching the global style guide.
@@ -33,7 +36,7 @@ export default function TabNavigator() {
         options={{
           tabBarLabel: 'الرئيسية',
           tabBarIcon: ({color}) => (
-            <Text style={[styles.tabIcon, {color}]}>🏠</Text>
+            <Feather name="home" size={ICON_SIZE} color={color} />
           ),
         }}
       />
@@ -43,7 +46,7 @@ export default function TabNavigator() {
         options={{
           tabBarLabel: 'اكتشف',
           tabBarIcon: ({color}) => (
-            <Text style={[styles.tabIcon, {color}]}>🧭</Text>
+            <Feather name="compass" size={ICON_SIZE} color={color} />
           ),
         }}
       />
@@ -53,7 +56,7 @@ export default function TabNavigator() {
         options={{
           tabBarLabel: 'البحث',
           tabBarIcon: ({color}) => (
-            <Text style={[styles.tabIcon, {color}]}>🔍</Text>
+            <Feather name="search" size={ICON_SIZE} color={color} />
           ),
         }}
       />
@@ -63,7 +66,7 @@ export default function TabNavigator() {
         options={{
           tabBarLabel: 'قائمتي',
           tabBarIcon: ({color}) => (
-            <Text style={[styles.tabIcon, {color}]}>🔖</Text>
+            <Feather name="bookmark" size={ICON_SIZE} color={color} />
           ),
         }}
       />
@@ -73,7 +76,7 @@ export default function TabNavigator() {
         options={{
           tabBarLabel: 'الملف الشخصي',
           tabBarIcon: ({color}) => (
-            <Text style={[styles.tabIcon, {color}]}>👤</Text>
+            <Feather name="user" size={ICON_SIZE} color={color} />
           ),
         }}
       />
@@ -92,8 +95,5 @@ const styles = StyleSheet.create({
   tabLabel: {
     fontSize: fontSizes.tabLabel,
     fontWeight: '600',
-  },
-  tabIcon: {
-    fontSize: sizes.tabIcon,
   },
 });

@@ -378,7 +378,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.semibold,
     color: colors.textMuted,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
 
   /* ---- Notification row ---- */
@@ -408,7 +407,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.semibold,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginBottom: 2,
   },
   notificationTitleRead: {
@@ -419,7 +417,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.regular,
     color: colors.textMuted,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginBottom: 2,
   },
   notificationSubtitleRead: {
@@ -430,7 +427,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.regular,
     color: colors.textDim,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   unreadDot: {
     width: UNREAD_DOT_SIZE,

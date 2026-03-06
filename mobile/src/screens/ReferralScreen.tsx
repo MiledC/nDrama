@@ -474,7 +474,6 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.body,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   referralRight: {
     flexDirection: 'row',
@@ -522,7 +521,6 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.caption,
     color: colors.textMuted,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginBottom: spacing.sm,
   },
   progressTrack: {

@@ -504,7 +504,7 @@ const styles = StyleSheet.create({
 
   // Skip intro pill
   skipIntroPill: {
-    alignSelf: 'flex-end',
+    alignSelf: 'flex-start',
     borderWidth: 1,
     borderColor: colors.cta,
     borderRadius: radii.pill,
@@ -543,7 +543,7 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
     backgroundColor: colors.text,
-    marginLeft: -6,
+    marginStart: -6,
   },
 
   // Time labels

@@ -9,7 +9,6 @@ import {
   Dimensions,
   Animated,
   ViewToken,
-  I18nManager,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -403,8 +402,7 @@ const styles = StyleSheet.create({
   // Social sidebar — positioned on left for RTL layout
   sidebar: {
     position: 'absolute',
-    left: I18nManager.isRTL ? spacing.lg : undefined,
-    right: I18nManager.isRTL ? undefined : spacing.lg,
+    end: spacing.lg,
     bottom: 200,
     alignItems: 'center',
     gap: SIDEBAR_GAP,
@@ -437,8 +435,8 @@ const styles = StyleSheet.create({
   bottomOverlay: {
     position: 'absolute',
     bottom: 60,
-    left: spacing.lg,
-    right: 80,
+    start: spacing.lg,
+    end: 80,
     zIndex: 10,
     writingDirection: 'rtl',
   },
@@ -447,7 +445,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.bold,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
     textShadowColor: 'rgba(0, 0, 0, 0.60)',
     textShadowOffset: {width: 0, height: 1},
     textShadowRadius: 4,
@@ -457,7 +454,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textMuted,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginBottom: spacing.md,
   },
 
@@ -468,7 +464,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.pill,
     alignItems: 'center',
     justifyContent: 'center',
-    alignSelf: 'flex-end',
+    alignSelf: 'flex-start',
     paddingHorizontal: spacing.xl,
   },
   watchButtonPressed: {
@@ -483,7 +479,7 @@ const styles = StyleSheet.create({
   // Progress dots
   dotsContainer: {
     position: 'absolute',
-    left: spacing.sm,
+    start: spacing.sm,
     top: '50%',
     transform: [{translateY: -((DOT_SIZE + DOT_GAP) * 2)}],
     alignItems: 'center',

@@ -266,14 +266,12 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.medium,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginBottom: spacing.xs,
   },
   cardEpisodeCount: {
     fontSize: fontSizes.caption,
     color: colors.textMuted,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
 
   /* ---- Empty State ---- */

@@ -66,7 +66,7 @@ export default function SeriesCard({series}: SeriesCardProps) {
 const styles = StyleSheet.create({
   container: {
     width: CARD_WIDTH,
-    marginLeft: spacing.md,
+    marginStart: spacing.md,
   },
   thumbnailContainer: {
     position: 'relative',
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
   newBadge: {
     position: 'absolute',
     top: spacing.sm,
-    right: spacing.sm,
+    end: spacing.sm,
     backgroundColor: colors.cta,
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
@@ -100,20 +100,17 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.semibold,
     marginTop: spacing.sm,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   episodeCount: {
     color: colors.textMuted,
     fontSize: fontSizes.caption,
     marginTop: spacing.xs,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   viewCount: {
     color: colors.textDim,
     fontSize: fontSizes.tabLabel,
     marginTop: 2,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
 });

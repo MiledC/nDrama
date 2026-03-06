@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
   subsHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
     gap: spacing.sm,
     marginBottom: spacing.xs,
   },
@@ -417,7 +417,6 @@ const styles = StyleSheet.create({
   subsDescription: {
     fontSize: fontSizes.caption,
     color: colors.textMuted,
-    textAlign: 'right',
     writingDirection: 'rtl',
     marginBottom: spacing.md,
   },
@@ -449,7 +448,6 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.button,
     fontWeight: fontWeights.bold,
     color: colors.text,
-    textAlign: 'right',
     writingDirection: 'rtl',
     marginBottom: spacing.md,
   },
@@ -460,17 +458,16 @@ const styles = StyleSheet.create({
   },
   earnRowIcon: {
     fontSize: 18,
-    marginLeft: spacing.md,
+    marginStart: spacing.md,
   },
   earnRowContent: {
     flex: 1,
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
   },
   earnRowText: {
     fontSize: fontSizes.body,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   earnChevron: {
     fontSize: 12,
