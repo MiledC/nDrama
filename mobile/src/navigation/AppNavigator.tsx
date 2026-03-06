@@ -5,6 +5,7 @@ import {colors} from '../theme';
 import type {RootStackParamList} from './types';
 import TabNavigator from './TabNavigator';
 import {
+  SplashScreen,
   SeriesDetailScreen,
   VideoPlayerScreen,
   CoinStoreScreen,
@@ -48,11 +49,19 @@ export default function AppNavigator() {
         },
       }}>
       <Stack.Navigator
+        initialRouteName="Splash"
         screenOptions={{
           headerShown: false,
           contentStyle: {backgroundColor: colors.bg},
           animation: 'slide_from_right',
         }}>
+        {/* Splash — auth init */}
+        <Stack.Screen
+          name="Splash"
+          component={SplashScreen}
+          options={{animation: 'none'}}
+        />
+
         {/* Main tab bar */}
         <Stack.Screen name="MainTabs" component={TabNavigator} />
 
