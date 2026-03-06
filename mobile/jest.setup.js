@@ -51,3 +51,17 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 jest.mock('react-native-video', () => 'Video');
 
 jest.mock('@react-native-vector-icons/feather', () => 'Feather', {virtual: true});
+
+jest.mock('react-native-device-info', () => ({
+  getUniqueId: jest.fn(() => Promise.resolve('test-device-id')),
+}));
+
+jest.mock('@tanstack/react-query', () => ({
+  QueryClient: jest.fn(() => ({
+    defaultOptions: {},
+  })),
+  QueryClientProvider: ({children}) => children,
+  useQuery: jest.fn(() => ({data: undefined, isLoading: false, error: null})),
+  useMutation: jest.fn(() => ({mutate: jest.fn(), isLoading: false})),
+  useQueryClient: jest.fn(() => ({invalidateQueries: jest.fn()})),
+}));

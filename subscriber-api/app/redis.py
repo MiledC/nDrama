@@ -63,3 +63,28 @@ async def delete_all_sessions(subscriber_id: str) -> None:
                 await r.delete(key)
         if cursor == 0:
             break
+
+
+OTP_PREFIX = "otp:"
+OTP_TTL = 300  # 5 minutes
+
+# Stubbed OTP code — accepts this code for any phone number
+STUB_OTP_CODE = "1234"
+
+
+async def store_otp(phone: str, code: str) -> None:
+    """Store OTP code in Redis with 5-minute TTL."""
+    r = await get_redis()
+    await r.setex(f"{OTP_PREFIX}{phone}", OTP_TTL, code)
+
+
+async def verify_otp(phone: str, code: str) -> bool:
+    """Verify OTP code. Accepts stub code or Redis-stored code."""
+    if code == STUB_OTP_CODE:
+        return True
+    r = await get_redis()
+    stored = await r.get(f"{OTP_PREFIX}{phone}")
+    if stored and stored == code:
+        await r.delete(f"{OTP_PREFIX}{phone}")
+        return True
+    return False

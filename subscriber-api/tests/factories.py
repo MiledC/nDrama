@@ -44,6 +44,7 @@ def make_subscriber(**overrides: Any) -> Subscriber:
         "device_id": f"device-{uuid.uuid4().hex[:12]}",
         "status": SubscriberStatus.anonymous,
         "coin_balance": 0,
+        "phone": None,
     }
     defaults.update(overrides)
     return Subscriber(**defaults)

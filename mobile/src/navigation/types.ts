@@ -4,6 +4,7 @@
  */
 
 export type RootStackParamList = {
+  Splash: undefined;
   MainTabs: undefined;
   SeriesDetail: {seriesId: string};
   VideoPlayer: {episodeId: string; seriesId: string};

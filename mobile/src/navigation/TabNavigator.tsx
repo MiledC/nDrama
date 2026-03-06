@@ -16,6 +16,22 @@ const Tab = createBottomTabNavigator<TabParamList>();
 
 const ICON_SIZE = 22;
 
+const HomeIcon = ({color}: {color: string}) => (
+  <Feather name="home" size={ICON_SIZE} color={color} />
+);
+const DiscoverIcon = ({color}: {color: string}) => (
+  <Feather name="compass" size={ICON_SIZE} color={color} />
+);
+const SearchIcon = ({color}: {color: string}) => (
+  <Feather name="search" size={ICON_SIZE} color={color} />
+);
+const MyListIcon = ({color}: {color: string}) => (
+  <Feather name="bookmark" size={ICON_SIZE} color={color} />
+);
+const ProfileIcon = ({color}: {color: string}) => (
+  <Feather name="user" size={ICON_SIZE} color={color} />
+);
+
 /**
  * 5-tab bottom navigator matching the global style guide.
  * Tabs: الرئيسية (Home), اكتشف (Discover), البحث (Search), قائمتي (My List), الملف الشخصي (Profile)
@@ -33,52 +49,27 @@ export default function TabNavigator() {
       <Tab.Screen
         name="Home"
         component={HomeScreen}
-        options={{
-          tabBarLabel: 'الرئيسية',
-          tabBarIcon: ({color}) => (
-            <Feather name="home" size={ICON_SIZE} color={color} />
-          ),
-        }}
+        options={{tabBarLabel: 'الرئيسية', tabBarIcon: HomeIcon}}
       />
       <Tab.Screen
         name="Discover"
         component={DiscoverScreen}
-        options={{
-          tabBarLabel: 'اكتشف',
-          tabBarIcon: ({color}) => (
-            <Feather name="compass" size={ICON_SIZE} color={color} />
-          ),
-        }}
+        options={{tabBarLabel: 'اكتشف', tabBarIcon: DiscoverIcon}}
       />
       <Tab.Screen
         name="Search"
         component={SearchScreen}
-        options={{
-          tabBarLabel: 'البحث',
-          tabBarIcon: ({color}) => (
-            <Feather name="search" size={ICON_SIZE} color={color} />
-          ),
-        }}
+        options={{tabBarLabel: 'البحث', tabBarIcon: SearchIcon}}
       />
       <Tab.Screen
         name="MyList"
         component={MyListScreen}
-        options={{
-          tabBarLabel: 'قائمتي',
-          tabBarIcon: ({color}) => (
-            <Feather name="bookmark" size={ICON_SIZE} color={color} />
-          ),
-        }}
+        options={{tabBarLabel: 'قائمتي', tabBarIcon: MyListIcon}}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{
-          tabBarLabel: 'الملف الشخصي',
-          tabBarIcon: ({color}) => (
-            <Feather name="user" size={ICON_SIZE} color={color} />
-          ),
-        }}
+        options={{tabBarLabel: 'الملف الشخصي', tabBarIcon: ProfileIcon}}
       />
     </Tab.Navigator>
   );

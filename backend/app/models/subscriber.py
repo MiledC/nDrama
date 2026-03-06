@@ -20,6 +20,9 @@ class Subscriber(Base, UUIDMixin, TimestampMixin):
     email: Mapped[str | None] = mapped_column(
         String(255), unique=True, index=True, nullable=True
     )
+    phone: Mapped[str | None] = mapped_column(
+        String(20), unique=True, index=True, nullable=True
+    )
     name: Mapped[str | None] = mapped_column(String(255), nullable=True)
     country: Mapped[str | None] = mapped_column(String(2), nullable=True)
     avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
