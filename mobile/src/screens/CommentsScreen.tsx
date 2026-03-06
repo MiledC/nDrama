@@ -224,6 +224,8 @@ function CommentInput({
   );
 }
 
+const ItemDivider = () => <View style={styles.divider} />;
+
 // ---------------------------------------------------------------------------
 // Main screen
 // ---------------------------------------------------------------------------
@@ -288,7 +290,7 @@ export default function CommentsScreen({navigation}: Props) {
             renderItem={({item}) => (
               <CommentItem comment={item} onLike={() => handleLike(item.id)} />
             )}
-            ItemSeparatorComponent={() => <View style={styles.divider} />}
+            ItemSeparatorComponent={ItemDivider}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
           />
