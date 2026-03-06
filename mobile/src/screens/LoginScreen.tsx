@@ -13,6 +13,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/types';
 import {colors, fontSizes, fontWeights, radii, sizes, spacing} from '../theme';
+import {useAuthStore} from '../stores/authStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -25,13 +26,24 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
  */
 const LoginScreen: React.FC<Props> = ({navigation}) => {
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const authRequestOtp = useAuthStore(s => s.requestOtp);
 
   // Valid Saudi mobile: starts with 5, exactly 9 digits
   const isValid = /^5\d{8}$/.test(phoneNumber);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!isValid) return;
-    navigation.navigate('Otp', {phoneNumber});
+    setIsLoading(true);
+    try {
+      const fullPhone = `+966${phoneNumber}`;
+      await authRequestOtp(fullPhone);
+      navigation.navigate('Otp', {phoneNumber: fullPhone});
+    } catch {
+      // TODO: show error toast
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -86,9 +98,9 @@ const LoginScreen: React.FC<Props> = ({navigation}) => {
 
           {/* Continue button */}
           <Pressable
-            style={[styles.continueBtn, !isValid && styles.continueBtnDisabled]}
+            style={[styles.continueBtn, (!isValid || isLoading) && styles.continueBtnDisabled]}
             onPress={handleContinue}
-            disabled={!isValid}>
+            disabled={!isValid || isLoading}>
             <Text
               style={[
                 styles.continueBtnText,
