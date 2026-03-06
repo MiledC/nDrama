@@ -393,7 +393,7 @@ onMounted(() => {
               <td class="px-4 py-3">
                 <div class="flex items-center gap-3">
                   <!-- Video thumbnail / placeholder -->
-                  <div class="flex-shrink-0 h-10 w-16 rounded bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
+                  <div class="flex-shrink-0 h-16 w-10 rounded bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100">
                     <img
                       v-if="ep.thumbnail_url"
                       :src="ep.thumbnail_url"

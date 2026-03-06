@@ -63,7 +63,7 @@ const showTrackInfo = ref(false)
 
 <template>
   <div>
-    <div class="relative w-full aspect-video rounded-lg overflow-hidden bg-bg-tertiary border border-border">
+    <div class="relative w-full aspect-[2/3] rounded-lg overflow-hidden bg-bg-tertiary border border-border">
       <!-- Video player when ready -->
       <div
         v-if="hasVideo && !isProcessing"

@@ -70,8 +70,8 @@ describe('VideoPlayer', () => {
       },
     })
 
-    // Should have aspect-video class for 16:9 ratio
-    const container = wrapper.find('.aspect-video')
+    // Should have portrait aspect ratio class
+    const container = wrapper.find('.aspect-\\[2\\/3\\]')
     expect(container.exists()).toBe(true)
   })
 
