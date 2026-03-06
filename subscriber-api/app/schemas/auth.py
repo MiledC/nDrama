@@ -27,6 +27,7 @@ class LoginRequest(BaseModel):
 class SubscriberProfile(BaseModel):
     id: uuid.UUID
     email: str | None = None
+    phone: str | None = None
     name: str | None = None
     country: str | None = None
     language: str | None = None
@@ -42,3 +43,22 @@ class SubscriberProfile(BaseModel):
 class AuthResponse(BaseModel):
     session_token: str
     subscriber: SubscriberProfile
+
+
+class OtpRequestRequest(BaseModel):
+    phone: str = Field(..., pattern=r"^\+9665\d{8}$")
+
+
+class OtpRequestResponse(BaseModel):
+    message: str = "OTP sent"
+
+
+class OtpVerifyRequest(BaseModel):
+    phone: str = Field(..., pattern=r"^\+9665\d{8}$")
+    code: str = Field(..., min_length=4, max_length=4)
+
+
+class OtpVerifyResponse(BaseModel):
+    session_token: str
+    subscriber: SubscriberProfile
+    is_new_account: bool
