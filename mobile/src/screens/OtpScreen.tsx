@@ -11,6 +11,7 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/types';
 import {colors, fontSizes, fontWeights, radii, sizes, spacing} from '../theme';
+import {useAuthStore} from '../stores/authStore';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Otp'>;
 
@@ -26,11 +27,14 @@ const RESEND_SECONDS = 30;
  */
 const OtpScreen: React.FC<Props> = ({navigation, route}) => {
   const {phoneNumber} = route.params;
+  const authVerifyOtp = useAuthStore(s => s.verifyOtp);
+  const authRequestOtp = useAuthStore(s => s.requestOtp);
 
   // Each digit stored individually
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''));
   const [focusedIndex, setFocusedIndex] = useState(0);
   const [countdown, setCountdown] = useState(RESEND_SECONDS);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Refs for each TextInput
   const inputRefs = useRef<(TextInput | null)[]>([]);
@@ -50,16 +54,34 @@ const OtpScreen: React.FC<Props> = ({navigation, route}) => {
     return () => clearInterval(interval);
   }, [countdown]);
 
+  // ---------- Verify OTP via API ----------
+  const handleVerify = useCallback(
+    async (code: string) => {
+      if (code.length !== OTP_LENGTH || isLoading) return;
+      setIsLoading(true);
+      try {
+        await authVerifyOtp(phoneNumber, code);
+        navigation.reset({index: 0, routes: [{name: 'MainTabs'}]});
+      } catch {
+        // Wrong code — reset digits
+        setDigits(Array(OTP_LENGTH).fill(''));
+        inputRefs.current[0]?.focus();
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [authVerifyOtp, phoneNumber, navigation, isLoading],
+  );
+
   // ---------- Auto-submit when all digits filled ----------
   const handleAutoSubmit = useCallback(
     (newDigits: string[]) => {
       const code = newDigits.join('');
       if (code.length === OTP_LENGTH && newDigits.every(d => d !== '')) {
-        // Navigate to MainTabs with stack reset
-        navigation.reset({index: 0, routes: [{name: 'MainTabs'}]});
+        handleVerify(code);
       }
     },
-    [navigation],
+    [handleVerify],
   );
 
   // ---------- Digit input handler ----------
@@ -94,21 +116,22 @@ const OtpScreen: React.FC<Props> = ({navigation, route}) => {
   };
 
   // ---------- Resend handler ----------
-  const handleResend = () => {
+  const handleResend = async () => {
     if (countdown > 0) return;
-    // Reset digits and countdown
     setDigits(Array(OTP_LENGTH).fill(''));
     setCountdown(RESEND_SECONDS);
     inputRefs.current[0]?.focus();
-    console.log('Resend OTP to', phoneNumber);
+    try {
+      await authRequestOtp(phoneNumber);
+    } catch {
+      // TODO: show error toast
+    }
   };
 
   // ---------- Confirm handler ----------
   const handleConfirm = () => {
     const code = digits.join('');
-    if (code.length === OTP_LENGTH) {
-      navigation.reset({index: 0, routes: [{name: 'MainTabs'}]});
-    }
+    handleVerify(code);
   };
 
   const isComplete = digits.every(d => d !== '');
