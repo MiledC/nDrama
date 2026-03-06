@@ -4,12 +4,12 @@ import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/types';
 import {colors, fontWeights} from '../theme';
+import {useAuthStore} from '../stores/authStore';
 
 type SplashNav = NativeStackNavigationProp<RootStackParamList>;
 
 const DOT_COUNT = 3;
 const DOT_SIZE = 6;
-const AUTO_NAV_DELAY = 2000;
 
 /**
  * Splash screen -- cinematic brand reveal shown on app launch.
@@ -49,9 +49,12 @@ const SplashScreen: React.FC = () => {
     return () => loops.forEach(l => l.stop());
   }, [dotAnimations]);
 
-  // Auto-navigate after delay
+  const init = useAuthStore(s => s.init);
+
+  // Initialize auth, then navigate
   useEffect(() => {
-    const timer = setTimeout(() => {
+    const doInit = async () => {
+      await init();
       // Fade the whole screen out, then navigate
       Animated.timing(screenOpacity, {
         toValue: 0,
@@ -60,10 +63,12 @@ const SplashScreen: React.FC = () => {
       }).start(() => {
         navigation.reset({index: 0, routes: [{name: 'MainTabs'}]});
       });
-    }, AUTO_NAV_DELAY);
+    };
 
+    // Show splash for at least 1.5s for branding, then init
+    const timer = setTimeout(doInit, 1500);
     return () => clearTimeout(timer);
-  }, [navigation, screenOpacity]);
+  }, [init, navigation, screenOpacity]);
 
   // ---------- Render ----------
   return (
