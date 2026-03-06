@@ -632,7 +632,6 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.body,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginStart: spacing.sm,
   },
   menuLabelCentered: {

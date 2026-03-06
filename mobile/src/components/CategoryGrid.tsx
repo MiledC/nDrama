@@ -57,7 +57,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.bold,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginBottom: spacing.lg,
   },
   grid: {

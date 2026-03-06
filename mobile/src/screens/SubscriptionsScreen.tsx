@@ -438,7 +438,6 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     flex: 1,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   featureTextExcluded: {
     color: colors.textDim,
@@ -475,7 +474,6 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginBottom: spacing.md,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
 
   /* ---- Footer ---- */

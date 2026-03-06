@@ -426,7 +426,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.bold,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginBottom: spacing.sm,
   },
   genreRow: {
@@ -434,7 +433,7 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: spacing.sm,
     marginBottom: spacing.sm,
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
   },
   genrePill: {
     backgroundColor: colors.cardElevated,
@@ -451,14 +450,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textMuted,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginBottom: 2,
   },
   socialProof: {
     fontSize: fontSizes.caption,
     color: colors.textDim,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
 
   /* ---- Content below hero ---- */
@@ -469,7 +466,7 @@ const styles = StyleSheet.create({
 
   /* Free episodes pill */
   freeEpPill: {
-    alignSelf: 'flex-end',
+    alignSelf: 'flex-start',
     backgroundColor: colors.ctaGlow,
     borderColor: colors.cta,
     borderWidth: 1,
@@ -491,14 +488,12 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     lineHeight: 22,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   moreToggle: {
     fontSize: fontSizes.body,
     color: colors.text,
     fontWeight: fontWeights.medium,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginTop: 2,
   },
 
@@ -508,7 +503,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: spacing.md,
     marginBottom: spacing.lg,
-    justifyContent: 'flex-end',
+    justifyContent: 'flex-start',
     gap: spacing.sm,
   },
   completionBar: {
@@ -528,7 +523,6 @@ const styles = StyleSheet.create({
     color: colors.textDim,
     fontStyle: 'italic',
     writingDirection: 'rtl',
-    textAlign: 'right',
     flex: 1,
   },
 

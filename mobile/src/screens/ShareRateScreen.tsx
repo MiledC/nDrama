@@ -380,11 +380,11 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: spacing.sm,
     backgroundColor: colors.border,
-    marginLeft: spacing.md,
+    marginStart: spacing.md,
   },
   previewInfo: {
     flex: 1,
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
   },
   previewTitle: {
     fontSize: fontSizes.body,
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   },
   clipInfo: {
     flex: 1,
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
     marginHorizontal: spacing.md,
   },
   clipTitle: {
@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
   clipPlayText: {
     fontSize: 14,
     color: colors.text,
-    marginLeft: 2,
+    marginStart: 2,
   },
 
   /* ---- Share targets ---- */

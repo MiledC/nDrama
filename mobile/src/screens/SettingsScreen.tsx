@@ -395,7 +395,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.semibold,
     color: colors.textMuted,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginBottom: spacing.sm,
   },
   groupCard: {
@@ -423,7 +422,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.regular,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginStart: spacing.sm,
   },
   rowRight: {

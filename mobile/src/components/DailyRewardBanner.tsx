@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   container: {
     height: BANNER_HEIGHT,
     backgroundColor: '#1A1A1A',
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     overflow: 'hidden',
   },
@@ -67,12 +67,12 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
   },
   leftContent: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
   },

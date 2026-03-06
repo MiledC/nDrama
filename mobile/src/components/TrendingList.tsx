@@ -65,7 +65,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.bold,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginBottom: spacing.lg,
   },
   row: {
@@ -85,7 +84,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginHorizontal: spacing.md,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   arrow: {
     fontSize: 20,

@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
   firstPurchaseBadge: {
     position: 'absolute',
     top: -spacing.sm,
-    left: spacing.md,
+    start: spacing.md,
     backgroundColor: colors.cta,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
   badgePopular: {
     position: 'absolute',
     top: -spacing.sm,
-    right: spacing.md,
+    end: spacing.md,
     backgroundColor: colors.cta,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
   badgeBestValue: {
     position: 'absolute',
     top: -spacing.sm,
-    right: spacing.md,
+    end: spacing.md,
     backgroundColor: colors.cta,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.xs,
@@ -533,7 +533,6 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.bold,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginBottom: spacing.lg,
   },
   earnRow: {
@@ -554,13 +553,11 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.medium,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   earnDescription: {
     fontSize: fontSizes.caption,
     color: colors.textMuted,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginTop: 2,
   },
   earnChevron: {
@@ -600,13 +597,11 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.semibold,
     color: colors.text,
     writingDirection: 'rtl',
-    textAlign: 'right',
   },
   subscriptionDescription: {
     fontSize: fontSizes.caption,
     color: colors.textMuted,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginTop: 2,
   },
   viewPlansButton: {

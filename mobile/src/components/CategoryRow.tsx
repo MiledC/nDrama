@@ -55,14 +55,14 @@ const styles = StyleSheet.create({
     marginTop: spacing.section,
   },
   header: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.md,
   },
   titleRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.sm,
     flex: 1,

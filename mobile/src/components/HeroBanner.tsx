@@ -132,11 +132,10 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.hero,
     fontWeight: fontWeights.bold,
     writingDirection: 'rtl',
-    textAlign: 'right',
     marginBottom: spacing.md,
   },
   genreRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     flexWrap: 'wrap',
     gap: spacing.sm,
     marginBottom: spacing.lg,
@@ -153,7 +152,7 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.medium,
   },
   actionRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
     marginBottom: spacing.lg,
