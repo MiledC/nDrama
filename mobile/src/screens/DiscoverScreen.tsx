@@ -1,4 +1,4 @@
-import React, {useState, useRef, useCallback, useEffect} from 'react';
+import React, {useState, useRef, useCallback, useEffect, useMemo} from 'react';
 import {
   View,
   Text,
@@ -9,11 +9,13 @@ import {
   Dimensions,
   Animated,
   ViewToken,
+  ActivityIndicator,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/types';
 import {colors, fontSizes, fontWeights, spacing, radii} from '../theme';
+import {useSeriesList} from '../hooks';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -33,75 +35,18 @@ interface DiscoverItem {
 }
 
 // ---------------------------------------------------------------------------
-// Mock data
-// ---------------------------------------------------------------------------
-
-const DISCOVER_FEED: DiscoverItem[] = [
-  {
-    id: 'd1',
-    title: 'ظلال الصحراء',
-    episode: 'ح 1',
-    genres: 'دراما، رومانسية',
-    likes: '12.5K',
-    comments: '3.2K',
-    bgColor: '#1a0a0a',
-    seriesId: 'series-1',
-  },
-  {
-    id: 'd2',
-    title: 'ليالي الرياض',
-    episode: 'ح 3',
-    genres: 'كوميدي، اجتماعي',
-    likes: '8.1K',
-    comments: '1.5K',
-    bgColor: '#0a0a1a',
-    seriesId: 'series-2',
-  },
-  {
-    id: 'd3',
-    title: 'أسرار العائلة',
-    episode: 'ح 7',
-    genres: 'دراما، إثارة',
-    likes: '15.3K',
-    comments: '4.8K',
-    bgColor: '#0a1a0a',
-    seriesId: 'series-3',
-  },
-  {
-    id: 'd4',
-    title: 'وعد الأمل',
-    episode: 'ح 2',
-    genres: 'رومانسية، دراما',
-    likes: '6.7K',
-    comments: '2.1K',
-    bgColor: '#1a0a1a',
-    seriesId: 'series-4',
-  },
-  {
-    id: 'd5',
-    title: 'صراع القمة',
-    episode: 'ح 5',
-    genres: 'أكشن، تشويق',
-    likes: '20.1K',
-    comments: '5.6K',
-    bgColor: '#0a1a1a',
-    seriesId: 'series-5',
-  },
-  {
-    id: 'd6',
-    title: 'حكايات الزمن',
-    episode: 'ح 4',
-    genres: 'دراما، تاريخي',
-    likes: '9.4K',
-    comments: '2.8K',
-    bgColor: '#1a1a0a',
-    seriesId: 'series-6',
-  },
-];
-
-// ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
+
+// Dark color palette for rotating backgrounds
+const BG_COLORS = [
+  '#1a0a0a', // Dark red-tinted
+  '#0a0a1a', // Dark blue-tinted
+  '#0a1a0a', // Dark green-tinted
+  '#1a0a1a', // Dark purple-tinted
+  '#1a1a0a', // Dark yellow-tinted
+  '#0a1a1a', // Dark cyan-tinted
+];
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 const ICON_SIZE = 28;
@@ -255,8 +200,8 @@ function FeedItem({
 
       {/* Social sidebar (left for RTL) */}
       <View style={styles.sidebar}>
-        <SidebarAction icon={'\u2661'} count={item.likes} />
-        <SidebarAction icon={'\uD83D\uDCAC'} count={item.comments} />
+        <SidebarAction icon={'\u2661'} count={item.likes || undefined} />
+        <SidebarAction icon={'\uD83D\uDCAC'} count={item.comments || undefined} />
         <SidebarAction icon={'\u2197'} />
         <SidebarAction icon={'\u2606'} />
       </View>
@@ -289,6 +234,25 @@ export default function DiscoverScreen() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [hasScrolled, setHasScrolled] = useState(false);
 
+  // Fetch series list from API
+  const {data, isLoading, isError} = useSeriesList({limit: 20});
+
+  // Transform API data to DiscoverItem format
+  const discoverItems = useMemo<DiscoverItem[]>(() => {
+    if (!data?.items) return [];
+
+    return data.items.map((series, index) => ({
+      id: series.id,
+      title: series.title,
+      episode: 'ح 1', // Default since we don't have the latest episode info
+      genres: series.tags.map(tag => tag.name).join('، ') || 'عام',
+      likes: '', // Not available from API
+      comments: '', // Not available from API
+      bgColor: BG_COLORS[index % BG_COLORS.length],
+      seriesId: series.id,
+    }));
+  }, [data]);
+
   const onViewableItemsChanged = useRef(
     ({viewableItems}: {viewableItems: ViewToken[]}) => {
       if (viewableItems.length > 0 && viewableItems[0].index != null) {
@@ -318,12 +282,32 @@ export default function DiscoverScreen() {
 
   const keyExtractor = useCallback((item: DiscoverItem) => item.id, []);
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <View style={styles.centerContainer}>
+        <ActivityIndicator size="large" color={colors.cta} />
+      </View>
+    );
+  }
+
+  // Error or empty state
+  if (isError || discoverItems.length === 0) {
+    return (
+      <View style={styles.centerContainer}>
+        <Text style={styles.emptyText}>
+          {isError ? 'حدث خطأ في تحميل المحتوى' : 'لا يوجد محتوى متاح'}
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar hidden />
 
       <FlatList
-        data={DISCOVER_FEED}
+        data={discoverItems}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         pagingEnabled
@@ -340,7 +324,7 @@ export default function DiscoverScreen() {
       />
 
       {/* Progress dots — left edge for RTL */}
-      <ProgressDots total={DISCOVER_FEED.length} activeIndex={activeIndex} />
+      <ProgressDots total={discoverItems.length} activeIndex={activeIndex} />
 
       {/* Swipe up hint — first load only */}
       <SwipeHint visible={!hasScrolled} />
@@ -356,6 +340,19 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
+  },
+
+  // Center container for loading/empty states
+  centerContainer: {
+    flex: 1,
+    backgroundColor: colors.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontSize: fontSizes.body,
+    color: colors.textMuted,
+    writingDirection: 'rtl',
   },
 
   // Feed item — full screen

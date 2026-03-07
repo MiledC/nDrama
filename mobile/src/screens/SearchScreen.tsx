@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback, useRef} from 'react';
+import React, {useState, useCallback, useRef, useEffect} from 'react';
 import {
   View,
   Text,
@@ -6,15 +6,18 @@ import {
   Pressable,
   ScrollView,
   StyleSheet,
+  ActivityIndicator,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import SearchBar from '../components/SearchBar';
 import CategoryGrid, {Category} from '../components/CategoryGrid';
 import TrendingList, {TrendingItem} from '../components/TrendingList';
 import {colors, fontSizes, fontWeights, spacing, radii} from '../theme';
+import {useSearchSeries, useCategoryTree} from '../hooks';
+import type {SeriesListItem} from '../types/api';
 
 // ---------------------------------------------------------------------------
-// Mock data
+// Mock data (kept for recent searches and trending)
 // ---------------------------------------------------------------------------
 
 const RECENT_SEARCHES = ['Desert Rose', 'Riyadh Nights', 'صحراء'];
@@ -32,41 +35,17 @@ const TRENDING_ITEMS: TrendingItem[] = [
   {id: '10', rank: 10, title: 'الميراث'},
 ];
 
-const CATEGORIES: Category[] = [
-  {id: 'drama', name: 'دراما', bgColor: '#7F1D1D'},
-  {id: 'romance', name: 'رومانسية', bgColor: '#831843'},
-  {id: 'comedy', name: 'كوميدي', bgColor: '#713F12'},
-  {id: 'thriller', name: 'إثارة', bgColor: '#6D28D9'},
-  {id: 'action', name: 'أكشن', bgColor: '#1E3A5F'},
-  {id: 'family', name: 'عائلي', bgColor: '#14532D'},
-  {id: 'social', name: 'اجتماعي', bgColor: '#5C3D2E'},
-  {id: 'historical', name: 'تاريخي', bgColor: '#78350F'},
+// Color palette for categories (mapped by index)
+const CATEGORY_COLORS = [
+  '#7F1D1D', // Dark red
+  '#831843', // Dark pink
+  '#713F12', // Dark amber
+  '#6D28D9', // Purple
+  '#1E3A5F', // Dark blue
+  '#14532D', // Dark green
+  '#5C3D2E', // Brown
+  '#78350F', // Dark orange
 ];
-
-interface MockSeries {
-  id: string;
-  title: string;
-  genre: string;
-  episodeCount: number;
-}
-
-const MOCK_SERIES: MockSeries[] = [
-  {id: 's1', title: 'وردة الصحراء', genre: 'دراما', episodeCount: 24},
-  {id: 's2', title: 'ليالي الرياض', genre: 'رومانسية', episodeCount: 16},
-  {id: 's3', title: 'القصر الأخير', genre: 'إثارة', episodeCount: 20},
-  {id: 's4', title: 'ظل الماضي', genre: 'دراما', episodeCount: 18},
-  {id: 's5', title: 'نبض المدينة', genre: 'اجتماعي', episodeCount: 30},
-  {id: 's6', title: 'سراب', genre: 'إثارة', episodeCount: 12},
-  {id: 's7', title: 'عهد الوفاء', genre: 'عائلي', episodeCount: 22},
-  {id: 's8', title: 'غربة', genre: 'دراما', episodeCount: 14},
-  {id: 's9', title: 'طريق النور', genre: 'تاريخي', episodeCount: 26},
-  {id: 's10', title: 'الميراث', genre: 'دراما', episodeCount: 20},
-  {id: 's11', title: 'Desert Rose', genre: 'دراما', episodeCount: 24},
-  {id: 's12', title: 'Riyadh Nights', genre: 'رومانسية', episodeCount: 16},
-  {id: 's13', title: 'صحراء الأحلام', genre: 'أكشن', episodeCount: 10},
-];
-
-const DEBOUNCE_MS = 300;
 
 // ---------------------------------------------------------------------------
 // Component
@@ -82,33 +61,38 @@ const SearchScreen: React.FC = () => {
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Debounce search query
   useEffect(() => {
-    if (debounceTimer.current) {
-      clearTimeout(debounceTimer.current);
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
     }
-    debounceTimer.current = setTimeout(() => {
+    debounceTimerRef.current = setTimeout(() => {
       setDebouncedQuery(query);
-    }, DEBOUNCE_MS);
+    }, 300);
 
     return () => {
-      if (debounceTimer.current) {
-        clearTimeout(debounceTimer.current);
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
       }
     };
   }, [query]);
 
-  // Filter mock data
-  const searchResults = debouncedQuery.trim()
-    ? MOCK_SERIES.filter(
-        s =>
-          s.title.toLowerCase().includes(debouncedQuery.toLowerCase()) ||
-          s.genre.includes(debouncedQuery),
-      )
+  // Fetch real data from API
+  const {data: searchData, isLoading: isSearching} = useSearchSeries(debouncedQuery);
+  const {data: categoryData} = useCategoryTree();
+
+  // Map API categories to component format (flatten tree for now, only use top-level)
+  const categories: Category[] = categoryData
+    ? categoryData.map((cat, index) => ({
+        id: cat.id,
+        name: cat.name,
+        bgColor: CATEGORY_COLORS[index % CATEGORY_COLORS.length],
+      }))
     : [];
 
+  const searchResults = searchData?.items || [];
   const isShowingResults = query.trim().length > 0;
 
   const handleChipPress = useCallback((chip: string) => {
@@ -152,7 +136,7 @@ const SearchScreen: React.FC = () => {
   // ---------------------------------------------------------------------------
   // Search results
   // ---------------------------------------------------------------------------
-  const renderResultItem = ({item}: {item: MockSeries}) => (
+  const renderResultItem = ({item}: {item: SeriesListItem}) => (
     <Pressable style={styles.resultRow}>
       {/* Thumbnail placeholder */}
       <View style={styles.resultThumbnail} />
@@ -160,19 +144,27 @@ const SearchScreen: React.FC = () => {
         <Text style={styles.resultTitle} numberOfLines={1}>
           {item.title}
         </Text>
-        <Text style={styles.resultGenre} numberOfLines={1}>
-          {item.genre}
-        </Text>
-        <Text style={styles.resultEpisodes}>
-          {item.episodeCount} حلقة
-        </Text>
+        {item.description && (
+          <Text style={styles.resultGenre} numberOfLines={1}>
+            {item.description}
+          </Text>
+        )}
+        {item.free_episode_count > 0 && (
+          <Text style={styles.resultEpisodes}>
+            {item.free_episode_count} حلقة مجانية
+          </Text>
+        )}
       </View>
     </Pressable>
   );
 
   const renderEmptyResults = () => (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>لا توجد نتائج</Text>
+      {isSearching ? (
+        <ActivityIndicator size="large" color={colors.cta} />
+      ) : (
+        <Text style={styles.emptyText}>لا توجد نتائج</Text>
+      )}
     </View>
   );
 
@@ -197,7 +189,9 @@ const SearchScreen: React.FC = () => {
           renderItem={renderResultItem}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.resultsContent}
-          ListEmptyComponent={debouncedQuery.trim() ? renderEmptyResults : null}
+          ListEmptyComponent={
+            debouncedQuery.length >= 2 || isSearching ? renderEmptyResults : null
+          }
           keyboardShouldPersistTaps="handled"
         />
       ) : (
@@ -216,7 +210,7 @@ const SearchScreen: React.FC = () => {
 
           {/* Browse categories */}
           <View style={styles.sectionSpacing}>
-            <CategoryGrid categories={CATEGORIES} />
+            <CategoryGrid categories={categories} />
           </View>
 
           {/* Bottom breathing room */}

@@ -11,6 +11,7 @@ from app.models.coin_transaction import CoinTransaction, TransactionType
 from app.models.episode import Episode, EpisodeStatus
 from app.models.episode_unlock import EpisodeUnlock
 from app.models.favorite import Favorite
+from app.models.home_section import HomeSection
 from app.models.series import Series, SeriesStatus
 from app.models.subscriber import Subscriber, SubscriberStatus
 from app.models.subtitle import Subtitle, SubtitleFormat
@@ -161,6 +162,20 @@ def make_category(**overrides: Any) -> Category:
     }
     defaults.update(overrides)
     return Category(**defaults)
+
+
+def make_home_section(**overrides: Any) -> HomeSection:
+    n = _next_id()
+    defaults: dict[str, Any] = {
+        "id": uuid.uuid4(),
+        "type": "featured",
+        "title": f"Test Section {n}",
+        "config": {"series_ids": []},
+        "sort_order": 0,
+        "is_active": True,
+    }
+    defaults.update(overrides)
+    return HomeSection(**defaults)
 
 
 def make_episode_unlock(

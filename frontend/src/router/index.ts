@@ -57,6 +57,12 @@ const router = createRouter({
       component: () => import('../views/BrowseView.vue'),
     },
     {
+      path: '/home-layout',
+      name: 'home-layout',
+      component: () => import('../views/HomeLayoutView.vue'),
+      meta: { requiresAdmin: true },
+    },
+    {
       path: '/tags',
       name: 'tags',
       component: () => import('../views/TagsView.vue'),
