@@ -3,11 +3,12 @@
 import uuid
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import func, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.category import Category
 from app.models.home_section import HomeSection
-from app.models.series import Series
+from app.models.series import Series, series_tags
 
 
 async def resolve_section_preview(
@@ -102,25 +103,66 @@ async def _resolve_trending(db: AsyncSession, config: dict) -> list[dict]:
 
 
 async def _resolve_category(db: AsyncSession, config: dict) -> list[dict]:
-    """Resolve category section by fetching series in a category.
-
-    Note: Category filtering is simplified for now since category-series
-    relationships aren't fully implemented yet.
-    """
+    """Resolve category section by fetching series in a category."""
     category_id = config.get("category_id")
     limit = config.get("limit", 10)
 
     if not category_id:
         return []
 
-    # For now, just return recent published series
-    # TODO: Filter by actual category when category-series relationship is implemented
-    result = await db.execute(
-        select(Series)
-        .where(Series.status == "published")
-        .order_by(Series.created_at.desc())
-        .limit(limit)
+    # Convert category_id to UUID
+    try:
+        category_uuid = uuid.UUID(str(category_id))
+    except (ValueError, TypeError):
+        return []
+
+    # Fetch the category with its tags
+    category_result = await db.execute(
+        select(Category).where(Category.id == category_uuid)
     )
+    category = category_result.scalar_one_or_none()
+
+    if not category or not category.tags:
+        return []
+
+    # Get tag IDs from the category
+    tag_ids = [tag.id for tag in category.tags]
+
+    # Build query based on match_mode
+    if category.match_mode == "all":
+        # Series must have ALL of the category's tags
+        # Use a subquery to count matching tags and ensure it equals total tags
+        tag_count_subquery = (
+            select(series_tags.c.series_id, func.count(series_tags.c.tag_id).label("tag_count"))
+            .where(series_tags.c.tag_id.in_(tag_ids))
+            .group_by(series_tags.c.series_id)
+            .having(func.count(series_tags.c.tag_id) == len(tag_ids))
+            .subquery()
+        )
+
+        result = await db.execute(
+            select(Series)
+            .join(tag_count_subquery, Series.id == tag_count_subquery.c.series_id)
+            .where(Series.status == "published")
+            .order_by(Series.created_at.desc())
+            .limit(limit)
+        )
+    else:
+        # match_mode == "any" (default): Series has at least 1 matching tag
+        result = await db.execute(
+            select(Series)
+            .distinct()
+            .join(series_tags, Series.id == series_tags.c.series_id)
+            .where(
+                and_(
+                    series_tags.c.tag_id.in_(tag_ids),
+                    Series.status == "published"
+                )
+            )
+            .order_by(Series.created_at.desc())
+            .limit(limit)
+        )
+
     return [_series_to_preview(s) for s in result.scalars().all()]
 
 

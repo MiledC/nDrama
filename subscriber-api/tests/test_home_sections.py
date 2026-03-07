@@ -4,14 +4,17 @@ import uuid
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.series import series_tags
 from tests.factories import (
     make_category,
     make_episode,
     make_home_section,
     make_series,
     make_subscriber,
+    make_tag,
     make_user,
     make_watch_history,
 )
@@ -285,20 +288,30 @@ async def test_get_home_sections_trending_excludes_draft(
 async def test_get_home_sections_category(
     client, active_subscriber, db_session: AsyncSession
 ):
-    """Category section returns series for category."""
+    """Category section returns series matching category tags."""
     _, token = active_subscriber
     user = make_user()
     db_session.add(user)
     await db_session.flush()
 
-    # Create category + published series
-    cat = make_category(name="Drama")
+    # Create a tag and assign it to both category and series
+    tag = make_tag(name="Drama")
+    db_session.add(tag)
+    await db_session.flush()
+
+    cat = make_category(name="Drama", match_mode="any")
+    cat.tags.append(tag)
     db_session.add(cat)
     await db_session.flush()
 
     s1 = make_series(user.id, status="published", title="Series 1")
     db_session.add(s1)
     await db_session.flush()
+
+    # Insert into series_tags directly (Series.tags is viewonly in subscriber-api)
+    await db_session.execute(
+        insert(series_tags).values(series_id=s1.id, tag_id=tag.id)
+    )
 
     # Create category section
     section = make_home_section(
@@ -317,7 +330,6 @@ async def test_get_home_sections_category(
     data = response.json()
     assert len(data) == 1
     assert data[0]["type"] == "category"
-    # Current impl returns all published series
     assert len(data[0]["items"]) >= 1
 
 
