@@ -54,12 +54,11 @@ const sortedSections = computed(() => {
 })
 
 function getTypeConfig(type: HomeSectionType) {
-  return sectionTypes.find(t => t.value === type) || sectionTypes[0]
+  return sectionTypes.find(t => t.value === type) ?? sectionTypes[0]!
 }
 
 function getTypeColor(type: HomeSectionType): string {
-  const config = getTypeConfig(type)
-  return config.color
+  return getTypeConfig(type).color
 }
 
 function resetCreateForm() {
