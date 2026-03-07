@@ -188,3 +188,98 @@ async def test_delete_section_not_found(admin_client: httpx.AsyncClient):
     """Test 404 on non-existent section."""
     response = await admin_client.delete(f"/api/home-sections/{uuid.uuid4()}")
     assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_update_section_sort_order_only(
+    admin_client: httpx.AsyncClient, db_session: AsyncSession
+):
+    """Test updating only sort_order preserves other fields."""
+    s = make_home_section(
+        title="Original",
+        sort_order=0,
+        config={"series_ids": ["abc"]}
+    )
+    db_session.add(s)
+    await db_session.commit()
+
+    response = await admin_client.patch(
+        f"/api/home-sections/{s.id}",
+        json={"sort_order": 5}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["sort_order"] == 5
+    assert data["title"] == "Original"
+    assert data["config"]["series_ids"] == ["abc"]
+
+
+@pytest.mark.asyncio
+async def test_update_section_config_only(
+    admin_client: httpx.AsyncClient, db_session: AsyncSession
+):
+    """Test updating only config preserves other fields."""
+    s = make_home_section(
+        title="Keep Me",
+        sort_order=3
+    )
+    db_session.add(s)
+    await db_session.commit()
+
+    response = await admin_client.patch(
+        f"/api/home-sections/{s.id}",
+        json={"config": {"series_ids": ["x", "y"]}}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["config"]["series_ids"] == ["x", "y"]
+    assert data["title"] == "Keep Me"
+    assert data["sort_order"] == 3
+
+
+@pytest.mark.asyncio
+async def test_update_section_type_change(
+    admin_client: httpx.AsyncClient, db_session: AsyncSession
+):
+    """Test changing section type."""
+    s = make_home_section(type="featured")
+    db_session.add(s)
+    await db_session.commit()
+
+    response = await admin_client.patch(
+        f"/api/home-sections/{s.id}",
+        json={"type": "trending"}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data["type"] == "trending"
+
+
+@pytest.mark.asyncio
+async def test_create_section_complex_config(admin_client: httpx.AsyncClient):
+    """Test creating section with complex config containing multiple series."""
+    series_ids = [str(uuid.uuid4()) for _ in range(3)]
+
+    response = await admin_client.post(
+        "/api/home-sections",
+        json={
+            "type": "featured",
+            "title": "Complex Featured",
+            "config": {"series_ids": series_ids},
+            "sort_order": 0,
+        }
+    )
+    assert response.status_code == 201
+    data = response.json()
+    assert len(data["config"]["series_ids"]) == 3
+    assert data["config"]["series_ids"] == series_ids
+
+
+@pytest.mark.asyncio
+async def test_list_sections_empty(admin_client: httpx.AsyncClient):
+    """Test listing sections when database is empty."""
+    response = await admin_client.get("/api/home-sections")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["total"] == 0
+    assert data["items"] == []
