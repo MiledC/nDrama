@@ -58,13 +58,13 @@ export default function HomeScreen() {
   const featuredSection = sections?.find(s => s.type === 'featured');
   const otherSections = sections?.filter(s => s.type !== 'featured') || [];
 
-  // Map first item from featured section for hero banner
-  const featuredItem = featuredSection?.items[0];
-  const heroData = featuredItem ? {
-    id: featuredItem.id,
-    title: featuredItem.title,
+  // Map all featured items for hero banner carousel
+  const heroItems = featuredSection?.items.map(item => ({
+    id: item.id,
+    title: item.title,
+    thumbnail_url: item.thumbnail_url,
     genreTags: [], // Tags not available in home section items
-  } : null;
+  })) || [];
 
   return (
     <ScrollView
@@ -76,8 +76,8 @@ export default function HomeScreen() {
       {/* Daily reward banner — dismissable per session */}
       <DailyRewardBanner />
 
-      {/* Hero featured series */}
-      {heroData && <HeroBanner featured={heroData} />}
+      {/* Hero featured series carousel */}
+      {heroItems.length > 0 && <HeroBanner featured={heroItems} />}
 
       {/* Continue watching - only show if we have data (empty for now) */}
       {/* TODO: Integrate with watch history API when available */}

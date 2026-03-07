@@ -6,11 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.audio_track import AudioTrack
-from app.models.category import Category
+from app.models.category import Category, category_tags
 from app.models.episode import Episode, EpisodeStatus
 from app.models.episode_unlock import EpisodeUnlock
 from app.models.home_section import HomeSection
-from app.models.series import Series, SeriesStatus
+from app.models.series import Series, SeriesStatus, series_tags
 from app.models.subtitle import Subtitle
 from app.models.watch_history import WatchHistory
 
@@ -286,13 +286,58 @@ async def get_category_series(
     limit: int = 20,
 ) -> tuple[list[Series], int]:
     """Get published series in a category (matches by tags)."""
-    # For now, return published series — category-tag matching
-    # can be refined later based on category's match_mode
-    query = select(Series).where(Series.status == SeriesStatus.published)
+    # First, fetch the category to get its match_mode and tag IDs
+    cat_result = await db.execute(
+        select(Category).where(Category.id == category_id)
+    )
+    category = cat_result.scalar_one_or_none()
+    if category is None:
+        return [], 0
 
+    # Get category's tag IDs
+    cat_tags_result = await db.execute(
+        select(category_tags.c.tag_id).where(category_tags.c.category_id == category_id)
+    )
+    category_tag_ids = {row[0] for row in cat_tags_result.all()}
+
+    # If category has no tags, return empty list
+    if not category_tag_ids:
+        return [], 0
+
+    # Build query based on match_mode
+    if category.match_mode == "all":
+        # Series must have ALL of the category's tags
+        # Use a subquery to count matching tags per series
+        matching_series_subq = (
+            select(series_tags.c.series_id)
+            .where(series_tags.c.tag_id.in_(category_tag_ids))
+            .group_by(series_tags.c.series_id)
+            .having(func.count(series_tags.c.tag_id) == len(category_tag_ids))
+            .subquery()
+        )
+
+        query = select(Series).where(
+            Series.id.in_(select(matching_series_subq.c.series_id)),
+            Series.status == SeriesStatus.published,
+        )
+    else:
+        # match_mode == "any" (default): Series has at least 1 matching tag
+        matching_series_ids = (
+            select(series_tags.c.series_id)
+            .where(series_tags.c.tag_id.in_(category_tag_ids))
+            .distinct()
+        )
+
+        query = select(Series).where(
+            Series.id.in_(matching_series_ids),
+            Series.status == SeriesStatus.published,
+        )
+
+    # Count total matching series
     count_query = select(func.count()).select_from(query.subquery())
     total = (await db.execute(count_query)).scalar() or 0
 
+    # Apply ordering and pagination
     query = query.order_by(Series.created_at.desc()).offset(offset).limit(limit)
     result = await db.execute(query)
     items = list(result.scalars().all())

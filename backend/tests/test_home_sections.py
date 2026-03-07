@@ -7,10 +7,12 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories import (
+    make_category,
     make_episode,
     make_home_section,
     make_series,
     make_subscriber,
+    make_tag,
     make_user,
     make_watch_history,
 )
@@ -376,18 +378,29 @@ async def test_preview_empty_featured_section(
 async def test_preview_category_section(
     admin_client: httpx.AsyncClient, db_session: AsyncSession
 ):
-    """Preview returns series for category section."""
+    """Preview returns series matching category tags."""
     user = make_user()
     db_session.add(user)
     await db_session.flush()
 
+    # Create a tag and assign it to both category and series
+    tag = make_tag(name="Drama")
+    db_session.add(tag)
+    await db_session.flush()
+
+    cat = make_category(name="Drama Category", match_mode="any")
+    cat.tags.append(tag)
+    db_session.add(cat)
+    await db_session.flush()
+
     s1 = make_series(user.id, status="published", title="Cat Series")
+    s1.tags.append(tag)
     db_session.add(s1)
     await db_session.flush()
 
     section = make_home_section(
         type="category",
-        config={"category_id": str(uuid.uuid4()), "limit": 5},
+        config={"category_id": str(cat.id), "limit": 5},
     )
     db_session.add(section)
     await db_session.commit()
@@ -395,7 +408,6 @@ async def test_preview_category_section(
     response = await admin_client.get(f"/api/home-sections/{section.id}/preview")
     assert response.status_code == 200
     data = response.json()
-    # Should return published series (simplified logic for now)
     assert len(data) >= 1
     assert data[0]["title"] == "Cat Series"
 
