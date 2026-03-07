@@ -1,4 +1,5 @@
 import uuid
+from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,8 +9,10 @@ from app.models.audio_track import AudioTrack
 from app.models.category import Category
 from app.models.episode import Episode, EpisodeStatus
 from app.models.episode_unlock import EpisodeUnlock
+from app.models.home_section import HomeSection
 from app.models.series import Series, SeriesStatus
 from app.models.subtitle import Subtitle
+from app.models.watch_history import WatchHistory
 
 
 async def list_series(
@@ -295,3 +298,140 @@ async def get_category_series(
     items = list(result.scalars().all())
 
     return items, total
+
+
+async def get_home_sections(db: AsyncSession) -> list[dict]:
+    """Get active home sections with resolved series data."""
+    result = await db.execute(
+        select(HomeSection)
+        .where(HomeSection.is_active.is_(True))
+        .order_by(HomeSection.sort_order, HomeSection.created_at)
+    )
+    sections = list(result.scalars().all())
+
+    resolved = []
+    for section in sections:
+        items = await _resolve_section(db, section)
+        resolved.append({
+            "id": section.id,
+            "type": section.type,
+            "title": section.title,
+            "items": items,
+        })
+
+    return resolved
+
+
+async def _resolve_section(db: AsyncSession, section: HomeSection) -> list[dict]:
+    """Resolve a home section's config into series data."""
+    config = section.config or {}
+    section_type = section.type
+
+    if section_type == "featured":
+        return await _resolve_featured(db, config)
+    elif section_type == "new_releases":
+        return await _resolve_new_releases(db, config)
+    elif section_type == "trending":
+        return await _resolve_trending(db, config)
+    elif section_type == "category":
+        return await _resolve_category(db, config)
+    return []
+
+
+async def _resolve_featured(db: AsyncSession, config: dict) -> list[dict]:
+    """Fetch series by explicit IDs."""
+    series_ids = config.get("series_ids", [])
+    if not series_ids:
+        return []
+
+    # Convert string IDs to UUIDs for the query
+    uuid_ids = [uuid.UUID(str(sid)) for sid in series_ids]
+
+    result = await db.execute(
+        select(Series).where(
+            Series.id.in_(uuid_ids),
+            Series.status == SeriesStatus.published,
+        )
+    )
+    series_list = list(result.scalars().all())
+
+    # Preserve the admin-defined order
+    order_map = {str(sid): i for i, sid in enumerate(series_ids)}
+    series_list.sort(key=lambda s: order_map.get(str(s.id), 999))
+
+    return [_series_to_dict(s) for s in series_list]
+
+
+async def _resolve_new_releases(db: AsyncSession, config: dict) -> list[dict]:
+    """Query recently published series."""
+    days = config.get("days", 14)
+    limit = config.get("limit", 10)
+    cutoff = datetime.now(UTC) - timedelta(days=days)
+
+    result = await db.execute(
+        select(Series)
+        .where(
+            Series.status == SeriesStatus.published,
+            Series.created_at >= cutoff,
+        )
+        .order_by(Series.created_at.desc())
+        .limit(limit)
+    )
+    return [_series_to_dict(s) for s in result.scalars().all()]
+
+
+async def _resolve_trending(db: AsyncSession, config: dict) -> list[dict]:
+    """Query most-watched series in recent days."""
+    days = config.get("days", 7)
+    limit = config.get("limit", 10)
+    cutoff = datetime.now(UTC) - timedelta(days=days)
+
+    result = await db.execute(
+        select(
+            Episode.series_id,
+            func.count(WatchHistory.id).label("watch_count"),
+        )
+        .join(WatchHistory, WatchHistory.episode_id == Episode.id)
+        .join(Series, Series.id == Episode.series_id)
+        .where(
+            WatchHistory.last_watched_at >= cutoff,
+            Series.status == SeriesStatus.published,
+        )
+        .group_by(Episode.series_id)
+        .order_by(func.count(WatchHistory.id).desc())
+        .limit(limit)
+    )
+    trending_ids = [row[0] for row in result.all()]
+
+    if not trending_ids:
+        return []
+
+    series_result = await db.execute(
+        select(Series).where(Series.id.in_(trending_ids))
+    )
+    series_map = {s.id: s for s in series_result.scalars().all()}
+
+    return [_series_to_dict(series_map[sid]) for sid in trending_ids if sid in series_map]
+
+
+async def _resolve_category(db: AsyncSession, config: dict) -> list[dict]:
+    """Query published series in a category."""
+    category_id = config.get("category_id")
+    limit = config.get("limit", 10)
+    if not category_id:
+        return []
+
+    items, _ = await get_category_series(db, uuid.UUID(str(category_id)), limit=limit)
+    return [_series_to_dict(s) for s in items]
+
+
+def _series_to_dict(series: Series) -> dict:
+    """Convert a Series model to a dict for home section response."""
+    return {
+        "id": str(series.id),
+        "title": series.title,
+        "description": series.description,
+        "thumbnail_url": series.thumbnail_url,
+        "free_episode_count": series.free_episode_count,
+        "coin_cost_per_episode": series.coin_cost_per_episode,
+    }
