@@ -12,7 +12,7 @@ const STORAGE_KEYS = {
 const api = axios.create({
   baseURL: __DEV__
     ? 'http://localhost:8001/api'
-    : 'https://api.draama.app/api',
+    : 'https://api.glory.dev/api',
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
