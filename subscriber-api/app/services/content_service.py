@@ -333,7 +333,9 @@ async def get_home_sections(db: AsyncSession) -> list[dict]:
     return resolved
 
 
-async def _resolve_section(db: AsyncSession, section: HomeSection, episode_counts: dict) -> list[dict]:
+async def _resolve_section(
+    db: AsyncSession, section: HomeSection, episode_counts: dict,
+) -> list[dict]:
     """Resolve a home section's config into series data."""
     config = section.config or {}
     section_type = section.type
@@ -422,7 +424,10 @@ async def _resolve_trending(db: AsyncSession, config: dict, episode_counts: dict
     )
     series_map = {s.id: s for s in series_result.scalars().all()}
 
-    return [_series_to_dict(series_map[sid], episode_counts) for sid in trending_ids if sid in series_map]
+    return [
+        _series_to_dict(series_map[sid], episode_counts)
+        for sid in trending_ids if sid in series_map
+    ]
 
 
 async def _resolve_category(db: AsyncSession, config: dict, episode_counts: dict) -> list[dict]:

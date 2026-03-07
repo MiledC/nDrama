@@ -931,7 +931,7 @@ onMounted(async () => {
                   class="mt-3 flex gap-3 overflow-x-auto pb-1"
                 >
                   <div
-                    v-for="item in store.previews[section.id].slice(0, 8)"
+                    v-for="item in (store.previews[section.id] ?? []).slice(0, 8)"
                     :key="item.id"
                     class="flex-shrink-0 w-14"
                   >
