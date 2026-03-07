@@ -13,6 +13,7 @@ import {
   FolderIcon,
   UserGroupIcon,
   CurrencyDollarIcon,
+  Squares2X2Icon,
 } from '@heroicons/vue/24/outline'
 import { useAuthStore } from '../../stores/auth'
 
@@ -45,6 +46,7 @@ const sections: NavSection[] = [
     label: 'Overview',
     items: [
       { name: 'Dashboard', href: '/', icon: HomeIcon },
+      { name: 'Home Layout', href: '/home-layout', icon: Squares2X2Icon, adminOnly: true },
     ],
   },
   {

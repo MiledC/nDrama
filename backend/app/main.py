@@ -9,6 +9,7 @@ from app.routers.categories import router as categories_router
 from app.routers.coin_packages import router as coin_packages_router
 from app.routers.dashboard import router as dashboard_router
 from app.routers.episodes import router as episodes_router
+from app.routers.home_sections import router as home_sections_router
 from app.routers.search import router as search_router
 from app.routers.series import router as series_router
 from app.routers.subscribers import router as subscribers_router
@@ -43,6 +44,7 @@ app.include_router(subtitles_router)
 app.include_router(upload_router)
 app.include_router(subscribers_router)
 app.include_router(coin_packages_router)
+app.include_router(home_sections_router)
 app.include_router(dashboard_router)
 app.include_router(search_router)
 
