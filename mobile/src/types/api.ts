@@ -52,6 +52,7 @@ export interface HomeSectionItem {
   thumbnail_url: string | null;
   free_episode_count: number;
   coin_cost_per_episode: number;
+  episode_count: number;
 }
 
 export interface HomeSection {

@@ -15,7 +15,7 @@ from app.schemas.home_section import (
     HomeSectionResponse,
     HomeSectionUpdate,
 )
-from app.services import home_section_service
+from app.services import home_section_resolver, home_section_service
 
 router = APIRouter(prefix="/api/home-sections", tags=["home-sections"])
 
@@ -76,3 +76,18 @@ async def delete_section(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Home section not found"
         )
+
+
+@router.get("/{section_id}/preview")
+async def preview_section(
+    section_id: uuid.UUID,
+    _user: Annotated[User, Depends(get_current_user)],
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
+    """Preview resolved series for a home section."""
+    section = await home_section_service.get_section(db, section_id)
+    if section is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Home section not found"
+        )
+    return await home_section_resolver.resolve_section_preview(db, section)

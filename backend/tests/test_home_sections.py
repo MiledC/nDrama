@@ -6,7 +6,14 @@ import httpx
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.factories import make_home_section
+from tests.factories import (
+    make_episode,
+    make_home_section,
+    make_series,
+    make_subscriber,
+    make_user,
+    make_watch_history,
+)
 
 
 @pytest.mark.asyncio
@@ -283,3 +290,153 @@ async def test_list_sections_empty(admin_client: httpx.AsyncClient):
     data = response.json()
     assert data["total"] == 0
     assert data["items"] == []
+
+
+@pytest.mark.asyncio
+async def test_preview_featured_section(
+    admin_client: httpx.AsyncClient, db_session: AsyncSession
+):
+    """Preview returns resolved series for featured section."""
+    user = make_user()
+    db_session.add(user)
+    await db_session.flush()
+
+    s1 = make_series(user.id, status="published", title="Preview Series")
+    db_session.add(s1)
+    await db_session.flush()
+
+    section = make_home_section(
+        type="featured",
+        config={"series_ids": [str(s1.id)]},
+    )
+    db_session.add(section)
+    await db_session.commit()
+
+    response = await admin_client.get(f"/api/home-sections/{section.id}/preview")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) == 1
+    assert data[0]["title"] == "Preview Series"
+    assert "id" in data[0]
+    assert "thumbnail_url" in data[0]
+
+
+@pytest.mark.asyncio
+async def test_preview_section_not_found(admin_client: httpx.AsyncClient):
+    """Preview returns 404 for non-existent section."""
+    response = await admin_client.get(f"/api/home-sections/{uuid.uuid4()}/preview")
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_preview_new_releases_section(
+    admin_client: httpx.AsyncClient, db_session: AsyncSession
+):
+    """Preview returns resolved series for new_releases section."""
+    user = make_user()
+    db_session.add(user)
+    await db_session.flush()
+
+    s1 = make_series(user.id, status="published")
+    db_session.add(s1)
+    await db_session.flush()
+
+    section = make_home_section(
+        type="new_releases",
+        config={"days": 14, "limit": 10},
+    )
+    db_session.add(section)
+    await db_session.commit()
+
+    response = await admin_client.get(f"/api/home-sections/{section.id}/preview")
+    assert response.status_code == 200
+    data = response.json()
+    assert len(data) >= 1
+
+
+@pytest.mark.asyncio
+async def test_preview_empty_featured_section(
+    admin_client: httpx.AsyncClient, db_session: AsyncSession
+):
+    """Preview returns empty list for featured section with no series."""
+    section = make_home_section(
+        type="featured",
+        config={"series_ids": []},
+    )
+    db_session.add(section)
+    await db_session.commit()
+
+    response = await admin_client.get(f"/api/home-sections/{section.id}/preview")
+    assert response.status_code == 200
+    data = response.json()
+    assert data == []
+
+
+@pytest.mark.asyncio
+async def test_preview_category_section(
+    admin_client: httpx.AsyncClient, db_session: AsyncSession
+):
+    """Preview returns series for category section."""
+    user = make_user()
+    db_session.add(user)
+    await db_session.flush()
+
+    s1 = make_series(user.id, status="published", title="Cat Series")
+    db_session.add(s1)
+    await db_session.flush()
+
+    section = make_home_section(
+        type="category",
+        config={"category_id": str(uuid.uuid4()), "limit": 5},
+    )
+    db_session.add(section)
+    await db_session.commit()
+
+    response = await admin_client.get(f"/api/home-sections/{section.id}/preview")
+    assert response.status_code == 200
+    data = response.json()
+    # Should return published series (simplified logic for now)
+    assert len(data) >= 1
+    assert data[0]["title"] == "Cat Series"
+
+
+@pytest.mark.asyncio
+async def test_preview_trending_section(
+    admin_client: httpx.AsyncClient, db_session: AsyncSession
+):
+    """Preview returns trending series based on watch history."""
+    user = make_user()
+    db_session.add(user)
+    await db_session.flush()
+
+    # Create a series with an episode
+    s1 = make_series(user.id, status="published", title="Trending Series")
+    db_session.add(s1)
+    await db_session.flush()
+
+    ep1 = make_episode(s1.id, user.id)
+    db_session.add(ep1)
+    await db_session.flush()
+
+    # Create subscriber and watch history
+    sub = make_subscriber()
+    db_session.add(sub)
+    await db_session.flush()
+
+    wh = make_watch_history(sub.id, ep1.id)
+    db_session.add(wh)
+    await db_session.flush()
+
+    section = make_home_section(
+        type="trending",
+        config={"days": 7, "limit": 10},
+    )
+    db_session.add(section)
+    await db_session.commit()
+
+    response = await admin_client.get(f"/api/home-sections/{section.id}/preview")
+    assert response.status_code == 200
+    data = response.json()
+    # Should find the series with watch history
+    assert len(data) >= 1
+    assert data[0]["title"] == "Trending Series"
