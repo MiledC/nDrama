@@ -548,3 +548,39 @@ async def test_get_home_sections_mixed_types(
     assert data[2]["type"] == "trending"
     assert data[2]["title"] == "الأكثر مشاهدة"
     assert len(data[2]["items"]) == 1
+
+
+@pytest.mark.asyncio
+async def test_get_home_sections_featured_includes_episode_count(
+    client, active_subscriber, db_session: AsyncSession
+):
+    """Featured section items include episode_count."""
+    _, token = active_subscriber
+    user = make_user()
+    db_session.add(user)
+    await db_session.flush()
+
+    s1 = make_series(user.id, status="published")
+    db_session.add(s1)
+    await db_session.flush()
+
+    # Add 3 published episodes
+    for i in range(3):
+        ep = make_episode(s1.id, user.id, episode_number=i + 1, status="published")
+        db_session.add(ep)
+    await db_session.flush()
+
+    section = make_home_section(
+        type="featured",
+        title="Test",
+        config={"series_ids": [str(s1.id)]},
+    )
+    db_session.add(section)
+    await db_session.commit()
+
+    response = await client.get(
+        "/api/home/sections", headers={"X-Session-Token": token}
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert data[0]["items"][0]["episode_count"] == 3

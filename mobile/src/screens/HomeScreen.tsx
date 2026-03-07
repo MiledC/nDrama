@@ -22,7 +22,7 @@ function mapToSeriesData(item: HomeSectionItem, isNew: boolean = false): SeriesD
     title: item.title,
     thumbnail: item.thumbnail_url,
     genreTags: [], // Tags not included in home section items
-    episodeCount: 0, // Episode count not available in home section items
+    episodeCount: item.episode_count,
     viewCount: '', // View count not available in home section items
     isNew: isNew,
   };

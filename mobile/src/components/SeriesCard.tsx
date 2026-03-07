@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Pressable, StyleSheet} from 'react-native';
+import {View, Text, Image, Pressable, StyleSheet} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/types';
@@ -37,7 +37,11 @@ export default function SeriesCard({series}: SeriesCardProps) {
     <Pressable style={styles.container} onPress={handlePress}>
       {/* Thumbnail placeholder */}
       <View style={styles.thumbnailContainer}>
-        <View style={styles.thumbnail} />
+        {series.thumbnail ? (
+          <Image source={{uri: series.thumbnail}} style={styles.thumbnail} resizeMode="cover" />
+        ) : (
+          <View style={styles.thumbnail} />
+        )}
         {series.isNew && (
           <View style={styles.newBadge}>
             <Text style={styles.newBadgeText}>جديد</Text>
