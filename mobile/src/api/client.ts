@@ -10,9 +10,7 @@ const STORAGE_KEYS = {
  * Uses X-Session-Token header (Redis-backed, 90-day sliding TTL).
  */
 const api = axios.create({
-  baseURL: __DEV__
-    ? 'http://localhost:8001/api'
-    : 'https://api.glory.dev/api',
+  baseURL: 'https://api.glory.dev/api',
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
