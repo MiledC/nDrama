@@ -40,9 +40,9 @@ export default function HeroBanner({featured}: HeroBannerProps) {
   const autoScrollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Handle watch button press
-  const handleWatch = (seriesId: string) => {
+  const handleWatch = useCallback((seriesId: string) => {
     navigation.navigate('SeriesDetail', {seriesId});
-  };
+  }, [navigation]);
 
   // Calculate active index from scroll position
   const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -142,7 +142,7 @@ export default function HeroBanner({featured}: HeroBannerProps) {
         </View>
       </View>
     );
-  }, []);
+  }, [handleWatch]);
 
   if (!featured || featured.length === 0) {
     return null;
