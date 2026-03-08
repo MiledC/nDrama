@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
+import React, {useState, useEffect, useRef, useCallback, useMemo} from 'react';
 import {
   View,
   Text,
@@ -7,9 +7,22 @@ import {
   StatusBar,
   Animated,
   Dimensions,
+  ActivityIndicator,
+  Image,
 } from 'react-native';
+import Video, {
+  type VideoRef,
+  type OnProgressData,
+  type OnLoadData,
+  type SelectedTrack,
+  SelectedTrackType,
+} from 'react-native-video';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import type {RootStackParamList} from '../navigation/types';
+import {useEpisodeDetail} from '../hooks/useEpisodes';
+import {useSeriesEpisodes} from '../hooks/useSeries';
+import {useReportProgress} from '../hooks/useHistory';
+import type {EpisodeListItem, AudioTrackItem, SubtitleItem} from '../types/api';
 import {colors, fontSizes, fontWeights, spacing, radii} from '../theme';
 
 // ---------------------------------------------------------------------------
@@ -25,17 +38,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'VideoPlayer'>;
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 
 const CONTROLS_HIDE_DELAY = 3000;
-const PLAYBACK_DURATION_MS = 10000; // 10 seconds mock playback
-const PROGRESS_INTERVAL_MS = 100;
 const AUTO_NEXT_COUNTDOWN = 5;
-const TOTAL_EPISODES = 78;
-
-// Mock episode data
-const EPISODES = [
-  {number: 31, title: 'العاصفة'},
-  {number: 32, title: 'الكشف'},
-  {number: 33, title: 'المواجهة'},
-];
+const PROGRESS_REPORT_INTERVAL_MS = 12000; // ~12 seconds between progress reports
 
 // Intro ends at 20% of progress
 const INTRO_END = 0.2;
@@ -55,32 +59,155 @@ function formatTime(totalSeconds: number): string {
 // Component
 // ---------------------------------------------------------------------------
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
+  const {episodeId, seriesId} = route.params;
 
-  // Episode state
-  const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(0);
-  const currentEpisode = EPISODES[currentEpisodeIndex];
-  const nextEpisode = EPISODES[currentEpisodeIndex + 1] ?? EPISODES[0];
+  // ---------------------------------------------------------------------------
+  // API data
+  // ---------------------------------------------------------------------------
 
+  const [currentEpisodeId, setCurrentEpisodeId] = useState(episodeId);
+  const {
+    data: episode,
+    isLoading: episodeLoading,
+    error: episodeError,
+  } = useEpisodeDetail(currentEpisodeId);
+  const {data: seriesEpisodes} = useSeriesEpisodes(seriesId, {limit: 200});
+  const reportProgress = useReportProgress();
+
+  // ---------------------------------------------------------------------------
+  // Derived episode list & navigation
+  // ---------------------------------------------------------------------------
+
+  const episodeList = useMemo(
+    () => seriesEpisodes?.items ?? [],
+    [seriesEpisodes?.items],
+  );
+  const currentIndex = episodeList.findIndex(ep => ep.id === currentEpisodeId);
+  const totalEpisodes = seriesEpisodes?.total ?? 0;
+
+  const findAdjacentEpisode = useCallback(
+    (direction: 'next' | 'prev'): EpisodeListItem | null => {
+      if (currentIndex === -1 || episodeList.length === 0) {
+        return null;
+      }
+      const targetIndex =
+        direction === 'next' ? currentIndex + 1 : currentIndex - 1;
+      return episodeList[targetIndex] ?? null;
+    },
+    [currentIndex, episodeList],
+  );
+
+  const nextEpisode = findAdjacentEpisode('next');
+  const prevEpisode = findAdjacentEpisode('prev');
+
+  // ---------------------------------------------------------------------------
+  // Redirect locked episodes
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (episode && episode.locked && !episode.is_free) {
+      navigation.replace('LockedEpisode', {
+        episodeId: episode.id,
+        coinCost: episode.coin_cost,
+      });
+    }
+  }, [episode, navigation]);
+
+  // ---------------------------------------------------------------------------
   // Playback state
+  // ---------------------------------------------------------------------------
+
+  const videoRef = useRef<VideoRef>(null);
   const [isPlaying, setIsPlaying] = useState(true);
-  const [progress, setProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isBuffering, setIsBuffering] = useState(true);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [showAutoNext, setShowAutoNext] = useState(false);
   const [autoNextCountdown, setAutoNextCountdown] = useState(AUTO_NEXT_COUNTDOWN);
 
+  // Audio & subtitle selection
+  const [selectedAudio, setSelectedAudio] = useState<AudioTrackItem | null>(
+    null,
+  );
+  const [selectedSubtitle, setSelectedSubtitle] =
+    useState<SubtitleItem | null>(null);
+  const [showTrackPicker, setShowTrackPicker] = useState<
+    'audio' | 'subtitle' | null
+  >(null);
+
   // Animated opacity for controls overlay
   const controlsOpacity = useRef(new Animated.Value(1)).current;
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const progressInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownInterval = useRef<ReturnType<typeof setInterval> | null>(null);
+  const progressReportTimer = useRef<ReturnType<typeof setInterval> | null>(
+    null,
+  );
+  const lastReportedTime = useRef(0);
+
+  // ---------------------------------------------------------------------------
+  // Set default audio/subtitle when episode loads
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (episode?.audio_tracks?.length) {
+      const defaultTrack =
+        episode.audio_tracks.find(t => t.is_default) ??
+        episode.audio_tracks[0];
+      setSelectedAudio(defaultTrack);
+    }
+    if (episode?.subtitles?.length) {
+      const defaultSub =
+        episode.subtitles.find(t => t.is_default) ?? null;
+      setSelectedSubtitle(defaultSub);
+    }
+  }, [episode]);
+
+  // ---------------------------------------------------------------------------
+  // Progress reporting (every ~12 seconds)
+  // ---------------------------------------------------------------------------
+
+  useEffect(() => {
+    if (!isPlaying || !currentEpisodeId) {
+      return;
+    }
+    progressReportTimer.current = setInterval(() => {
+      const seconds = Math.floor(lastReportedTime.current);
+      if (seconds > 0) {
+        reportProgress.mutate({
+          episodeId: currentEpisodeId,
+          progressSeconds: seconds,
+        });
+      }
+    }, PROGRESS_REPORT_INTERVAL_MS);
+
+    return () => {
+      if (progressReportTimer.current) {
+        clearInterval(progressReportTimer.current);
+      }
+    };
+  }, [isPlaying, currentEpisodeId, reportProgress]);
+
+  // Report final progress on unmount or episode change
+  useEffect(() => {
+    return () => {
+      const seconds = Math.floor(lastReportedTime.current);
+      if (seconds > 0 && currentEpisodeId) {
+        reportProgress.mutate({
+          episodeId: currentEpisodeId,
+          progressSeconds: seconds,
+        });
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentEpisodeId]);
 
   // ---------------------------------------------------------------------------
   // Controls visibility
   // ---------------------------------------------------------------------------
 
-  const showControls = useCallback(() => {
+  const showControlsFn = useCallback(() => {
     setControlsVisible(true);
     Animated.timing(controlsOpacity, {
       toValue: 1,
@@ -89,7 +216,7 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
     }).start();
   }, [controlsOpacity]);
 
-  const hideControls = useCallback(() => {
+  const hideControlsFn = useCallback(() => {
     Animated.timing(controlsOpacity, {
       toValue: 0,
       duration: 300,
@@ -105,25 +232,35 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
     }
     hideTimer.current = setTimeout(() => {
       if (!showAutoNext) {
-        hideControls();
+        hideControlsFn();
       }
     }, CONTROLS_HIDE_DELAY);
-  }, [hideControls, showAutoNext]);
+  }, [hideControlsFn, showAutoNext]);
 
   const handleScreenTap = useCallback(() => {
-    if (showAutoNext) {
+    if (showAutoNext || showTrackPicker) {
+      if (showTrackPicker) {
+        setShowTrackPicker(null);
+      }
       return;
     }
     if (controlsVisible) {
-      hideControls();
+      hideControlsFn();
       if (hideTimer.current) {
         clearTimeout(hideTimer.current);
       }
     } else {
-      showControls();
+      showControlsFn();
       resetHideTimer();
     }
-  }, [controlsVisible, showAutoNext, showControls, hideControls, resetHideTimer]);
+  }, [
+    controlsVisible,
+    showAutoNext,
+    showTrackPicker,
+    showControlsFn,
+    hideControlsFn,
+    resetHideTimer,
+  ]);
 
   // Auto-hide controls after 3 seconds
   useEffect(() => {
@@ -138,41 +275,31 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
   }, [controlsVisible, isPlaying, showAutoNext, resetHideTimer]);
 
   // ---------------------------------------------------------------------------
-  // Mock progress
+  // Video callbacks
   // ---------------------------------------------------------------------------
 
-  useEffect(() => {
-    if (isPlaying && !showAutoNext) {
-      progressInterval.current = setInterval(() => {
-        setProgress(prev => {
-          const step = PROGRESS_INTERVAL_MS / PLAYBACK_DURATION_MS;
-          const next = prev + step;
-          if (next >= 1) {
-            // Episode "ended"
-            clearInterval(progressInterval.current!);
-            return 1;
-          }
-          return next;
-        });
-      }, PROGRESS_INTERVAL_MS);
-    }
+  const onLoad = useCallback((data: OnLoadData) => {
+    setDuration(data.duration);
+    setIsBuffering(false);
+  }, []);
 
-    return () => {
-      if (progressInterval.current) {
-        clearInterval(progressInterval.current);
-      }
-    };
-  }, [isPlaying, showAutoNext]);
+  const onProgress = useCallback((data: OnProgressData) => {
+    setCurrentTime(data.currentTime);
+    lastReportedTime.current = data.currentTime;
+  }, []);
 
-  // Trigger auto-next when progress reaches 1
-  useEffect(() => {
-    if (progress >= 1 && !showAutoNext) {
-      setIsPlaying(false);
+  const onEnd = useCallback(() => {
+    setIsPlaying(false);
+    if (nextEpisode) {
       setShowAutoNext(true);
       setAutoNextCountdown(AUTO_NEXT_COUNTDOWN);
-      showControls();
+      showControlsFn();
     }
-  }, [progress, showAutoNext, showControls]);
+  }, [nextEpisode, showControlsFn]);
+
+  const onBuffer = useCallback(({isBuffering: buffering}: {isBuffering: boolean}) => {
+    setIsBuffering(buffering);
+  }, []);
 
   // ---------------------------------------------------------------------------
   // Auto-next countdown
@@ -184,7 +311,6 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
         setAutoNextCountdown(prev => {
           if (prev <= 1) {
             clearInterval(countdownInterval.current!);
-            // Auto-advance to next episode
             goToNextEpisode();
             return 0;
           }
@@ -206,26 +332,61 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
   // ---------------------------------------------------------------------------
 
   const goToNextEpisode = useCallback(() => {
+    if (!nextEpisode) {
+      return;
+    }
+    // Report final progress before switching
+    const seconds = Math.floor(lastReportedTime.current);
+    if (seconds > 0) {
+      reportProgress.mutate({
+        episodeId: currentEpisodeId,
+        progressSeconds: seconds,
+      });
+    }
     setShowAutoNext(false);
-    setProgress(0);
+    setCurrentTime(0);
+    setDuration(0);
     setIsPlaying(true);
-    setCurrentEpisodeIndex(prev =>
-      prev < EPISODES.length - 1 ? prev + 1 : 0,
-    );
-    showControls();
+    setIsBuffering(true);
+    lastReportedTime.current = 0;
+    setCurrentEpisodeId(nextEpisode.id);
+    showControlsFn();
     resetHideTimer();
-  }, [showControls, resetHideTimer]);
+  }, [
+    nextEpisode,
+    currentEpisodeId,
+    reportProgress,
+    showControlsFn,
+    resetHideTimer,
+  ]);
 
   const goToPreviousEpisode = useCallback(() => {
+    if (!prevEpisode) {
+      return;
+    }
+    const seconds = Math.floor(lastReportedTime.current);
+    if (seconds > 0) {
+      reportProgress.mutate({
+        episodeId: currentEpisodeId,
+        progressSeconds: seconds,
+      });
+    }
     setShowAutoNext(false);
-    setProgress(0);
+    setCurrentTime(0);
+    setDuration(0);
     setIsPlaying(true);
-    setCurrentEpisodeIndex(prev =>
-      prev > 0 ? prev - 1 : EPISODES.length - 1,
-    );
-    showControls();
+    setIsBuffering(true);
+    lastReportedTime.current = 0;
+    setCurrentEpisodeId(prevEpisode.id);
+    showControlsFn();
     resetHideTimer();
-  }, [showControls, resetHideTimer]);
+  }, [
+    prevEpisode,
+    currentEpisodeId,
+    reportProgress,
+    showControlsFn,
+    resetHideTimer,
+  ]);
 
   const cancelAutoNext = useCallback(() => {
     if (countdownInterval.current) {
@@ -233,8 +394,8 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
     }
     setShowAutoNext(false);
     setIsPlaying(false);
-    showControls();
-  }, [showControls]);
+    showControlsFn();
+  }, [showControlsFn]);
 
   const playNow = useCallback(() => {
     if (countdownInterval.current) {
@@ -249,27 +410,93 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
 
   const togglePlayPause = useCallback(() => {
     setIsPlaying(prev => !prev);
-    showControls();
+    showControlsFn();
     resetHideTimer();
-  }, [showControls, resetHideTimer]);
+  }, [showControlsFn, resetHideTimer]);
 
   // ---------------------------------------------------------------------------
   // Skip intro
   // ---------------------------------------------------------------------------
 
   const skipIntro = useCallback(() => {
-    setProgress(INTRO_END);
-    showControls();
+    if (duration > 0) {
+      const skipToTime = duration * INTRO_END;
+      videoRef.current?.seek(skipToTime);
+      setCurrentTime(skipToTime);
+    }
+    showControlsFn();
     resetHideTimer();
-  }, [showControls, resetHideTimer]);
+  }, [duration, showControlsFn, resetHideTimer]);
+
+  // ---------------------------------------------------------------------------
+  // Track selection helpers
+  // ---------------------------------------------------------------------------
+
+  const videoSelectedAudioTrack: SelectedTrack | undefined = selectedAudio
+    ? {type: SelectedTrackType.INDEX, value: (episode?.audio_tracks ?? []).indexOf(selectedAudio)}
+    : undefined;
+
+  const videoSelectedTextTrack: SelectedTrack | undefined = selectedSubtitle
+    ? {type: SelectedTrackType.INDEX, value: (episode?.subtitles ?? []).indexOf(selectedSubtitle)}
+    : undefined;
 
   // ---------------------------------------------------------------------------
   // Derived values
   // ---------------------------------------------------------------------------
 
-  const totalDurationSec = 4 * 60 + 56; // "04:56"
-  const currentTimeSec = progress * totalDurationSec;
-  const showSkipIntro = isPlaying && progress < INTRO_END && !showAutoNext;
+  const progress = duration > 0 ? currentTime / duration : 0;
+  const showSkipIntro = isPlaying && progress < INTRO_END && !showAutoNext && duration > 0;
+  const episodeNumber = episode?.episode_number ?? 0;
+  const episodeTitle = episode?.title ?? '';
+
+  // ---------------------------------------------------------------------------
+  // Loading / error states
+  // ---------------------------------------------------------------------------
+
+  if (episodeLoading) {
+    return (
+      <View style={styles.root}>
+        <StatusBar hidden />
+        <ActivityIndicator
+          size="large"
+          color={colors.cta}
+          style={styles.centered}
+        />
+      </View>
+    );
+  }
+
+  if (episodeError || !episode) {
+    return (
+      <View style={styles.root}>
+        <StatusBar hidden />
+        <View style={styles.centered}>
+          <Text style={styles.errorText}>
+            حدث خطأ في تحميل الحلقة
+          </Text>
+          <Pressable
+            style={styles.retryButton}
+            onPress={() => navigation.goBack()}>
+            <Text style={styles.retryText}>العودة</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  // If locked, we'll redirect via the useEffect above — show loading while redirecting
+  if (episode.locked && !episode.is_free) {
+    return (
+      <View style={styles.root}>
+        <StatusBar hidden />
+        <ActivityIndicator
+          size="large"
+          color={colors.cta}
+          style={styles.centered}
+        />
+      </View>
+    );
+  }
 
   // ---------------------------------------------------------------------------
   // Render
@@ -279,8 +506,34 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
     <View style={styles.root}>
       <StatusBar hidden />
 
-      {/* Black video placeholder */}
-      <View style={styles.videoPlaceholder} />
+      {/* Video player */}
+      {episode.playback_url ? (
+        <Video
+          ref={videoRef}
+          source={{uri: episode.playback_url}}
+          style={StyleSheet.absoluteFill}
+          resizeMode="contain"
+          paused={!isPlaying}
+          onLoad={onLoad}
+          onProgress={onProgress}
+          onEnd={onEnd}
+          onBuffer={onBuffer}
+          selectedAudioTrack={videoSelectedAudioTrack}
+          selectedTextTrack={videoSelectedTextTrack}
+          progressUpdateInterval={250}
+        />
+      ) : (
+        <View style={styles.videoPlaceholder} />
+      )}
+
+      {/* Buffering indicator */}
+      {isBuffering && isPlaying && (
+        <ActivityIndicator
+          size="large"
+          color={colors.cta}
+          style={styles.bufferingIndicator}
+        />
+      )}
 
       {/* Tap target for showing/hiding controls */}
       <Pressable style={StyleSheet.absoluteFill} onPress={handleScreenTap}>
@@ -297,17 +550,100 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
               <Text style={styles.backIcon}>{'‹'}</Text>
             </Pressable>
 
-            <Text style={styles.episodeTitle} numberOfLines={1}>
-              {'ح ' + currentEpisode.number + ' — ' + currentEpisode.title}
+            <Text style={styles.episodeTitleText} numberOfLines={1}>
+              {'ح ' + episodeNumber + ' — ' + episodeTitle}
             </Text>
 
-            <Pressable style={styles.topButton} hitSlop={12}>
-              <Text style={styles.shareIcon}>{'⤴'}</Text>
-            </Pressable>
+            <View style={styles.topActions}>
+              {/* Audio track button */}
+              {(episode.audio_tracks?.length ?? 0) > 1 && (
+                <Pressable
+                  style={styles.topButton}
+                  onPress={() =>
+                    setShowTrackPicker(
+                      showTrackPicker === 'audio' ? null : 'audio',
+                    )
+                  }
+                  hitSlop={8}>
+                  <Text style={styles.trackIcon}>{'🔊'}</Text>
+                </Pressable>
+              )}
+
+              {/* Subtitle button */}
+              {(episode.subtitles?.length ?? 0) > 0 && (
+                <Pressable
+                  style={styles.topButton}
+                  onPress={() =>
+                    setShowTrackPicker(
+                      showTrackPicker === 'subtitle' ? null : 'subtitle',
+                    )
+                  }
+                  hitSlop={8}>
+                  <Text style={styles.trackIcon}>{'CC'}</Text>
+                </Pressable>
+              )}
+
+              <Pressable style={styles.topButton} hitSlop={12}>
+                <Text style={styles.shareIcon}>{'⤴'}</Text>
+              </Pressable>
+            </View>
           </View>
 
+          {/* Track picker dropdown */}
+          {showTrackPicker === 'audio' && (
+            <View style={styles.trackPickerOverlay}>
+              <Text style={styles.trackPickerTitle}>الصوت</Text>
+              {episode.audio_tracks.map(track => (
+                <Pressable
+                  key={track.id}
+                  style={[
+                    styles.trackOption,
+                    selectedAudio?.id === track.id && styles.trackOptionSelected,
+                  ]}
+                  onPress={() => {
+                    setSelectedAudio(track);
+                    setShowTrackPicker(null);
+                  }}>
+                  <Text style={styles.trackOptionText}>{track.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+
+          {showTrackPicker === 'subtitle' && (
+            <View style={styles.trackPickerOverlay}>
+              <Text style={styles.trackPickerTitle}>الترجمة</Text>
+              <Pressable
+                style={[
+                  styles.trackOption,
+                  !selectedSubtitle && styles.trackOptionSelected,
+                ]}
+                onPress={() => {
+                  setSelectedSubtitle(null);
+                  setShowTrackPicker(null);
+                }}>
+                <Text style={styles.trackOptionText}>إيقاف</Text>
+              </Pressable>
+              {episode.subtitles.map(track => (
+                <Pressable
+                  key={track.id}
+                  style={[
+                    styles.trackOption,
+                    selectedSubtitle?.id === track.id &&
+                      styles.trackOptionSelected,
+                  ]}
+                  onPress={() => {
+                    setSelectedSubtitle(track);
+                    setShowTrackPicker(null);
+                  }}>
+                  <Text style={styles.trackOptionText}>{track.label}</Text>
+                </Pressable>
+              ))}
+            </View>
+          )}
+
           {/* Center play/pause button */}
-          {!showAutoNext && (
+          {!showAutoNext && !showTrackPicker && (
             <View style={styles.centerControls}>
               <Pressable
                 style={styles.playPauseButton}
@@ -350,25 +686,43 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
               {/* Time labels */}
               <View style={styles.timeRow}>
                 <Text style={styles.timeLabel}>
-                  {formatTime(currentTimeSec)}
+                  {formatTime(currentTime)}
                 </Text>
                 <Text style={styles.timeLabel}>
-                  {formatTime(totalDurationSec)}
+                  {formatTime(duration)}
                 </Text>
               </View>
 
               {/* Episode navigation row */}
               <View style={styles.episodeNavRow}>
-                <Pressable onPress={goToPreviousEpisode} hitSlop={12}>
-                  <Text style={styles.episodeNavText}>السابقة</Text>
+                <Pressable
+                  onPress={goToPreviousEpisode}
+                  hitSlop={12}
+                  disabled={!prevEpisode}>
+                  <Text
+                    style={[
+                      styles.episodeNavText,
+                      !prevEpisode && styles.episodeNavDisabled,
+                    ]}>
+                    السابقة
+                  </Text>
                 </Pressable>
 
                 <Text style={styles.episodeCounter}>
-                  {'ح ' + currentEpisode.number + '/' + TOTAL_EPISODES}
+                  {'ح ' + episodeNumber + '/' + totalEpisodes}
                 </Text>
 
-                <Pressable onPress={goToNextEpisode} hitSlop={12}>
-                  <Text style={styles.episodeNavText}>التالية</Text>
+                <Pressable
+                  onPress={goToNextEpisode}
+                  hitSlop={12}
+                  disabled={!nextEpisode}>
+                  <Text
+                    style={[
+                      styles.episodeNavText,
+                      !nextEpisode && styles.episodeNavDisabled,
+                    ]}>
+                    التالية
+                  </Text>
                 </Pressable>
               </View>
             </View>
@@ -383,15 +737,24 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
             </Text>
 
             {/* Next episode card */}
-            <View style={styles.nextEpisodeCard}>
-              {/* Thumbnail placeholder */}
-              <View style={styles.nextEpisodeThumbnail} />
-              <View style={styles.nextEpisodeInfo}>
-                <Text style={styles.nextEpisodeTitle}>
-                  {'ح ' + nextEpisode.number + ' — ' + nextEpisode.title}
-                </Text>
+            {nextEpisode && (
+              <View style={styles.nextEpisodeCard}>
+                {nextEpisode.thumbnail_url ? (
+                  <Image
+                    source={{uri: nextEpisode.thumbnail_url}}
+                    style={styles.nextEpisodeThumbnail}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.nextEpisodeThumbnail} />
+                )}
+                <View style={styles.nextEpisodeInfo}>
+                  <Text style={styles.nextEpisodeTitleText}>
+                    {'ح ' + nextEpisode.episode_number + ' — ' + nextEpisode.title}
+                  </Text>
+                </View>
               </View>
-            </View>
+            )}
 
             {/* Action buttons */}
             <Pressable style={styles.playNowButton} onPress={playNow}>
@@ -442,12 +805,47 @@ const styles = StyleSheet.create({
     backgroundColor: '#000000',
   },
 
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  errorText: {
+    fontSize: fontSizes.body,
+    color: colors.text,
+    marginBottom: spacing.lg,
+    writingDirection: 'rtl',
+  },
+
+  retryButton: {
+    backgroundColor: colors.cta,
+    borderRadius: radii.pill,
+    paddingHorizontal: spacing.xl,
+    paddingVertical: spacing.md,
+  },
+
+  retryText: {
+    fontSize: fontSizes.button,
+    color: colors.text,
+    fontWeight: fontWeights.semibold,
+    writingDirection: 'rtl',
+  },
+
+  bufferingIndicator: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginLeft: -18,
+    marginTop: -18,
+  },
+
   // ---- Top bar ----
   topBar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingTop: spacing.xl + 20, // account for hidden status bar area
+    paddingTop: spacing.xl + 20,
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
   },
@@ -456,6 +854,10 @@ const styles = StyleSheet.create({
     height: 40,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  topActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   backIcon: {
     fontSize: 32,
@@ -467,13 +869,51 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: colors.text,
   },
-  episodeTitle: {
+  trackIcon: {
+    fontSize: 16,
+    color: colors.text,
+  },
+  episodeTitleText: {
     flex: 1,
     textAlign: 'center',
     fontSize: fontSizes.body,
     fontWeight: fontWeights.semibold,
     color: colors.text,
     writingDirection: 'rtl',
+  },
+
+  // ---- Track picker ----
+  trackPickerOverlay: {
+    position: 'absolute',
+    top: spacing.xl + 70,
+    right: spacing.lg,
+    backgroundColor: 'rgba(0, 0, 0, 0.90)',
+    borderRadius: radii.card,
+    padding: spacing.md,
+    minWidth: 160,
+    zIndex: 10,
+  },
+  trackPickerTitle: {
+    fontSize: fontSizes.caption,
+    color: colors.textMuted,
+    fontWeight: fontWeights.semibold,
+    marginBottom: spacing.sm,
+    writingDirection: 'rtl',
+    textAlign: 'right',
+  },
+  trackOption: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radii.thumbnail,
+  },
+  trackOptionSelected: {
+    backgroundColor: 'rgba(0, 108, 53, 0.30)',
+  },
+  trackOptionText: {
+    fontSize: fontSizes.body,
+    color: colors.text,
+    writingDirection: 'rtl',
+    textAlign: 'right',
   },
 
   // ---- Center controls ----
@@ -499,7 +939,7 @@ const styles = StyleSheet.create({
   // ---- Bottom controls ----
   bottomControls: {
     paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.xl + 20, // account for home indicator area
+    paddingBottom: spacing.xl + 20,
   },
 
   // Skip intro pill
@@ -569,6 +1009,9 @@ const styles = StyleSheet.create({
     fontWeight: fontWeights.semibold,
     writingDirection: 'rtl',
   },
+  episodeNavDisabled: {
+    opacity: 0.3,
+  },
   episodeCounter: {
     fontSize: 13,
     color: colors.textMuted,
@@ -602,13 +1045,13 @@ const styles = StyleSheet.create({
   },
   nextEpisodeThumbnail: {
     width: '100%',
-    height: SCREEN_WIDTH * 0.75 * 0.56, // ~16:9 aspect
+    height: SCREEN_WIDTH * 0.75 * 0.56,
     backgroundColor: '#252525',
   },
   nextEpisodeInfo: {
     padding: spacing.md,
   },
-  nextEpisodeTitle: {
+  nextEpisodeTitleText: {
     fontSize: fontSizes.body,
     color: colors.text,
     fontWeight: fontWeights.semibold,
