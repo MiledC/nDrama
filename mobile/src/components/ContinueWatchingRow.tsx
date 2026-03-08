@@ -86,7 +86,6 @@ export default function ContinueWatchingRow({items}: ContinueWatchingRowProps) {
         renderItem={renderItem}
         keyExtractor={item => item.id}
         horizontal
-        inverted
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
       />

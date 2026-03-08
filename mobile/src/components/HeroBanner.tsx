@@ -71,7 +71,7 @@ export default function HeroBanner({featured}: HeroBannerProps) {
     if (!isUserInteracting && featured.length > 1) {
       autoScrollTimer.current = setInterval(() => {
         if (flatListRef.current) {
-          const nextIndex = (activeIndex + 1) % featured.length;
+          const nextIndex = (activeIndex - 1 + featured.length) % featured.length;
           flatListRef.current.scrollToIndex({
             index: nextIndex,
             animated: true,
@@ -156,6 +156,7 @@ export default function HeroBanner({featured}: HeroBannerProps) {
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
         horizontal
+        inverted
         pagingEnabled
         showsHorizontalScrollIndicator={false}
         onScroll={handleScroll}
@@ -173,15 +174,18 @@ export default function HeroBanner({featured}: HeroBannerProps) {
       {featured.length > 1 && (
         <View style={styles.dotsContainer}>
           <View style={styles.dotsRow}>
-            {featured.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.dot,
-                  index === activeIndex && styles.dotActive,
-                ]}
-              />
-            ))}
+            {featured.map((_, index) => {
+              const invertedIndex = featured.length - 1 - index;
+              return (
+                <View
+                  key={index}
+                  style={[
+                    styles.dot,
+                    invertedIndex === activeIndex && styles.dotActive,
+                  ]}
+                />
+              );
+            })}
           </View>
         </View>
       )}

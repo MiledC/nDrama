@@ -42,7 +42,6 @@ export default function CategoryRow({
         renderItem={({item}) => <SeriesCard series={item} />}
         keyExtractor={item => item.id}
         horizontal
-        inverted
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
       />
