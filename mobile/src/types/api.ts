@@ -107,6 +107,19 @@ export interface SubtitleItem {
   is_default: boolean;
 }
 
+// Watch History
+export interface WatchHistoryItem {
+  episode_id: string;
+  episode_title: string;
+  series_id: string;
+  series_title: string;
+  thumbnail_url: string | null;
+  progress_seconds: number;
+  duration_seconds: number | null;
+  completed: boolean;
+  last_watched_at: string;
+}
+
 // Coins
 export interface BalanceResponse {
   balance: number;

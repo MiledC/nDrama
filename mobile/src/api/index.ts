@@ -6,3 +6,4 @@ export * from './categories';
 export * from './home';
 export * from './history';
 export * from './coins';
+export * from './profile';

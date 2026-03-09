@@ -8,11 +8,13 @@ import {
   StyleSheet,
   StatusBar,
   Alert,
+  Modal,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/types';
 import {colors, fontSizes, fontWeights, spacing, radii} from '../theme';
+import {useProfile, useUpdateProfile} from '../hooks/useProfile';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -39,12 +41,27 @@ interface SettingsGroupData {
 }
 
 // ---------------------------------------------------------------------------
-// Mock data builders
+// Language options
+// ---------------------------------------------------------------------------
+
+const LANGUAGE_OPTIONS = [
+  {code: 'ar', label: '\u0627\u0644\u0639\u0631\u0628\u064A\u0629'},
+  {code: 'en', label: 'English'},
+] as const;
+
+function getLanguageLabel(code: string | null | undefined): string {
+  const match = LANGUAGE_OPTIONS.find(l => l.code === code);
+  return match?.label ?? '\u0627\u0644\u0639\u0631\u0628\u064A\u0629';
+}
+
+// ---------------------------------------------------------------------------
+// Data builder
 // ---------------------------------------------------------------------------
 
 function buildGroups(
   toggleState: Record<string, boolean>,
-  onToggle: (key: string, val: boolean) => void,
+  currentLanguage: string,
+  onLanguagePress: () => void,
   onClearCache: () => void,
   onClearHistory: () => void,
 ): SettingsGroupData[] {
@@ -58,8 +75,8 @@ function buildGroups(
           icon: '\uD83C\uDF10',
           label: '\u0627\u0644\u0644\u063A\u0629',
           type: 'navigation',
-          value: '\u0627\u0644\u0639\u0631\u0628\u064A\u0629',
-          onPress: () => console.log('Navigate to language settings'),
+          value: currentLanguage,
+          onPress: onLanguagePress,
         },
         {
           id: 'video-quality',
@@ -67,14 +84,12 @@ function buildGroups(
           label: '\u062C\u0648\u062F\u0629 \u0627\u0644\u0641\u064A\u062F\u064A\u0648',
           type: 'navigation',
           value: '\u0639\u0627\u0644\u064A\u0629',
-          onPress: () => console.log('Navigate to video quality settings'),
         },
         {
           id: 'downloads',
           icon: '\u2B07\uFE0F',
           label: '\u0627\u0644\u062A\u0646\u0632\u064A\u0644\u0627\u062A',
           type: 'navigation',
-          onPress: () => console.log('Navigate to downloads'),
         },
       ],
     },
@@ -135,21 +150,18 @@ function buildGroups(
           icon: '\uD83D\uDCC4',
           label: '\u0634\u0631\u0648\u0637 \u0627\u0644\u062E\u062F\u0645\u0629',
           type: 'navigation',
-          onPress: () => console.log('Navigate to terms of service'),
         },
         {
           id: 'privacy',
           icon: '\uD83D\uDEE1\uFE0F',
           label: '\u0633\u064A\u0627\u0633\u0629 \u0627\u0644\u062E\u0635\u0648\u0635\u064A\u0629',
           type: 'navigation',
-          onPress: () => console.log('Navigate to privacy policy'),
         },
         {
           id: 'about-app',
           icon: '\u2139\uFE0F',
           label: '\u062D\u0648\u0644 \u0627\u0644\u062A\u0637\u0628\u064A\u0642',
           type: 'navigation',
-          onPress: () => console.log('Navigate to about app'),
         },
       ],
     },
@@ -160,7 +172,6 @@ function buildGroups(
 // Sub-components
 // ---------------------------------------------------------------------------
 
-/** Single settings row */
 function SettingsRow({
   item,
   isLast,
@@ -183,13 +194,8 @@ function SettingsRow({
       <Pressable
         style={styles.settingsRow}
         onPress={item.type === 'navigation' ? handlePress : undefined}>
-        {/* Icon */}
         <Text style={styles.rowIcon}>{item.icon}</Text>
-
-        {/* Label */}
         <Text style={styles.rowLabel}>{item.label}</Text>
-
-        {/* Right side */}
         <View style={styles.rowRight}>
           {item.type === 'toggle' && item.toggleKey != null ? (
             <Switch
@@ -208,14 +214,11 @@ function SettingsRow({
           )}
         </View>
       </Pressable>
-
-      {/* Divider within group */}
       {!isLast && <View style={styles.rowDivider} />}
     </>
   );
 }
 
-/** A group card with title */
 function SettingsGroup({
   group,
   toggleState,
@@ -249,15 +252,35 @@ function SettingsGroup({
 
 export default function SettingsScreen({navigation}: Props) {
   const insets = useSafeAreaInsets();
+  const {data: profile} = useProfile();
+  const updateProfile = useUpdateProfile();
 
   const [toggleState, setToggleState] = useState<Record<string, boolean>>({
     newEpisodes: true,
     promotions: true,
     dailyReward: true,
   });
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
+
+  const currentLanguageLabel = getLanguageLabel(profile?.language);
 
   const handleToggle = (key: string, value: boolean) => {
     setToggleState(prev => ({...prev, [key]: value}));
+  };
+
+  const handleLanguageSelect = (code: string) => {
+    setLanguageModalVisible(false);
+    updateProfile.mutate(
+      {language: code},
+      {
+        onError: () => {
+          Alert.alert(
+            '\u062E\u0637\u0623',
+            '\u0641\u0634\u0644 \u062A\u063A\u064A\u064A\u0631 \u0627\u0644\u0644\u063A\u0629',
+          );
+        },
+      },
+    );
   };
 
   const handleClearCache = () => {
@@ -290,13 +313,18 @@ export default function SettingsScreen({navigation}: Props) {
     );
   };
 
-  const groups = buildGroups(toggleState, handleToggle, handleClearCache, handleClearHistory);
+  const groups = buildGroups(
+    toggleState,
+    currentLanguageLabel,
+    () => setLanguageModalVisible(true),
+    handleClearCache,
+    handleClearHistory,
+  );
 
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-      {/* Header */}
       <View style={[styles.header, {paddingTop: insets.top + spacing.sm}]}>
         <Pressable
           style={styles.backButton}
@@ -314,8 +342,6 @@ export default function SettingsScreen({navigation}: Props) {
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
-
-        {/* Settings groups */}
         {groups.map(group => (
           <SettingsGroup
             key={group.id}
@@ -325,12 +351,50 @@ export default function SettingsScreen({navigation}: Props) {
           />
         ))}
 
-        {/* Footer version */}
         <Text style={styles.versionText}>Draama v1.0.0</Text>
-
-        {/* Bottom spacer */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
+
+      {/* Language Picker Modal */}
+      <Modal
+        visible={languageModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setLanguageModalVisible(false)}>
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setLanguageModalVisible(false)}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              {'\u0627\u0644\u0644\u063A\u0629'}
+            </Text>
+            {LANGUAGE_OPTIONS.map(option => {
+              const isSelected = profile?.language === option.code ||
+                (!profile?.language && option.code === 'ar');
+              return (
+                <Pressable
+                  key={option.code}
+                  style={[
+                    styles.languageOption,
+                    isSelected && styles.languageOptionSelected,
+                  ]}
+                  onPress={() => handleLanguageSelect(option.code)}>
+                  <Text
+                    style={[
+                      styles.languageOptionText,
+                      isSelected && styles.languageOptionTextSelected,
+                    ]}>
+                    {option.label}
+                  </Text>
+                  {isSelected && (
+                    <Text style={styles.languageCheck}>{'\u2713'}</Text>
+                  )}
+                </Pressable>
+              );
+            })}
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -443,6 +507,53 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: colors.border,
     marginHorizontal: spacing.lg,
+  },
+
+  /* ---- Language Modal ---- */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: spacing.xl,
+  },
+  modalContent: {
+    width: '100%',
+    backgroundColor: colors.card,
+    borderRadius: radii.card,
+    padding: spacing.xl,
+  },
+  modalTitle: {
+    fontSize: fontSizes.sectionTitle,
+    fontWeight: fontWeights.bold,
+    color: colors.text,
+    writingDirection: 'rtl',
+    marginBottom: spacing.lg,
+  },
+  languageOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    height: ROW_HEIGHT,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radii.thumbnail,
+    marginBottom: spacing.sm,
+  },
+  languageOptionSelected: {
+    backgroundColor: colors.cardElevated,
+  },
+  languageOptionText: {
+    fontSize: fontSizes.body,
+    color: colors.text,
+  },
+  languageOptionTextSelected: {
+    fontWeight: fontWeights.bold,
+    color: colors.cta,
+  },
+  languageCheck: {
+    fontSize: 18,
+    color: colors.cta,
+    fontWeight: fontWeights.bold,
   },
 
   /* ---- Footer ---- */
