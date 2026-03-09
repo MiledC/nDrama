@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useCallback} from 'react';
 import {
   View,
   Text,
@@ -7,11 +7,15 @@ import {
   StyleSheet,
   Dimensions,
   StatusBar,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/types';
+import {useBalance, useSpendMutation} from '../hooks/useCoins';
 import {colors, fontSizes, fontWeights, spacing, radii, sizes} from '../theme';
+import type {AxiosError} from 'axios';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -104,7 +108,6 @@ function EarnFreeCoins({
         {'\u0627\u0643\u0633\u0628 \u0639\u0645\u0644\u0627\u062A \u0645\u062C\u0627\u0646\u064A\u0629'}
       </Text>
 
-      {/* Daily reward row */}
       <Pressable style={styles.earnRow} onPress={onDailyRewards}>
         <Text style={styles.earnChevron}>{'\u276E'}</Text>
         <View style={styles.earnRowContent}>
@@ -115,10 +118,8 @@ function EarnFreeCoins({
         <Text style={styles.earnRowIcon}>{'\uD83D\uDD25'}</Text>
       </Pressable>
 
-      {/* Divider */}
       <View style={styles.earnDivider} />
 
-      {/* Referral row */}
       <Pressable style={styles.earnRow} onPress={onReferral}>
         <Text style={styles.earnChevron}>{'\u276E'}</Text>
         <View style={styles.earnRowContent}>
@@ -139,12 +140,59 @@ function EarnFreeCoins({
 export default function LockedEpisodeScreen({navigation, route}: Props) {
   const insets = useSafeAreaInsets();
   const {episodeId, coinCost} = route.params;
-  const [balance] = useState(23);
 
+  const {data: balanceData, isLoading: balanceLoading} = useBalance();
+  const spendMutation = useSpendMutation();
+
+  const balance = balanceData?.balance ?? 0;
   const canAfford = balance >= coinCost;
   const deficit = coinCost - balance;
 
-  const dismiss = () => navigation.goBack();
+  const dismiss = useCallback(() => navigation.goBack(), [navigation]);
+
+  const handleUnlock = useCallback(() => {
+    spendMutation.mutate(
+      {episodeId, cost: coinCost},
+      {
+        onSuccess: () => {
+          // Dismiss modal and navigate to the player
+          navigation.goBack();
+          navigation.navigate('VideoPlayer', {episodeId, seriesId: ''});
+        },
+        onError: (error) => {
+          const axiosError = error as AxiosError;
+          const status = axiosError?.response?.status;
+
+          if (status === 402) {
+            // Insufficient balance
+            Alert.alert(
+              '\u0631\u0635\u064A\u062F \u063A\u064A\u0631 \u0643\u0627\u0641\u064A',
+              '\u0644\u0627 \u062A\u0645\u0644\u0643 \u0639\u0645\u0644\u0627\u062A \u0643\u0627\u0641\u064A\u0629',
+              [
+                {text: '\u0625\u0644\u063A\u0627\u0621', style: 'cancel'},
+                {
+                  text: '\u0634\u0631\u0627\u0621 \u0639\u0645\u0644\u0627\u062A',
+                  onPress: () => {
+                    navigation.goBack();
+                    navigation.navigate('CoinStore');
+                  },
+                },
+              ],
+            );
+          } else if (status === 409) {
+            // Already unlocked — go straight to player
+            navigation.goBack();
+            navigation.navigate('VideoPlayer', {episodeId, seriesId: ''});
+          } else {
+            Alert.alert(
+              '\u062E\u0637\u0623',
+              '\u062D\u062F\u062B \u062E\u0637\u0623 \u0623\u062B\u0646\u0627\u0621 \u0641\u062A\u062D \u0627\u0644\u062D\u0644\u0642\u0629',
+            );
+          }
+        },
+      },
+    );
+  }, [episodeId, coinCost, spendMutation, navigation]);
 
   return (
     <View style={styles.root}>
@@ -181,46 +229,75 @@ export default function LockedEpisodeScreen({navigation, route}: Props) {
           <Text style={styles.lockedHeading}>
             {'\u0647\u0630\u0647 \u0627\u0644\u062D\u0644\u0642\u0629 \u0645\u0642\u0641\u0644\u0629'}
           </Text>
-          <Text style={styles.episodeInfo}>
-            {'\u062D'} {episodeId.replace(/\D/g, '') || '32'}{' '}
-            {'\u2014 \u0627\u0644\u0643\u0634\u0641'}
-          </Text>
 
           {/* ---- Primary CTA: Coin unlock ---- */}
           <Pressable
-            style={[styles.unlockButton, !canAfford && styles.unlockButtonDisabled]}
-            onPress={dismiss}>
-            <Text style={styles.unlockCoinIcon}>{'\uD83E\uDE99'}</Text>
-            <Text style={styles.unlockButtonText}>
-              {'\u0627\u0641\u062A\u062D \u0628\u0640'} {coinCost}{' '}
-              {'\u0639\u0645\u0644\u0627\u062A'}
-            </Text>
+            style={[
+              styles.unlockButton,
+              (!canAfford || spendMutation.isPending) && styles.unlockButtonDisabled,
+            ]}
+            onPress={handleUnlock}
+            disabled={!canAfford || spendMutation.isPending}>
+            {spendMutation.isPending ? (
+              <ActivityIndicator size="small" color={colors.text} />
+            ) : (
+              <>
+                <Text style={styles.unlockCoinIcon}>{'\uD83E\uDE99'}</Text>
+                <Text style={styles.unlockButtonText}>
+                  {'\u0627\u0641\u062A\u062D \u0628\u0640'} {coinCost}{' '}
+                  {'\u0639\u0645\u0644\u0627\u062A'}
+                </Text>
+              </>
+            )}
           </Pressable>
 
           {/* Balance display */}
-          <Text style={[styles.balanceText, !canAfford && styles.balanceTextInsufficient]}>
-            {'\u0631\u0635\u064A\u062F\u0643:'} {balance}{' '}
-            {'\u0639\u0645\u0644\u0629'}
-          </Text>
+          {balanceLoading ? (
+            <ActivityIndicator
+              size="small"
+              color={colors.coin}
+              style={styles.balanceLoading}
+            />
+          ) : (
+            <Text style={[styles.balanceText, !canAfford && styles.balanceTextInsufficient]}>
+              {'\u0631\u0635\u064A\u062F\u0643:'} {balance}{' '}
+              {'\u0639\u0645\u0644\u0629'}
+            </Text>
+          )}
 
           {/* Balance helper when insufficient */}
-          {!canAfford && (
+          {!canAfford && !balanceLoading && (
             <BalanceHelper
               deficit={deficit}
-              onBuyCoins={() => navigation.navigate('CoinStore')}
-              onEarnFree={() => navigation.navigate('DailyRewards')}
+              onBuyCoins={() => {
+                navigation.goBack();
+                navigation.navigate('CoinStore');
+              }}
+              onEarnFree={() => {
+                navigation.goBack();
+                navigation.navigate('DailyRewards');
+              }}
             />
           )}
 
           {/* ---- Subscription upsell ---- */}
           <SubscriptionUpsell
-            onSubscribe={() => navigation.navigate('Subscriptions')}
+            onSubscribe={() => {
+              navigation.goBack();
+              navigation.navigate('Subscriptions');
+            }}
           />
 
           {/* ---- Earn Free Coins section ---- */}
           <EarnFreeCoins
-            onDailyRewards={() => navigation.navigate('DailyRewards')}
-            onReferral={() => navigation.navigate('Referral')}
+            onDailyRewards={() => {
+              navigation.goBack();
+              navigation.navigate('DailyRewards');
+            }}
+            onReferral={() => {
+              navigation.goBack();
+              navigation.navigate('Referral');
+            }}
           />
 
           {/* ---- Dismiss button ---- */}
@@ -314,13 +391,6 @@ const styles = StyleSheet.create({
     color: colors.text,
     textAlign: 'center',
     writingDirection: 'rtl',
-    marginBottom: spacing.xs,
-  },
-  episodeInfo: {
-    fontSize: fontSizes.body,
-    color: colors.textMuted,
-    textAlign: 'center',
-    writingDirection: 'rtl',
     marginBottom: spacing.xl,
   },
 
@@ -358,6 +428,10 @@ const styles = StyleSheet.create({
   },
   balanceTextInsufficient: {
     color: colors.error,
+  },
+  balanceLoading: {
+    marginTop: spacing.sm,
+    marginBottom: spacing.lg,
   },
 
   /* ---- Balance helper ---- */

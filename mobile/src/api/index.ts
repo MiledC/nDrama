@@ -5,3 +5,4 @@ export * from './episodes';
 export * from './categories';
 export * from './home';
 export * from './history';
+export * from './coins';
