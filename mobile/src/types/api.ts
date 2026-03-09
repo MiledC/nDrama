@@ -106,3 +106,32 @@ export interface SubtitleItem {
   format: string;
   is_default: boolean;
 }
+
+// Coins
+export interface BalanceResponse {
+  balance: number;
+}
+
+export interface CoinPackageResponse {
+  id: string;
+  name: string;
+  description: string | null;
+  coin_amount: number;
+  price_sar: string;
+  sort_order: number;
+}
+
+export interface TransactionResponse {
+  id: string;
+  type: 'purchase' | 'spend' | 'refund' | 'promo' | 'adjustment';
+  amount: number;
+  balance_after: number;
+  description: string | null;
+  created_at: string;
+}
+
+export interface UnlockResponse {
+  episode_id: string;
+  new_balance: number;
+  transaction_id: string;
+}
