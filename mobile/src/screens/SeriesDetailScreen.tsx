@@ -1,4 +1,4 @@
-import React, {useState, useMemo} from 'react';
+import React, {useMemo} from 'react';
 import {
   View,
   Text,
@@ -15,7 +15,7 @@ import {RootStackParamList} from '../navigation/types';
 import {colors, fontSizes, fontWeights, spacing, radii, sizes} from '../theme';
 import EpisodeGrid, {EpisodeData} from '../components/EpisodeGrid';
 import NowPlayingCard, {NowPlayingEpisode} from '../components/NowPlayingCard';
-import {useSeriesDetail} from '../hooks';
+import {useSeriesDetail, useIsFavorite, useToggleFavorite} from '../hooks';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -59,10 +59,11 @@ function HeaderButton({
 
 export default function SeriesDetailScreen({navigation, route}: Props) {
   const insets = useSafeAreaInsets();
-  const [descExpanded, setDescExpanded] = useState(false);
-  const [inMyList, setInMyList] = useState(false);
-
+  const [descExpanded, setDescExpanded] = React.useState(false);
   const seriesId = route.params.seriesId;
+  const inMyList = useIsFavorite(seriesId);
+  const toggleFavorite = useToggleFavorite();
+
   const {data: series, isLoading, error} = useSeriesDetail(seriesId);
 
   const heroHeight = Dimensions.get('window').height * HERO_HEIGHT_RATIO;
@@ -306,7 +307,9 @@ export default function SeriesDetailScreen({navigation, route}: Props) {
           <View style={styles.secondaryActions}>
             <Pressable
               style={styles.secondaryButton}
-              onPress={() => setInMyList(prev => !prev)}>
+              onPress={() =>
+                toggleFavorite.mutate({seriesId: series.id, isFavorite: inMyList})
+              }>
               <Text
                 style={[
                   styles.secondaryIcon,

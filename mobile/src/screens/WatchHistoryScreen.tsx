@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useCallback, useMemo} from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,14 @@ import {
   Pressable,
   StyleSheet,
   StatusBar,
-  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/types';
 import {colors, fontSizes, fontWeights, spacing, radii} from '../theme';
+import {useWatchHistory} from '../hooks/useHistory';
+import type {WatchHistoryItem} from '../types/api';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -19,150 +21,95 @@ import {colors, fontSizes, fontWeights, spacing, radii} from '../theme';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'WatchHistory'>;
 
-interface HistoryItem {
-  id: string;
-  seriesId: string;
-  episodeId: string;
-  seriesTitle: string;
-  episodeNumber: number;
-  episodeTitle: string;
-  duration: string;
-  progress: number; // 0-1
-}
-
 interface HistorySection {
   title: string;
-  data: HistoryItem[];
+  data: WatchHistoryItem[];
 }
 
 // ---------------------------------------------------------------------------
-// Mock data
+// Helpers
 // ---------------------------------------------------------------------------
 
-const INITIAL_HISTORY: HistorySection[] = [
-  {
-    title: '\u0627\u0644\u064A\u0648\u0645', // اليوم
-    data: [
-      {
-        id: 'h1',
-        seriesId: 'series-1',
-        episodeId: 'ep-31',
-        seriesTitle: '\u0638\u0644\u0627\u0644 \u0627\u0644\u0635\u062D\u0631\u0627\u0621',
-        episodeNumber: 31,
-        episodeTitle: '\u0627\u0644\u0639\u0627\u0635\u0641\u0629',
-        duration: '04:23',
-        progress: 0.65,
-      },
-      {
-        id: 'h2',
-        seriesId: 'series-2',
-        episodeId: 'ep-12',
-        seriesTitle: '\u0644\u064A\u0627\u0644\u064A \u0627\u0644\u0631\u064A\u0627\u0636',
-        episodeNumber: 12,
-        episodeTitle: '\u0627\u0644\u0644\u0642\u0627\u0621',
-        duration: '03:45',
-        progress: 1,
-      },
-      {
-        id: 'h3',
-        seriesId: 'series-1',
-        episodeId: 'ep-30',
-        seriesTitle: '\u0638\u0644\u0627\u0644 \u0627\u0644\u0635\u062D\u0631\u0627\u0621',
-        episodeNumber: 30,
-        episodeTitle: '\u0627\u0644\u0628\u062F\u0627\u064A\u0629',
-        duration: '05:10',
-        progress: 1,
-      },
-    ],
-  },
-  {
-    title: '\u0623\u0645\u0633', // أمس
-    data: [
-      {
-        id: 'h4',
-        seriesId: 'series-3',
-        episodeId: 'ep-7',
-        seriesTitle: '\u0623\u0633\u0631\u0627\u0631 \u0627\u0644\u0639\u0627\u0626\u0644\u0629',
-        episodeNumber: 7,
-        episodeTitle: '\u0627\u0644\u062D\u0642\u064A\u0642\u0629',
-        duration: '04:50',
-        progress: 0.45,
-      },
-      {
-        id: 'h5',
-        seriesId: 'series-4',
-        episodeId: 'ep-2',
-        seriesTitle: '\u0648\u0639\u062F \u0627\u0644\u0623\u0645\u0644',
-        episodeNumber: 2,
-        episodeTitle: '\u0627\u0644\u0648\u0639\u062F',
-        duration: '03:20',
-        progress: 1,
-      },
-    ],
-  },
-  {
-    title: '15 \u0641\u0628\u0631\u0627\u064A\u0631', // 15 فبراير
-    data: [
-      {
-        id: 'h6',
-        seriesId: 'series-5',
-        episodeId: 'ep-5',
-        seriesTitle: '\u0635\u0631\u0627\u0639 \u0627\u0644\u0642\u0645\u0629',
-        episodeNumber: 5,
-        episodeTitle: '\u0627\u0644\u0645\u0648\u0627\u062C\u0647\u0629',
-        duration: '04:00',
-        progress: 0.8,
-      },
-      {
-        id: 'h7',
-        seriesId: 'series-6',
-        episodeId: 'ep-4',
-        seriesTitle: '\u062D\u0643\u0627\u064A\u0627\u062A \u0627\u0644\u0632\u0645\u0646',
-        episodeNumber: 4,
-        episodeTitle: '\u0627\u0644\u0630\u0643\u0631\u064A\u0627\u062A',
-        duration: '03:55',
-        progress: 1,
-      },
-      {
-        id: 'h8',
-        seriesId: 'series-5',
-        episodeId: 'ep-4',
-        seriesTitle: '\u0635\u0631\u0627\u0639 \u0627\u0644\u0642\u0645\u0629',
-        episodeNumber: 4,
-        episodeTitle: '\u0627\u0644\u062A\u062D\u062F\u064A',
-        duration: '04:15',
-        progress: 1,
-      },
-    ],
-  },
-];
+function formatDuration(seconds: number | null): string {
+  if (!seconds) return '';
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+function groupByDate(items: WatchHistoryItem[]): HistorySection[] {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today.getTime() - 86400000);
+
+  const groups: Record<string, WatchHistoryItem[]> = {};
+  const groupOrder: string[] = [];
+
+  for (const item of items) {
+    const d = new Date(item.last_watched_at);
+    const itemDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+    let label: string;
+    if (itemDate.getTime() === today.getTime()) {
+      label = '\u0627\u0644\u064A\u0648\u0645';
+    } else if (itemDate.getTime() === yesterday.getTime()) {
+      label = '\u0623\u0645\u0633';
+    } else {
+      label = `${d.getDate()} ${getArabicMonth(d.getMonth())}`;
+    }
+
+    if (!groups[label]) {
+      groups[label] = [];
+      groupOrder.push(label);
+    }
+    groups[label].push(item);
+  }
+
+  return groupOrder.map(title => ({title, data: groups[title]}));
+}
+
+function getArabicMonth(month: number): string {
+  const months = [
+    '\u064A\u0646\u0627\u064A\u0631',
+    '\u0641\u0628\u0631\u0627\u064A\u0631',
+    '\u0645\u0627\u0631\u0633',
+    '\u0623\u0628\u0631\u064A\u0644',
+    '\u0645\u0627\u064A\u0648',
+    '\u064A\u0648\u0646\u064A\u0648',
+    '\u064A\u0648\u0644\u064A\u0648',
+    '\u0623\u063A\u0633\u0637\u0633',
+    '\u0633\u0628\u062A\u0645\u0628\u0631',
+    '\u0623\u0643\u062A\u0648\u0628\u0631',
+    '\u0646\u0648\u0641\u0645\u0628\u0631',
+    '\u062F\u064A\u0633\u0645\u0628\u0631',
+  ];
+  return months[month];
+}
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
 
 const THUMBNAIL_WIDTH = 55;
-const THUMBNAIL_HEIGHT = 82; // ~2:3 portrait
+const THUMBNAIL_HEIGHT = 82;
 
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
 
-/** Thumbnail with progress bar and play overlay */
-function Thumbnail({progress}: {progress: number}) {
+function Thumbnail({progress, duration}: {progress: number; duration: number | null}) {
+  const ratio = duration && duration > 0 ? Math.min(progress / duration, 1) : 0;
+
   return (
     <View style={styles.thumbnail}>
-      {/* Placeholder background */}
       <View style={styles.thumbnailBg}>
         <Text style={styles.thumbnailPlayIcon}>{'\u25B6'}</Text>
       </View>
-
-      {/* Progress bar at bottom */}
       <View style={styles.thumbnailProgressTrack}>
         <View
           style={[
             styles.thumbnailProgressFill,
-            {width: `${Math.min(progress * 100, 100)}%`},
+            {width: `${Math.min(ratio * 100, 100)}%`},
           ]}
         />
       </View>
@@ -170,12 +117,11 @@ function Thumbnail({progress}: {progress: number}) {
   );
 }
 
-/** Single history item row */
 function HistoryItemRow({
   item,
   onPress,
 }: {
-  item: HistoryItem;
+  item: WatchHistoryItem;
   onPress: () => void;
 }) {
   return (
@@ -185,36 +131,28 @@ function HistoryItemRow({
         pressed && styles.historyItemPressed,
       ]}
       onPress={onPress}>
-      {/* Thumbnail */}
-      <Thumbnail progress={item.progress} />
-
-      {/* Info */}
+      <Thumbnail progress={item.progress_seconds} duration={item.duration_seconds} />
       <View style={styles.historyInfo}>
-        {/* Series title */}
         <Text style={styles.historySeriesTitle} numberOfLines={1}>
-          {item.seriesTitle}
+          {item.series_title}
         </Text>
-
-        {/* Episode info */}
         <Text style={styles.historyEpisode} numberOfLines={1}>
-          {'\u062D'} {item.episodeNumber} {'\u2014'} {item.episodeTitle}
+          {'\u062D'} {item.episode_title}
         </Text>
-
-        {/* Duration */}
-        <Text style={styles.historyDuration}>{item.duration}</Text>
+        {item.duration_seconds != null && (
+          <Text style={styles.historyDuration}>
+            {formatDuration(item.duration_seconds)}
+          </Text>
+        )}
       </View>
     </Pressable>
   );
 }
 
-/** Empty state when history is empty */
 function EmptyState() {
   return (
     <View style={styles.emptyContainer}>
-      {/* Clock icon */}
       <Text style={styles.emptyIcon}>{'\uD83D\uDD52'}</Text>
-
-      {/* Title */}
       <Text style={styles.emptyTitle}>
         {'\u0644\u0627 \u064A\u0648\u062C\u062F \u0633\u062C\u0644 \u0645\u0634\u0627\u0647\u062F\u0629'}
       </Text>
@@ -228,40 +166,28 @@ function EmptyState() {
 
 export default function WatchHistoryScreen({navigation}: Props) {
   const insets = useSafeAreaInsets();
-  const [history, setHistory] = useState<HistorySection[]>(INITIAL_HISTORY);
+  const {data: historyData, isLoading} = useWatchHistory();
+
+  const sections = useMemo(() => {
+    const items = historyData?.items ?? [];
+    if (items.length === 0) return [];
+    return groupByDate(items);
+  }, [historyData]);
+
+  const hasHistory = sections.length > 0;
 
   const handleItemPress = useCallback(
-    (item: HistoryItem) => {
+    (item: WatchHistoryItem) => {
       navigation.navigate('VideoPlayer', {
-        episodeId: item.episodeId,
-        seriesId: item.seriesId,
+        episodeId: item.episode_id,
+        seriesId: item.series_id,
       });
     },
     [navigation],
   );
 
-  const handleClearHistory = useCallback(() => {
-    Alert.alert(
-      '\u0645\u0633\u062D \u0627\u0644\u0633\u062C\u0644', // مسح السجل
-      '\u0647\u0644 \u062A\u0631\u064A\u062F \u0645\u0633\u062D \u0633\u062C\u0644 \u0627\u0644\u0645\u0634\u0627\u0647\u062F\u0629 \u0628\u0627\u0644\u0643\u0627\u0645\u0644\u061F', // هل تريد مسح سجل المشاهدة بالكامل؟
-      [
-        {
-          text: '\u0625\u0644\u063A\u0627\u0621', // إلغاء
-          style: 'cancel',
-        },
-        {
-          text: '\u0645\u0633\u062D', // مسح
-          style: 'destructive',
-          onPress: () => setHistory([]),
-        },
-      ],
-    );
-  }, []);
-
-  const hasHistory = history.length > 0 && history.some(s => s.data.length > 0);
-
   const renderItem = useCallback(
-    ({item}: {item: HistoryItem}) => (
+    ({item}: {item: WatchHistoryItem}) => (
       <HistoryItemRow item={item} onPress={() => handleItemPress(item)} />
     ),
     [handleItemPress],
@@ -281,45 +207,37 @@ export default function WatchHistoryScreen({navigation}: Props) {
     [],
   );
 
-  const keyExtractor = useCallback((item: HistoryItem) => item.id, []);
+  const keyExtractor = useCallback(
+    (item: WatchHistoryItem) => item.episode_id,
+    [],
+  );
 
   return (
     <View style={styles.root}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-      {/* Header */}
       <View style={[styles.header, {paddingTop: insets.top + spacing.sm}]}>
-        {/* Back button */}
         <Pressable
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           hitSlop={8}>
           <Text style={styles.backIcon}>{'\u276F'}</Text>
         </Pressable>
-
-        {/* Title */}
         <Text style={styles.headerTitle}>
           {'\u0633\u062C\u0644 \u0627\u0644\u0645\u0634\u0627\u0647\u062F\u0629'}
         </Text>
-
-        {/* Clear history / spacer */}
-        {hasHistory ? (
-          <Pressable onPress={handleClearHistory} hitSlop={8}>
-            <Text style={styles.clearButton}>
-              {'\u0645\u0633\u062D \u0627\u0644\u0633\u062C\u0644'}
-            </Text>
-          </Pressable>
-        ) : (
-          <View style={styles.headerSpacer} />
-        )}
+        <View style={styles.headerSpacer} />
       </View>
 
-      {/* Content */}
-      {!hasHistory ? (
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.cta} />
+        </View>
+      ) : !hasHistory ? (
         <EmptyState />
       ) : (
         <SectionList
-          sections={history}
+          sections={sections}
           renderItem={renderItem}
           renderSectionHeader={renderSectionHeader}
           ItemSeparatorComponent={renderSeparator}
@@ -371,13 +289,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     writingDirection: 'rtl',
   },
-  clearButton: {
-    fontSize: fontSizes.body,
-    color: colors.error,
-    writingDirection: 'rtl',
-  },
   headerSpacer: {
     width: 36,
+  },
+
+  /* ---- Loading ---- */
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   /* ---- Section Headers ---- */

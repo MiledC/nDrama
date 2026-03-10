@@ -1,12 +1,12 @@
-import React from 'react';
+import React, {useMemo} from 'react';
 import {ScrollView, StyleSheet, StatusBar, View, Text, ActivityIndicator} from 'react-native';
 import {colors, spacing, fontSizes} from '../theme';
 import DailyRewardBanner from '../components/DailyRewardBanner';
 import HeroBanner from '../components/HeroBanner';
-import ContinueWatchingRow from '../components/ContinueWatchingRow';
+import ContinueWatchingRow, {ContinueWatchingItem} from '../components/ContinueWatchingRow';
 import CategoryRow from '../components/CategoryRow';
 import {SeriesData} from '../components/SeriesCard';
-import {useHomeSections} from '../hooks';
+import {useHomeSections, useWatchHistory} from '../hooks';
 import type {HomeSectionItem} from '../types/api';
 
 // ---------------------------------------------------------------------------
@@ -34,6 +34,23 @@ function mapToSeriesData(item: HomeSectionItem, isNew: boolean = false): SeriesD
 
 export default function HomeScreen() {
   const {data: sections, isLoading, error} = useHomeSections();
+  const {data: historyData} = useWatchHistory();
+
+  const continueWatchingItems = useMemo<ContinueWatchingItem[]>(() => {
+    const items = historyData?.items ?? [];
+    return items
+      .filter(h => !h.completed && h.duration_seconds && h.duration_seconds > 0)
+      .slice(0, 10)
+      .map(h => ({
+        id: h.episode_id,
+        seriesId: h.series_id,
+        title: h.series_title,
+        thumbnail: h.thumbnail_url,
+        currentEp: 1, // Episode number not available in history response
+        totalEps: 1,
+        progress: h.duration_seconds ? h.progress_seconds / h.duration_seconds : 0,
+      }));
+  }, [historyData]);
 
   // Show loading state
   if (isLoading) {
@@ -79,9 +96,8 @@ export default function HomeScreen() {
       {/* Hero featured series carousel */}
       {heroItems.length > 0 && <HeroBanner featured={heroItems} />}
 
-      {/* Continue watching - only show if we have data (empty for now) */}
-      {/* TODO: Integrate with watch history API when available */}
-      <ContinueWatchingRow items={[]} />
+      {/* Continue watching row from watch history */}
+      <ContinueWatchingRow items={continueWatchingItems} />
 
       {/* Render other sections as category rows */}
       {otherSections.map((section) => {
