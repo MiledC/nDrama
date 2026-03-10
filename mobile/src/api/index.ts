@@ -7,3 +7,4 @@ export * from './home';
 export * from './history';
 export * from './coins';
 export * from './profile';
+export * from './favorites';
