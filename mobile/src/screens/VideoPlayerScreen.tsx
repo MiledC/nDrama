@@ -17,6 +17,13 @@ import Video, {
   type SelectedTrack,
   SelectedTrackType,
 } from 'react-native-video';
+import {GestureDetector, Gesture} from 'react-native-gesture-handler';
+import ReAnimated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  runOnJS,
+} from 'react-native-reanimated';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 import type {RootStackParamList} from '../navigation/types';
 import {useEpisodeDetail} from '../hooks/useEpisodes';
@@ -24,6 +31,7 @@ import {useSeriesEpisodes} from '../hooks/useSeries';
 import {useReportProgress} from '../hooks/useHistory';
 import type {EpisodeListItem, AudioTrackItem, SubtitleItem} from '../types/api';
 import {colors, fontSizes, fontWeights, spacing, radii} from '../theme';
+import UnlockEpisodeSheet from '../components/sheets/UnlockEpisodeSheet';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -35,7 +43,8 @@ type Props = NativeStackScreenProps<RootStackParamList, 'VideoPlayer'>;
 // Constants
 // ---------------------------------------------------------------------------
 
-const {width: SCREEN_WIDTH} = Dimensions.get('window');
+const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
+const SWIPE_THRESHOLD = 80;
 
 const CONTROLS_HIDE_DELAY = 3000;
 const AUTO_NEXT_COUNTDOWN = 5;
@@ -102,19 +111,6 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
   const prevEpisode = findAdjacentEpisode('prev');
 
   // ---------------------------------------------------------------------------
-  // Redirect locked episodes
-  // ---------------------------------------------------------------------------
-
-  useEffect(() => {
-    if (episode && episode.locked && !episode.is_free) {
-      navigation.replace('LockedEpisode', {
-        episodeId: episode.id,
-        coinCost: episode.coin_cost,
-      });
-    }
-  }, [episode, navigation]);
-
-  // ---------------------------------------------------------------------------
   // Playback state
   // ---------------------------------------------------------------------------
 
@@ -136,6 +132,15 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
   const [showTrackPicker, setShowTrackPicker] = useState<
     'audio' | 'subtitle' | null
   >(null);
+
+  // Swipe navigation
+  const translateY = useSharedValue(0);
+  const [lockedEpisodeInfo, setLockedEpisodeInfo] = useState<{
+    episodeId: string;
+    episodeNumber: number;
+    episodeTitle: string;
+    coinCost: number;
+  } | null>(null);
 
   // Animated opacity for controls overlay
   const controlsOpacity = useRef(new Animated.Value(1)).current;
@@ -397,6 +402,90 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
     showControlsFn();
   }, [showControlsFn]);
 
+  // ---------------------------------------------------------------------------
+  // Swipe episode navigation
+  // ---------------------------------------------------------------------------
+
+  const handleSwipeToEpisode = useCallback(
+    (direction: 'next' | 'prev') => {
+      const targetEpisode = direction === 'next' ? nextEpisode : prevEpisode;
+      if (!targetEpisode) return;
+
+      // Check if the target episode is locked
+      if (!targetEpisode.is_free && !targetEpisode.is_unlocked) {
+        setLockedEpisodeInfo({
+          episodeId: targetEpisode.id,
+          episodeNumber: targetEpisode.episode_number,
+          episodeTitle: targetEpisode.title,
+          coinCost: targetEpisode.coin_price ?? 0,
+        });
+        return;
+      }
+
+      // Navigate to the episode
+      if (direction === 'next') {
+        goToNextEpisode();
+      } else {
+        goToPreviousEpisode();
+      }
+    },
+    [nextEpisode, prevEpisode, goToNextEpisode, goToPreviousEpisode],
+  );
+
+  const handleLockedUnlocked = useCallback(() => {
+    if (!lockedEpisodeInfo) return;
+    // After unlock, switch to the episode
+    const unlockedId = lockedEpisodeInfo.episodeId;
+    setLockedEpisodeInfo(null);
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlaying(true);
+    setIsBuffering(true);
+    lastReportedTime.current = 0;
+    setCurrentEpisodeId(unlockedId);
+    showControlsFn();
+    resetHideTimer();
+  }, [lockedEpisodeInfo, showControlsFn, resetHideTimer]);
+
+  const handleLockedDismiss = useCallback(() => {
+    setLockedEpisodeInfo(null);
+  }, []);
+
+  const swipeGesture = Gesture.Pan()
+    .onUpdate((e) => {
+      if (showAutoNext || showTrackPicker) return;
+      translateY.value = e.translationY;
+    })
+    .onEnd((e) => {
+      if (showAutoNext || showTrackPicker) {
+        translateY.value = withSpring(0);
+        return;
+      }
+
+      if (e.translationY < -SWIPE_THRESHOLD && nextEpisode) {
+        // Swiped up — go to next
+        translateY.value = withSpring(-SCREEN_HEIGHT, {damping: 20}, () => {
+          translateY.value = 0;
+          runOnJS(handleSwipeToEpisode)('next');
+        });
+      } else if (e.translationY > SWIPE_THRESHOLD && prevEpisode) {
+        // Swiped down — go to prev
+        translateY.value = withSpring(SCREEN_HEIGHT, {damping: 20}, () => {
+          translateY.value = 0;
+          runOnJS(handleSwipeToEpisode)('prev');
+        });
+      } else {
+        // Snap back
+        translateY.value = withSpring(0);
+      }
+    })
+    .activeOffsetY([-20, 20])
+    .failOffsetX([-20, 20]);
+
+  const animatedPlayerStyle = useAnimatedStyle(() => ({
+    transform: [{translateY: translateY.value}],
+  }));
+
   const playNow = useCallback(() => {
     if (countdownInterval.current) {
       clearInterval(countdownInterval.current);
@@ -484,26 +573,13 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
     );
   }
 
-  // If locked, we'll redirect via the useEffect above — show loading while redirecting
-  if (episode.locked && !episode.is_free) {
-    return (
-      <View style={styles.root}>
-        <StatusBar hidden />
-        <ActivityIndicator
-          size="large"
-          color={colors.cta}
-          style={styles.centered}
-        />
-      </View>
-    );
-  }
-
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
 
   return (
-    <View style={styles.root}>
+    <GestureDetector gesture={swipeGesture}>
+    <ReAnimated.View style={[styles.root, animatedPlayerStyle]}>
       <StatusBar hidden />
 
       {/* Video player */}
@@ -784,7 +860,20 @@ const VideoPlayerScreen: React.FC<Props> = ({navigation, route}) => {
           </View>
         </View>
       )}
-    </View>
+
+      {/* Locked episode sheet */}
+      {lockedEpisodeInfo && (
+        <UnlockEpisodeSheet
+          episodeId={lockedEpisodeInfo.episodeId}
+          episodeNumber={lockedEpisodeInfo.episodeNumber}
+          episodeTitle={lockedEpisodeInfo.episodeTitle}
+          coinCost={lockedEpisodeInfo.coinCost}
+          onUnlocked={handleLockedUnlocked}
+          onDismiss={handleLockedDismiss}
+        />
+      )}
+    </ReAnimated.View>
+    </GestureDetector>
   );
 };
 
