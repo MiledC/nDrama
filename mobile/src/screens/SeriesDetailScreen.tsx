@@ -8,6 +8,7 @@ import {
   StatusBar,
   Dimensions,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {NativeStackScreenProps} from '@react-navigation/native-stack';
@@ -15,7 +16,7 @@ import {RootStackParamList} from '../navigation/types';
 import {colors, fontSizes, fontWeights, spacing, radii, sizes} from '../theme';
 import EpisodeGrid, {EpisodeData} from '../components/EpisodeGrid';
 import NowPlayingCard, {NowPlayingEpisode} from '../components/NowPlayingCard';
-import {useSeriesDetail, useIsFavorite, useToggleFavorite} from '../hooks';
+import {useSeriesDetail, useIsFavorite, useToggleFavorite, useWatchHistory} from '../hooks';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -65,6 +66,7 @@ export default function SeriesDetailScreen({navigation, route}: Props) {
   const toggleFavorite = useToggleFavorite();
 
   const {data: series, isLoading, error} = useSeriesDetail(seriesId);
+  const {data: historyData} = useWatchHistory();
 
   const heroHeight = Dimensions.get('window').height * HERO_HEIGHT_RATIO;
 
@@ -144,14 +146,15 @@ export default function SeriesDetailScreen({navigation, route}: Props) {
   const freeEpisodes = series?.free_episode_count || 0;
   const coinCostPerEpisode = series?.coin_cost_per_episode || 0;
 
-  // Calculate completion rate from unlocked episodes
+  // Calculate completion rate from watch history
   const completionRate = useMemo(() => {
-    if (!episodes.length) return 0;
-    const unlockedCount = episodes.filter(
-      ep => ep.state === 'watched' || ep.state === 'current' || ep.state === 'free'
+    if (!series?.episodes?.length || !historyData?.items?.length) return 0;
+    const seriesEpisodeIds = new Set(series.episodes.map(ep => ep.id));
+    const completedCount = historyData.items.filter(
+      h => seriesEpisodeIds.has(h.episode_id) && h.completed,
     ).length;
-    return Math.round((unlockedCount / episodes.length) * 100);
-  }, [episodes]);
+    return Math.round((completedCount / series.episodes.length) * 100);
+  }, [series, historyData]);
 
   // Loading state
   if (isLoading) {
@@ -189,8 +192,16 @@ export default function SeriesDetailScreen({navigation, route}: Props) {
         {/* Hero Section */}
         {/* ---------------------------------------------------------------- */}
         <View style={[styles.hero, {height: heroHeight}]}>
-          {/* Banner placeholder */}
-          <View style={styles.heroBanner} />
+          {/* Banner image */}
+          {series.thumbnail_url ? (
+            <Image
+              source={{uri: series.thumbnail_url}}
+              style={styles.heroBanner}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={styles.heroBanner} />
+          )}
 
           {/* Gradient overlay */}
           <View style={styles.heroGradientTop} />
@@ -281,7 +292,7 @@ export default function SeriesDetailScreen({navigation, route}: Props) {
               </View>
               <Text style={styles.completionText}>
                 {completionRate}%{' '}
-                {'\u0645\u0646 \u0627\u0644\u0645\u0634\u0627\u0647\u062F\u064A\u0646 \u0623\u0643\u0645\u0644\u0648\u0627 \u0647\u0630\u0627 \u0627\u0644\u0645\u0633\u0644\u0633\u0644'}
+                {'\u0623\u0643\u0645\u0644\u062A \u0645\u0646 \u0627\u0644\u0645\u0633\u0644\u0633\u0644'}
               </Text>
             </View>
           )}

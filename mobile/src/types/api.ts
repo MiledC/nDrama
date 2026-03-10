@@ -22,6 +22,7 @@ export interface EpisodeListItem {
   thumbnail_url: string | null;
   is_free: boolean;
   is_unlocked: boolean;
+  coin_price: number;
   duration_seconds: number | null;
 }
 
